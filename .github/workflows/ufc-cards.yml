@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['collector/ufc_cards.py', 'collector/test_ufc_cards.py', '.github/workflows/ufc-cards.yml']
+    paths: ['collector/ufc_cards.py', 'collector/test_ufc_cards.py', 'collector/ufc_cards_review.py', 'collector/test_ufc_cards_review.py', '.github/workflows/ufc-cards.yml']
 permissions:
   contents: read
 jobs:
@@ -15,10 +15,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Tester les extracteurs
+      - name: Tester les extracteurs et les cartes en attente
         run: python -m unittest discover -s collector -p 'test_*.py' -v
       - name: Lire les cartes UFC sans modifier les données
-        run: python collector/ufc_cards.py
+        run: python collector/ufc_cards_review.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
