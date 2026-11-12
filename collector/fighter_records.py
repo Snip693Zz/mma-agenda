@@ -60,7 +60,8 @@ def resolve_url(name, roster):
         url = 'https://pflmma.com/all-fighter/' + quote(candidate)
         try:
             html = fetch_page(url)
-            if key and key in normalize(html): return url, 'slug_verified'
+            if roster and key and key not in normalize(html): continue
+            return url, 'slug_verified' if not roster else 'roster_fallback_verified'
         except ValueError:
             continue
     raise ValueError('Aucune fiche PFL fiable trouvee')
@@ -93,16 +94,14 @@ class Report:
 def build_report(fighters, fetcher=fetch_page):
     try:
         roster = roster_index(fetcher(ROSTER_URL))
+        roster_error = ''
     except (HTTPError, URLError, ValueError) as error:
         roster, roster_error = {}, str(error)
-    else:
-        roster_error = ''
     reports, errors, seen = [], [], {}
     for fighter in fighters:
         if not needs_review(fighter): continue
         name = fighter.get('name') or ''
         try:
-            if not roster and roster_error: raise ValueError('Roster PFL indisponible : ' + roster_error)
             url, resolution = resolve_url(name, roster)
             record = extract_record(fetcher(url))
             if record is None:
