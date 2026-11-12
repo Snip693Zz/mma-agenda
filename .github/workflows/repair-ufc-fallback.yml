@@ -1,0 +1,37 @@
+name: Réparer le JSON de secours UFC
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - maintenance/repair_ufc_fallback_20261112.py
+      - .github/workflows/repair-ufc-fallback.yml
+permissions:
+  contents: write
+jobs:
+  repair:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restaurer, fusionner et valider le JSON exact
+        run: python maintenance/repair_ufc_fallback_20261112.py
+      - name: Enregistrer uniquement le JSON réparé
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -- mma-data.json
+          if git diff --cached --quiet; then exit 0; fi
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'fix: restaurer le JSON de secours et ajouter les trois soirées UFC'
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        with:
+          name: secours-ufc-repare
+          path: mma-data.json
+          retention-days: 14
