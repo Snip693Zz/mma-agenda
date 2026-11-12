@@ -54,8 +54,8 @@ if (!window.mmaSupabaseSync) window.mmaSupabaseSync = (async () => {
     }
     for (const c of cardRows) {
       const id = JSON.stringify([c.event_id, c.position]);
-      if (!eventMap.has(c.event_id) || cardMap.has(id) || !Number.isInteger(c.position) || c.position < 0 || !c.start_at || !Number.isFinite(Date.parse(c.start_at))) throw Error('Carte incohérente');
-      const value = { ...c.extra, name: c.name, start: new Date(c.start_at).toISOString(), level: c.level, source: c.source, fights: [] };
+      if (!eventMap.has(c.event_id) || cardMap.has(id) || !Number.isInteger(c.position) || c.position < 0 || (c.start_at !== null && (typeof c.start_at !== 'string' || !Number.isFinite(Date.parse(c.start_at))))) throw Error('Carte incohérente');
+      const value = { ...c.extra, name: c.name, start: c.start_at === null ? null : new Date(c.start_at).toISOString(), level: c.level, source: c.source, fights: [] };
       cardMap.set(id, value);
       eventMap.get(c.event_id).cards.push(value);
     }
