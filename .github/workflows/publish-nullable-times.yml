@@ -1,0 +1,57 @@
+name: Publier la correction des horaires inconnus
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['maintenance/apply_nullable_times.py', '.github/workflows/publish-nullable-times.yml']
+permissions:
+  contents: write
+  pages: write
+concurrency:
+  group: mma-agenda-publication-horaires
+  cancel-in-progress: false
+jobs:
+  patch-test-publish:
+    if: github.repository == 'Snip693Zz/mma-agenda' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Appliquer le lot uniquement aux empreintes attendues
+        run: python maintenance/apply_nullable_times.py
+      - name: Vérifier syntaxe et tests navigateur avant tout commit
+        run: |
+          node --check app.js
+          node --check supabase-sync.js
+          npm install --no-save --package-lock=false @playwright/test@1.56.1
+          npx playwright install --with-deps chromium
+          npx playwright test --config=tests/playwright.config.cjs
+      - name: Enregistrer les quatre fichiers testés sur main
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app.js mma-data.json supabase-sync.js tests/timing-null.spec.cjs
+          git commit -m 'fix: accepter les horaires inconnus et aligner les données de secours'
+          git push origin HEAD:main
+          git rev-parse HEAD >> "$GITHUB_STEP_SUMMARY"
+      - name: Demander la reconstruction GitHub Pages
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method POST repos/Snip693Zz/mma-agenda/pages/builds > pages-build.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: publication-horaires-diagnostic
+          path: |
+            test-results/
+            pages-build.json
+          if-no-files-found: ignore
