@@ -1,0 +1,34 @@
+name: Prévalider les ajouts UFC - sans écriture
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - collector/publication_preview.py
+      - collector/test_publication_preview.py
+      - .github/workflows/publication-preview.yml
+permissions:
+  contents: read
+jobs:
+  preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Tester les règles de prépublication
+        run: python -m unittest discover -s collector -p 'test_publication_preview.py' -v
+      - run: pip install supabase
+      - name: Simuler depuis les propositions et les données actuelles
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python collector/publication_preview.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: prevalidation-publication-ufc
+          path: reports/publication-preview.json
+          retention-days: 14
