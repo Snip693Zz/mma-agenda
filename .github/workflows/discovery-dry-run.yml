@@ -8,7 +8,7 @@ permissions:
 jobs:
   discovery:
     runs-on: ubuntu-24.04
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -17,11 +17,11 @@ jobs:
       - name: Tester les règles de collecte
         run: python -m unittest discover -s collector -p 'test_*.py' -v
       - name: Examiner les sources sans écrire dans la base
-        run: python collector/discover.py
+        run: python collector/v2.py --detail-limit 12
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: rapport-decouverte-mma
-          path: reports/discovery.json
+          name: rapport-decouverte-mma-v2
+          path: reports/discovery-v2.json
           if-no-files-found: warn
           retention-days: 14
