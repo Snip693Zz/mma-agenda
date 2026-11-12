@@ -16,6 +16,8 @@ on:
       - collector/test_publisher_run.py
       - collector/fallback_sync.py
       - collector/test_fallback_sync.py
+      - collector/update_reconciliation.py
+      - collector/test_update_reconciliation.py
       - .github/workflows/daily-refresh.yml
 permissions:
   contents: read
@@ -31,13 +33,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Tester la collecte, le journal, le publieur et la synchronisation
+      - name: Tester la collecte, le journal, le publieur, la synchronisation et le rapprochement
         run: |
           python -m unittest discover -s collector -p 'test_daily_refresh_readonly.py' -v
           python -m unittest discover -s collector -p 'test_journal_ufc_report.py' -v
           python -m unittest discover -s collector -p 'test_publisher_control.py' -v
           python -m unittest discover -s collector -p 'test_publisher_run.py' -v
           python -m unittest discover -s collector -p 'test_fallback_sync.py' -v
+          python -m unittest discover -s collector -p 'test_update_reconciliation.py' -v
       - run: pip install supabase
       - name: Relire et comparer sans publication
         id: collect
