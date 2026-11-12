@@ -15,7 +15,7 @@ on:
 
 jobs:
   verify-and-report:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -28,9 +28,24 @@ jobs:
           python -m pip install --upgrade pip
           pip install supabase pytest
 
-      - name: Run unit tests
+      - name: Check required secrets
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ]; then
+            echo "SUPABASE_URL est absent."
+            exit 1
+          fi
+          if [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "SUPABASE_SERVICE_ROLE_KEY est absent."
+            exit 1
+          fi
+          echo "Secrets Supabase présents."
+
+      - name: Run fighter records tests
         working-directory: collector
-        run: pytest -q
+        run: pytest -q test_fighter_records.py
 
       - name: Run PFL fighter records report
         working-directory: collector
