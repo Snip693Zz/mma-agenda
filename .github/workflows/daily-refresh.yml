@@ -10,6 +10,8 @@ on:
       - collector/test_daily_refresh_readonly.py
       - collector/journal_ufc_report.py
       - collector/test_journal_ufc_report.py
+      - collector/publisher_control.py
+      - collector/test_publisher_control.py
       - .github/workflows/daily-refresh.yml
 permissions:
   contents: read
@@ -25,10 +27,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Tester le lecteur et le journal
+      - name: Tester le lecteur, le journal et le raccordement
         run: |
           python -m unittest discover -s collector -p 'test_daily_refresh_readonly.py' -v
           python -m unittest discover -s collector -p 'test_journal_ufc_report.py' -v
+          python -m unittest discover -s collector -p 'test_publisher_control.py' -v
       - run: pip install supabase
       - name: Relire et comparer sans publication
         id: collect
@@ -38,11 +41,18 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: python collector/daily_refresh_readonly.py
       - name: Journaliser sans publication dans l’agenda
+        id: journal
         if: ${{ always() && (steps.collect.outcome == 'success' || steps.collect.outcome == 'failure') }}
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: python collector/journal_ufc_report.py
+      - name: Vérifier le raccordement et la désactivation du publieur
+        if: ${{ success() && steps.collect.outcome == 'success' && steps.journal.outcome == 'success' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python collector/publisher_control.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -50,6 +60,7 @@ jobs:
           path: |
             reports/daily-refresh.json
             reports/journal-receipt.json
+            reports/publisher-control.json
           if-no-files-found: warn
           retention-days: 14
       - name: Conserver le statut d’échec de la collecte
