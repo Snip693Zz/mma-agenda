@@ -30,12 +30,12 @@ class RunTests(unittest.TestCase):
         client = Client({'proposals':[{'id':'w','kind':'watch_only','status':'pending','event_id':None,'ingest_run_id':'run'}]})
         out = run(client,report(),journal())
         self.assertEqual(out['status'],'no_eligible_proposals'); self.assertFalse(client.calls)
-    def test_eligible_proposal_called(self):
-        client = Client({'proposals':[{'id':'p','kind':'add_fights_proposal','status':'pending','event_id':'e','ingest_run_id':'run'}]},{'p':{'status':'disabled','agenda_writes':False,'journal_writes':False}})
+    def test_add_fight_proposal_called(self):
+        client = Client({'proposals':[{'id':'p','kind':'add_fight','status':'pending','event_id':'e','ingest_run_id':'run'}]},{'p':{'status':'disabled','agenda_writes':False,'journal_writes':False}})
         out = run(client,report(),journal())
-        self.assertEqual(out['status'],'not_published'); self.assertEqual(client.calls,[('publish_ufc_add_fights_v1',{'p_proposal_id':'p'})]); self.assertEqual(out['results'][0]['status'],'disabled')
+        self.assertEqual(out['status'],'not_published'); self.assertEqual(client.calls,[('publish_ufc_add_fights_v1',{'p_proposal_id':'p'})]); self.assertEqual(out['results'][0]['kind'],'add_fight'); self.assertEqual(out['results'][0]['status'],'disabled')
     def test_published_result_detected(self):
-        client = Client({'proposals':[{'id':'p','kind':'add_fights_proposal','status':'pending','event_id':'e','ingest_run_id':'run'}]},{'p':{'status':'published','agenda_writes':True,'journal_writes':True,'card_position':1,'inserted_fights':[{'id':'f'}]}})
+        client = Client({'proposals':[{'id':'p','kind':'add_fight','status':'pending','event_id':'e','ingest_run_id':'run'}]},{'p':{'status':'published','agenda_writes':True,'journal_writes':True,'card_position':1,'inserted_fights':[{'id':'f'}]}})
         out = run(client,report(),journal())
         self.assertEqual(out['status'],'published'); self.assertEqual(out['published_count'],1); self.assertTrue(out['agenda_writes']); self.assertTrue(out['journal_writes'])
     def test_bad_journal_refused(self):
