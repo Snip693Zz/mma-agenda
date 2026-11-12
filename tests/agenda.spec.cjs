@@ -12,7 +12,7 @@ for (const mode of ['absent', 'invalide', 'valide']) {
     await page.goto(base);
     await expect(page.locator('#calendar button[data-open]').first()).toBeVisible();
     await expect(page.locator('#nEvents')).toHaveText('8');
-    await expect(page.locator('#nFights')).toHaveText('49');
+    await expect(page.locator('#nFights')).toHaveText('61');
     await expect(page.locator('#nFighters')).toHaveText('59');
     await expect(page.locator('#loadStatus')).toContainText(mode === 'valide' ? 'mma-data.json chargé' : 'intégrées conservées');
     await page.locator('#listBtn').click();
@@ -69,7 +69,7 @@ for (const mode of ['valide', 'refuse', 'incoherent', 'vide', 'pagination']) {
     expect(result.ok).toBe(success);
     await expect(page.locator('#loadStatus')).toContainText(success ? 'Supabase chargé en lecture seule' : 'données de secours conservées');
     await expect(page.locator('#nEvents')).toHaveText('8');
-    await expect(page.locator('#nFights')).toHaveText('49');
+    await expect(page.locator('#nFights')).toHaveText('61');
     await expect(page.locator('#nFighters')).toHaveText(mode === 'pagination' ? '509' : '59');
     await page.locator('#listBtn').click();
     await expect(page.locator('#eventList [data-open]')).toHaveCount(8);
