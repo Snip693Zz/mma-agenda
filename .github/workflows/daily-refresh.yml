@@ -18,6 +18,8 @@ on:
       - collector/test_fallback_sync.py
       - collector/update_reconciliation.py
       - collector/test_update_reconciliation.py
+      - collector/pfl_reconciliation.py
+      - collector/test_pfl_reconciliation.py
       - .github/workflows/daily-refresh.yml
 permissions:
   contents: read
@@ -41,6 +43,7 @@ jobs:
           python -m unittest discover -s collector -p 'test_publisher_run.py' -v
           python -m unittest discover -s collector -p 'test_fallback_sync.py' -v
           python -m unittest discover -s collector -p 'test_update_reconciliation.py' -v
+          python -m unittest discover -s collector -p 'test_pfl_reconciliation.py' -v
       - run: pip install supabase
       - name: Relire et comparer sans publication
         id: collect
@@ -56,6 +59,13 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: python collector/journal_ufc_report.py
+      - name: Rapprocher les cartes PFL sans publication
+        id: pfl_reconciliation
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python collector/pfl_reconciliation.py --output reports/pfl-reconciliation.json
       - name: Vérifier le raccordement et la désactivation du publieur
         if: ${{ success() && steps.collect.outcome == 'success' && steps.journal.outcome == 'success' }}
         env:
@@ -84,6 +94,7 @@ jobs:
             reports/publisher-control.json
             reports/publication-result.json
             reports/fallback-sync.json
+            reports/pfl-reconciliation.json
           if-no-files-found: warn
           retention-days: 14
       - name: Conserver le statut d’échec de la collecte
