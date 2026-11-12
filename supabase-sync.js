@@ -83,7 +83,7 @@ if (!window.mmaSupabaseSync) window.mmaSupabaseSync = (async () => {
       profiles[f.name] = value;
     }
     const initialOrder = new Map(data.map((e, i) => [e.id, i]));
-    const events = [...eventMap.values()].sort((a, b) => String(a.date).localeCompare(String(b.date)) || (initialOrder.get(a.id) ?? 1000000) - (initialOrder.get(b.id) ?? 1000000) || String(a.id).localeCompare(String(b.id));
+    const events = [...eventMap.values()].sort((a, b) => String(a.date).localeCompare(String(b.date)) || (initialOrder.get(a.id) ?? 1000000) - (initialOrder.get(b.id) ?? 1000000) || String(a.id).localeCompare(String(b.id)));
     const next = { events, fighterRecords: profiles };
     validate(next);
     return next;
