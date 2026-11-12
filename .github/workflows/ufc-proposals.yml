@@ -1,0 +1,28 @@
+name: Préparer les propositions UFC - sans publication
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['collector/ufc_proposals.py', 'collector/test_ufc_proposals.py', '.github/workflows/ufc-proposals.yml']
+permissions:
+  contents: read
+jobs:
+  proposals:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Tester les rapprochements et protections
+        run: python -m unittest discover -s collector -p 'test_*.py' -v
+      - name: Extraire puis proposer sans écrire dans l’agenda
+        run: python collector/ufc_proposals.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: propositions-ufc
+          path: reports/ufc-proposals.json
+          if-no-files-found: warn
+          retention-days: 14
