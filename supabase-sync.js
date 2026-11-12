@@ -42,7 +42,7 @@ if (!window.mmaSupabaseSync) window.mmaSupabaseSync = (async () => {
   function snapshot(tables) {
     const [eventRows, cardRows, fightRows, fighterRows] = tables;
     if (!eventRows.length || !fighterRows.length) throw Error('Base vide ou inaccessible');
-    const eventMap = new Map(), cardMap = new Map(), profiles = Object.create(null);
+    const eventMap = new Map(), cardMap = new Map(), inactiveCards = new Set(), profiles = Object.create(null);
     for (const e of eventRows) {
       if (eventMap.has(e.id)) throw Error('Événement en double');
       [e.url, e.official_card_url, e.box_url].forEach(safeUrl);
@@ -54,6 +54,7 @@ if (!window.mmaSupabaseSync) window.mmaSupabaseSync = (async () => {
     }
     for (const c of cardRows) {
       const id = JSON.stringify([c.event_id, c.position]);
+      if (c.is_active === false) { inactiveCards.add(id); continue; }
       if (!eventMap.has(c.event_id) || cardMap.has(id) || !Number.isInteger(c.position) || c.position < 0 || (c.start_at !== null && (typeof c.start_at !== 'string' || !Number.isFinite(Date.parse(c.start_at))))) throw Error('Carte incohérente');
       const value = { ...c.extra, name: c.name, start: c.start_at === null ? null : new Date(c.start_at).toISOString(), level: c.level, source: c.source, fights: [] };
       cardMap.set(id, value);
@@ -61,9 +62,14 @@ if (!window.mmaSupabaseSync) window.mmaSupabaseSync = (async () => {
     }
     const fightIds = new Set();
     for (const f of fightRows) {
-      const card = cardMap.get(JSON.stringify([f.event_id, f.card_position]));
+      const cardKey = JSON.stringify([f.event_id, f.card_position]);
+      const card = cardMap.get(cardKey);
       const id = JSON.stringify([f.event_id, f.card_position, f.position]);
-      if (!card || fightIds.has(id) || !Number.isInteger(f.position) || f.position < 0 || !f.fighter_a || !f.fighter_b || f.fighter_a === f.fighter_b) throw Error('Combat incohérent');
+      if (!card) {
+        if (inactiveCards.has(cardKey)) continue;
+        throw Error('Combat incohérent');
+      }
+      if (fightIds.has(id) || !Number.isInteger(f.position) || f.position < 0 || !f.fighter_a || !f.fighter_b || f.fighter_a === f.fighter_b) throw Error('Combat incohérent');
       fightIds.add(id);
       card.fights.push([f.fighter_a, f.fighter_b]);
     }
