@@ -9,7 +9,7 @@ from pathlib import Path
 
 RPC = 'publish_ufc_add_fights_v1'
 
-class ControlError(Exception):
+class ControlError(ValueError):
     def __init__(self, stage: str, message: str):
         super().__init__(message)
         self.stage = stage
