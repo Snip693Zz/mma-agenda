@@ -1,0 +1,27 @@
+name: Découverte MMA - test sans écriture
+on:
+  workflow_dispatch:
+  push:
+    paths: ['collector/**', '.github/workflows/discovery-dry-run.yml']
+permissions:
+  contents: read
+jobs:
+  discovery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Tester les règles de collecte
+        run: python -m unittest discover -s collector -p 'test_*.py' -v
+      - name: Examiner les sources sans écrire dans la base
+        run: python collector/discover.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rapport-decouverte-mma
+          path: reports/discovery.json
+          if-no-files-found: warn
+          retention-days: 14
