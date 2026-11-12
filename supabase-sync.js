@@ -83,11 +83,63 @@ if (!window.mmaSupabaseSync) window.mmaSupabaseSync = (async () => {
       profiles[f.name] = value;
     }
     const initialOrder = new Map(data.map((e, i) => [e.id, i]));
-    const events = [...eventMap.values()].sort((a, b) => String(a.date).localeCompare(String(b.date)) || (initialOrder.get(a.id) ?? 1000000) - (initialOrder.get(b.id) ?? 1000000) || String(a.id).localeCompare(String(b.id)));
+    const events = [...eventMap.values()].sort((a, b) => String(a.date).localeCompare(String(b.date)) || (initialOrder.get(a.id) ?? 1000000) - (initialOrder.get(b.id) ?? 1000000) || String(a.id).localeCompare(String(b.id));
     const next = { events, fighterRecords: profiles };
     validate(next);
     return next;
   }
+  async function pflReports() {
+    const response = await fetch(api + 'rpc/pfl_reconciliation_reports_v1', {
+      method: 'POST',
+      cache: 'no-store',
+      headers: { apikey: key, 'Content-Type': 'application/json' },
+      body: '{}'
+    });
+    if (!response.ok) throw Error('Lecture des rapports PFL refusée');
+    return response.json();
+  }
+  function pflSummaryText(summary) {
+    if (!summary) return 'Résumé indisponible.';
+    return `Total : ${summary.total ?? 0} · Ajouts : ${summary.add_fight ?? 0} · Revues : ${summary.review_discrepancy ?? 0} · Blocages : ${summary.blocked ?? 0} · À surveiller : ${summary.watch_only ?? 0}`;
+  }
+  function renderPflLatest(report) {
+    const section = document.querySelector('#pflReports');
+    if (!section) return;
+    if (!report) {
+      document.querySelector('#pflTitle').textContent = 'Aucun rapport PFL';
+      document.querySelector('#pflMeta').textContent = '';
+      document.querySelector('#pflSummary').textContent = '';
+      section.classList.add('hidden');
+      return;
+    }
+    const started = report.started_at ? new Date(report.started_at) : null;
+    document.querySelector('#pflTitle').textContent = started ? `Rapport PFL du ${new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeStyle: 'short', timeZone: 'Europe/Paris' }).format(started)}` : 'Rapport PFL';
+    document.querySelector('#pflMeta').textContent = `Statut : ${report.status ?? 'inconnu'} · ${report.events_observed ?? 0} événement(s) observé(s) · ${report.fights_observed ?? 0} combat(s) observé(s) · ${report.errors ?? 0} erreur(s)`;
+    document.querySelector('#pflSummary').textContent = pflSummaryText(report.summary);
+    section.classList.remove('hidden');
+  }
+  function renderPflHistory(items) {
+    const list = document.querySelector('#pflHistoryList');
+    if (!list) return;
+    list.innerHTML = items.map(report => {
+      const started = report.started_at ? new Date(report.started_at) : null;
+      const date = started ? new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Paris' }).format(started) : 'Date inconnue';
+      return `<article class="event-row"><div class="row-main"><h3>${esc(date)}</h3><p>Statut : ${esc(report.status ?? 'inconnu')} · ${report.events_observed ?? 0} événement(s) · ${report.fights_observed ?? 0} combat(s) · ${report.errors ?? 0} erreur(s)</p><p class="small">${esc(pflSummaryText(report.summary))}</p></div></article>`;
+    }).join('') || '<div class="empty"><h3>Aucun rapport PFL</h3></div>';
+  }
+  async function loadPflReports() {
+    try {
+      const payload = await pflReports();
+      renderPflLatest(payload.latest);
+      renderPflHistory(payload.history ?? []);
+    } catch (error) {
+      const section = document.querySelector('#pflReports');
+      if (section) section.classList.add('hidden');
+    }
+  }
+  document.querySelector('#pflHistory')?.addEventListener('click', () => {
+    document.querySelector('#pflHistoryDialog')?.showModal();
+  });
   try {
     await fallbackReady();
     timeout = setTimeout(() => controller.abort(), 12000);
@@ -109,6 +161,7 @@ if (!window.mmaSupabaseSync) window.mmaSupabaseSync = (async () => {
       data = oldData; fighterRecords = oldProfiles; org.innerHTML = oldOptions; org.value = oldOrg; render(); throw error;
     }
     statusEl.textContent = 'Données : Supabase chargé en lecture seule';
+    loadPflReports();
     return { ok: true };
   } catch (error) {
     statusEl.textContent += ' · Supabase indisponible : données de secours conservées';
