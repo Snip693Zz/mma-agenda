@@ -1,4 +1,4 @@
-name: Rafraîchir les cartes UFC - rapport uniquement
+name: Rafraîchir les cartes UFC - rapport et journal
 on:
   schedule:
     - cron: '30 5 * * *'
@@ -8,6 +8,8 @@ on:
     paths:
       - collector/daily_refresh_readonly.py
       - collector/test_daily_refresh_readonly.py
+      - collector/journal_ufc_report.py
+      - collector/test_journal_ufc_report.py
       - .github/workflows/daily-refresh.yml
 permissions:
   contents: read
@@ -23,18 +25,33 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Tester la lecture Supabase et l’absence de publication
-        run: python -m unittest discover -s collector -p 'test_daily_refresh_readonly.py' -v
+      - name: Tester le lecteur et le journal
+        run: |
+          python -m unittest discover -s collector -p 'test_daily_refresh_readonly.py' -v
+          python -m unittest discover -s collector -p 'test_journal_ufc_report.py' -v
       - run: pip install supabase
       - name: Relire et comparer sans publication
+        id: collect
+        continue-on-error: true
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: python collector/daily_refresh_readonly.py
+      - name: Journaliser sans publication dans l’agenda
+        if: ${{ always() && (steps.collect.outcome == 'success' || steps.collect.outcome == 'failure') }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python collector/journal_ufc_report.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: rafraichissement-ufc
-          path: reports/daily-refresh.json
+          path: |
+            reports/daily-refresh.json
+            reports/journal-receipt.json
           if-no-files-found: warn
           retention-days: 14
+      - name: Conserver le statut d’échec de la collecte
+        if: ${{ always() && steps.collect.outcome == 'failure' }}
+        run: exit 1
