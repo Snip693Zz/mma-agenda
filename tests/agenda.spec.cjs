@@ -67,13 +67,14 @@ for (const mode of ['valide', 'refuse', 'incoherent', 'vide', 'pagination']) {
     await page.addScriptTag({ url: base + '/supabase-sync.js' });
     const result = await page.evaluate(() => window.mmaSupabaseSync);
     const success = ['valide', 'pagination'].includes(mode);
+    const fallback = !success;
     expect(result.ok).toBe(success);
     await expect(page.locator('#loadStatus')).toContainText(success ? 'Supabase chargé en lecture seule' : 'données de secours conservées');
-    await expect(page.locator('#nEvents')).toHaveText('11');
-    await expect(page.locator('#nFights')).toHaveText('78');
-    await expect(page.locator('#nFighters')).toHaveText(mode === 'pagination' ? '511' : '61');
+    await expect(page.locator('#nEvents')).toHaveText(fallback ? '8' : '11');
+    await expect(page.locator('#nFights')).toHaveText(fallback ? '61' : '78');
+    await expect(page.locator('#nFighters')).toHaveText(fallback ? '59' : (mode === 'pagination' ? '511' : '61'));
     await page.locator('#listBtn').click();
-    await expect(page.locator('#eventList [data-open]')).toHaveCount(11);
+    await expect(page.locator('#eventList [data-open]')).toHaveCount(fallback ? 8 : 11);
     if (success) await expect(page.locator('#eventList')).toContainText('TEST SUPABASE');
     else await expect(page.locator('#eventList')).not.toContainText('TEST SUPABASE');
     expect(requests.length).toBeGreaterThanOrEqual(mode === 'pagination' ? 5 : 4);
