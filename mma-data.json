@@ -12,14 +12,76 @@
           "name": "Main Card",
           "level": "official",
           "start": "2026-11-14T18:00:00+00:00",
-          "fights": [["Vadim Nemkov", "Sergei Bilostenniy"], ["Patrick Habirora", "Omar El Dafrawy"], ["Pouya Rahmani", "Oleg Popov"], ["Abubakar Nurmagomedov", "David Martinez"], ["Sergio Pettis", "Joji Goto"]],
+          "fights": [
+            [
+              "Vadim Nemkov",
+              "Sergei Bilostenniy"
+            ],
+            [
+              "Patrick Habirora",
+              "Omar El Dafrawy"
+            ],
+            [
+              "Pouya Rahmani",
+              "Oleg Popov"
+            ],
+            [
+              "Abubakar Nurmagomedov",
+              "David Martinez"
+            ],
+            [
+              "Sergio Pettis",
+              "Joji Goto"
+            ]
+          ],
           "source": "https://pflmma.com/news/pfl-dubai-full-card-confirmed-for-november-14-at-cocacola-arena"
         },
         {
           "name": "Preliminary Card",
           "level": "official",
           "start": "2026-11-14T14:00:00+00:00",
-          "fights": [["Shem Rock", "Connor Hughes"], ["Lewis McGrillen", "Nawras Abzakh"], ["Asaël Adjoudj", "Movlid Khaybulaev"], ["Alexei Pergande", "Akhmed Magomedov"], ["Khasan Magomedsharipov", "Adam Borics"], ["Denis Goltsov", "Maxwell Djantou Nana"], ["Ernesto Rodriguez", "Rhys McKee"], ["Khabib Nabiev", "Styve Ngono"], ["Khamzat Abaev", "Leon Hill"], ["Aleksandra Savicheva", "Jacinta Austin"]],
+          "fights": [
+            [
+              "Shem Rock",
+              "Connor Hughes"
+            ],
+            [
+              "Lewis McGrillen",
+              "Nawras Abzakh"
+            ],
+            [
+              "Asaël Adjoudj",
+              "Movlid Khaybulaev"
+            ],
+            [
+              "Alexei Pergande",
+              "Akhmed Magomedov"
+            ],
+            [
+              "Khasan Magomedsharipov",
+              "Adam Borics"
+            ],
+            [
+              "Denis Goltsov",
+              "Maxwell Djantou Nana"
+            ],
+            [
+              "Ernesto Rodriguez",
+              "Rhys McKee"
+            ],
+            [
+              "Khabib Nabiev",
+              "Styve Ngono"
+            ],
+            [
+              "Khamzat Abaev",
+              "Leon Hill"
+            ],
+            [
+              "Aleksandra Savicheva",
+              "Jacinta Austin"
+            ]
+          ],
           "source": "https://pflmma.com/news/pfl-dubai-full-card-confirmed-for-november-14-at-cocacola-arena"
         }
       ],
@@ -41,21 +103,76 @@
           "name": "Premiers préliminaires",
           "level": "official",
           "start": "2026-11-14T22:00:00+00:00",
-          "fights": [["Jared Gordon", "Melquizael Costa"], ["Macy Chiasson", "Bia Mesquita"], ["Alatengheili", "Juan Diaz"], ["Evan Elder", "Samuel Sanches"]],
+          "fights": [
+            [
+              "Jared Gordon",
+              "Melquizael Costa"
+            ],
+            [
+              "Macy Chiasson",
+              "Bia Mesquita"
+            ],
+            [
+              "Alatengheili",
+              "Juan Diaz"
+            ],
+            [
+              "Evan Elder",
+              "Samuel Sanches"
+            ]
+          ],
           "source": "Fiche officielle UFC"
         },
         {
           "name": "Préliminaires",
           "level": "official",
           "start": "2026-11-15T00:00:00+00:00",
-          "fights": [["Stephen Thompson", "Charles Radtke"], ["Drew Dober", "Chris Duncan"], ["Jim Miller", "Terrance McKinney"], ["Donte Johnson", "Cesar Almeida"]],
+          "fights": [
+            [
+              "Stephen Thompson",
+              "Charles Radtke"
+            ],
+            [
+              "Drew Dober",
+              "Chris Duncan"
+            ],
+            [
+              "Jim Miller",
+              "Terrance McKinney"
+            ],
+            [
+              "Donte Johnson",
+              "Cesar Almeida"
+            ]
+          ],
           "source": "Fiche officielle UFC"
         },
         {
           "name": "Carte principale",
           "level": "official",
           "start": "2026-11-15T02:00:00+00:00",
-          "fights": [["Ciryl Gane", "Josh Hokit"], ["Kayla Harrison", "Amanda Nunes"], ["Caio Borralho", "Yousri Belgaroui"], ["Uroš Medić", "Kevin Holland"], ["Bilal Hasan", "Luis Gurule"]],
+          "fights": [
+            [
+              "Ciryl Gane",
+              "Josh Hokit"
+            ],
+            [
+              "Kayla Harrison",
+              "Amanda Nunes"
+            ],
+            [
+              "Caio Borralho",
+              "Yousri Belgaroui"
+            ],
+            [
+              "Uroš Medić",
+              "Kevin Holland"
+            ],
+            [
+              "Bilal Hasan",
+              "Luis Gurule"
+            ]
+          ],
           "source": "Fiche officielle UFC"
         }
       ],
@@ -77,14 +194,48 @@
           "name": "Combat principal officiel",
           "level": "official",
           "start": "2026-11-20T18:00:00+00:00",
-          "fights": [["Jordan Zebo", "Baysangour Chamsoudinov"]],
+          "fights": [
+            [
+              "Jordan Zebo",
+              "Baysangour Chamsoudinov"
+            ]
+          ],
           "source": "ARES officiel"
         },
         {
           "name": "Carte secondaire Sherdog · 7 combats",
           "level": "secondary",
           "start": "2026-11-20T18:00:00+00:00",
-          "fights": [["Ghassen Jbalia", "Modibo Diakite"], ["Amir Aliev", "Adionai Maciel"], ["Nimo Djagbo", "Nikodem Blazejewski"], ["Marvin Caperan", "Bruno Pudins"], ["Sarah Moussaddak", "Dina da Silva"], ["Lamp Touré", "Valeriu Asaftei"], ["Alou Camara", "Garcia Pinto Kinkela"]],
+          "fights": [
+            [
+              "Ghassen Jbalia",
+              "Modibo Diakite"
+            ],
+            [
+              "Amir Aliev",
+              "Adionai Maciel"
+            ],
+            [
+              "Nimo Djagbo",
+              "Nikodem Blazejewski"
+            ],
+            [
+              "Marvin Caperan",
+              "Bruno Pudins"
+            ],
+            [
+              "Sarah Moussaddak",
+              "Dina da Silva"
+            ],
+            [
+              "Lamp Touré",
+              "Valeriu Asaftei"
+            ],
+            [
+              "Alou Camara",
+              "Garcia Pinto Kinkela"
+            ]
+          ],
           "source": "Sherdog"
         }
       ],
@@ -106,7 +257,44 @@
           "name": "Combats officiels — répartition à confirmer",
           "level": "official",
           "start": null,
-          "fights": [["Jiří Procházka", "Navajo Stirling"], ["Aljamain Sterling", "Kevin Vallejos"], ["Dan Hooker", "Brian Ortega"], ["Kyoji Horiguchi", "Asu Almabayev"], ["Jared Cannonier", "Ikram Aliskerov"], ["Aleksandre Topuria", "Santiago Luna"], ["Shamil Gaziev", "Tallison Teixeira"], ["Amir Albazi", "Alessandro Costa"], ["Jake Matthews", "Tahir Abdullayev"]],
+          "fights": [
+            [
+              "Jiří Procházka",
+              "Navajo Stirling"
+            ],
+            [
+              "Aljamain Sterling",
+              "Kevin Vallejos"
+            ],
+            [
+              "Dan Hooker",
+              "Brian Ortega"
+            ],
+            [
+              "Kyoji Horiguchi",
+              "Asu Almabayev"
+            ],
+            [
+              "Jared Cannonier",
+              "Ikram Aliskerov"
+            ],
+            [
+              "Aleksandre Topuria",
+              "Santiago Luna"
+            ],
+            [
+              "Shamil Gaziev",
+              "Tallison Teixeira"
+            ],
+            [
+              "Amir Albazi",
+              "Alessandro Costa"
+            ],
+            [
+              "Jake Matthews",
+              "Tahir Abdullayev"
+            ]
+          ],
           "source": "https://www.ufc.com/event/ufc-fight-night-november-21-2026"
         }
       ],
@@ -128,7 +316,40 @@
           "name": "Carte secondaire Sherdog · 8 combats",
           "level": "secondary",
           "start": "2026-11-27T18:00:00+00:00",
-          "fights": [["Théo Ulrich", "Davy Gallon"], ["Anthony Morel", "Tamerlan Albiekov"], ["Antero dos Santos", "Georges Ngoma"], ["Václav Žemla", "Louis Banhiet"], ["Allan Landouzy", "Benjamin Molnár"], ["Kalim Mastouri", "Mathieu Abbe"], ["Océane Samson", "Lindsey Payne"], ["Olivier Fleurmon", "Mathieu Szymborski"]],
+          "fights": [
+            [
+              "Théo Ulrich",
+              "Davy Gallon"
+            ],
+            [
+              "Anthony Morel",
+              "Tamerlan Albiekov"
+            ],
+            [
+              "Antero dos Santos",
+              "Georges Ngoma"
+            ],
+            [
+              "Václav Žemla",
+              "Louis Banhiet"
+            ],
+            [
+              "Allan Landouzy",
+              "Benjamin Molnár"
+            ],
+            [
+              "Kalim Mastouri",
+              "Mathieu Abbe"
+            ],
+            [
+              "Océane Samson",
+              "Lindsey Payne"
+            ],
+            [
+              "Olivier Fleurmon",
+              "Mathieu Szymborski"
+            ]
+          ],
           "source": "Sherdog"
         }
       ],
@@ -171,7 +392,56 @@
           "name": "Combats officiels — répartition à confirmer",
           "level": "official",
           "start": null,
-          "fights": [["Israel Adesanya", "Shara Magomedov"], ["Ian Machado Garry", "Yaroslav Amosov"], ["Serghei Spivac", "Mario Pinto"], ["Levan Chokheli", "Islam Dulatov"], ["Mairon Santos", "Akbar Abdullaev"], ["Magomed Tuchalov", "Ion Cutelaba"], ["Bruno Silva", "Jafel Filho"], ["Uran Satybaldiev", "Ivan Gnizditskiy"], ["Marco Tulio", "JunYong Park"], ["Pavel Andrusca", "Mahammadali Osmanli"], ["Modestino Rodrigues", "Matthieu Duclos"], ["Abdul Hussein", "Hecher Sosa"]],
+          "fights": [
+            [
+              "Israel Adesanya",
+              "Shara Magomedov"
+            ],
+            [
+              "Ian Machado Garry",
+              "Yaroslav Amosov"
+            ],
+            [
+              "Serghei Spivac",
+              "Mario Pinto"
+            ],
+            [
+              "Levan Chokheli",
+              "Islam Dulatov"
+            ],
+            [
+              "Mairon Santos",
+              "Akbar Abdullaev"
+            ],
+            [
+              "Magomed Tuchalov",
+              "Ion Cutelaba"
+            ],
+            [
+              "Bruno Silva",
+              "Jafel Filho"
+            ],
+            [
+              "Uran Satybaldiev",
+              "Ivan Gnizditskiy"
+            ],
+            [
+              "Marco Tulio",
+              "JunYong Park"
+            ],
+            [
+              "Pavel Andrusca",
+              "Mahammadali Osmanli"
+            ],
+            [
+              "Modestino Rodrigues",
+              "Matthieu Duclos"
+            ],
+            [
+              "Abdul Hussein",
+              "Hecher Sosa"
+            ]
+          ],
           "source": "UFC — fiche officielle du 12/11/2026"
         }
       ],
@@ -214,7 +484,28 @@
           "name": "Carte principale",
           "level": "official",
           "start": "2026-12-13T02:00:00+00:00",
-          "fights": [["Charles Oliveira", "Diego Lopes"], ["Alex Pereira", "Sergei Pavlovich"], ["Brandon Moreno", "Charles Johnson"], ["Quentin Pasley", "Junior Tafa"], ["Joe Pyfer", "Bo Nickal"]],
+          "fights": [
+            [
+              "Charles Oliveira",
+              "Diego Lopes"
+            ],
+            [
+              "Alex Pereira",
+              "Sergei Pavlovich"
+            ],
+            [
+              "Brandon Moreno",
+              "Charles Johnson"
+            ],
+            [
+              "Quentin Pasley",
+              "Junior Tafa"
+            ],
+            [
+              "Joe Pyfer",
+              "Bo Nickal"
+            ]
+          ],
           "source": "Fiche officielle UFC"
         }
       ],
@@ -243,14 +534,24 @@
           "name": "Carte principale",
           "level": "official",
           "start": "2026-12-19T20:00:00+00:00",
-          "fights": [["Taylor Lapilus", "Mitch McKee"]],
+          "fights": [
+            [
+              "Taylor Lapilus",
+              "Mitch McKee"
+            ]
+          ],
           "source": "PFL officiel"
         },
         {
           "name": "Combats officiels — répartition à confirmer",
           "level": "official",
           "start": null,
-          "fights": [["Boris Atangana", "Bryan Battle"]],
+          "fights": [
+            [
+              "Boris Atangana",
+              "Bryan Battle"
+            ]
+          ],
           "source": "https://www.ldlcarena.com/evenement/pfl-lyon-decembre-2026/"
         }
       ],
@@ -272,7 +573,16 @@
           "name": "Combats officiels — répartition à confirmer",
           "level": "official",
           "start": null,
-          "fights": [["Joshua Van", "Manel Kape"], ["Carlos Prates", "Michael Morales"]],
+          "fights": [
+            [
+              "Joshua Van",
+              "Manel Kape"
+            ],
+            [
+              "Carlos Prates",
+              "Michael Morales"
+            ]
+          ],
           "source": "https://www.ufc.com/event/ufc-336"
         }
       ],
@@ -294,7 +604,24 @@
           "name": "Combats officiels — répartition à confirmer",
           "level": "official",
           "start": null,
-          "fights": [["Quillan Salkilld", "Benoît Saint Denis"], ["Bogdan Guskov", "Robert Whittaker"], ["Marwan Rahiki", "JooSang Yoo"], ["Kaan Ofli", "Joanderson Brito"]],
+          "fights": [
+            [
+              "Quillan Salkilld",
+              "Benoît Saint Denis"
+            ],
+            [
+              "Bogdan Guskov",
+              "Robert Whittaker"
+            ],
+            [
+              "Marwan Rahiki",
+              "JooSang Yoo"
+            ],
+            [
+              "Kaan Ofli",
+              "Joanderson Brito"
+            ]
+          ],
           "source": "https://www.ufc.com/event/ufc-fight-night-february-06-2027"
         }
       ],
@@ -307,66 +634,554 @@
     }
   ],
   "fighterRecords": {
-    "Juan Diaz": {"nc": null, "url": "https://www.ufc.com/athlete/juan-diaz", "note": "", "record": "16-1-1", "source": "Fiche UFC", "compare": null, "ncSource": null},
-    "Ciryl Gane": {"nc": null, "url": "https://www.ufc.com/athlete/ciryl-gane", "note": "", "record": "14-2-0", "source": "Fiche UFC", "compare": null, "ncSource": null},
-    "Drew Dober": {"nc": 1, "url": "https://www.ufc.com/athlete/drew-dober", "note": "", "record": "29-15-0", "source": "Fiche UFC", "compare": null, "ncSource": "https://www.ufc-fr.com/combattant-612.html"},
-    "Evan Elder": {"nc": null, "url": "https://www.ufc.com/athlete/evan-elder", "note": "", "record": "10-2-0", "source": "Fiche UFC", "compare": null, "ncSource": null},
-    "Jim Miller": {"nc": 1, "url": "https://www.ufc.com/athlete/jim-miller", "note": "", "record": "39-19-0", "source": "Fiche UFC", "compare": null, "ncSource": "https://www.ufc-fr.com/combat-9100.html"},
-    "Josh Hokit": {"nc": null, "url": "https://www.ufc.com/athlete/josh-hokit", "note": "", "record": "10-0-0", "source": "Fiche UFC", "compare": null, "ncSource": null},
-    "Rhys McKee": {"nc": null, "url": "https://pflmma.com/index.php/wt-fighter/rhys-mckee", "note": "", "record": "15-7-1", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Bilal Hasan": {"nc": 1, "url": "https://www.ufc.com/athlete/bilal-hasan", "note": "", "record": "10-0-0", "source": "Fiche UFC", "compare": null, "ncSource": "https://www.ufc-fr.com/combat-9084.html"},
-    "Jason Ponet": {"nc": null, "url": "https://pflmma.com/all-fighter-roster", "note": "Palmarès à confirmer sur la fiche PFL.", "record": "0-0-0", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Luis Gurule": {"nc": null, "url": "https://www.ufc.com/athlete/luis-gurule", "note": "", "record": "11-4-0", "source": "Fiche UFC", "compare": null, "ncSource": null},
-    "Nimo Djagbo": {"nc": null, "url": "https://www.sherdog.com/fighter/Nimo-Djagbo-425229", "note": "", "record": "1-0-0", "source": "Sherdog", "compare": null, "ncSource": null},
-    "Ranam Wehbe": {"nc": null, "url": "https://www.sherdog.com/fighter/Roman-Wehbe-19922", "note": "", "record": "7-7-0", "source": "Sherdog", "compare": null, "ncSource": null},
-    "Alatengheili": {"nc": null, "url": "https://www.ufc.com/athlete/heili-alateng", "note": "", "record": "18-10-2", "source": "Fiche UFC", "compare": null, "ncSource": null},
-    "Amanda Nunes": {"nc": null, "url": "https://www.ufc.com/athlete/amanda-nunes", "note": "", "record": "23-5-0", "source": "Fiche UFC", "compare": null, "ncSource": null},
-    "Bia Mesquita": {"nc": null, "url": "https://www.ufc.com/athlete/bia-mesquita", "note": "", "record": "8-0-0", "source": "Fiche UFC", "compare": null, "ncSource": null},
-    "Bryan Battle": {"nc": null, "url": "https://pflmma.com/all-fighter/bryan-battle", "note": "Palmarès professionnel confirmé par la fiche PFL.", "record": "13-3-0", "source": "PFL officiel", "compare": null, "ncSource": null},
-    "Chris Duncan": {"nc": null, "url": "https://www.ufc.com/athlete/chris-duncan", "note": "", "record": "15-3-0", "source": "Fiche UFC", "compare": null, "ncSource": null},
-    "Jared Gordon": {"nc": null, "url": "https://www.ufc.com/athlete/jared-gordon", "note": "", "record": "21-9-0", "source": "Fiche UFC", "compare": null, "ncSource": null},
-    "Tariq Ismail": {"nc": null, "url": "https://pflmma.com/wt-fighter/tariq-ismail", "note": "", "record": "8-2-0", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Uroš Medić": {"nc": null, "url": "https://www.ufc.com/athlete/uros-medic", "note": "", "record": "14-3-0", "source": "Fiche UFC", "compare": null, "ncSource": null},
-    "Vadim Nemkov": {"nc": null, "url": "https://pflmma.com/all-fighter/vadim-nemkov", "note": "", "record": "28-2-0", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Caio Borralho": {"nc": null, "url": "https://www.ufc.com/athlete/caio-borralho", "note": "", "record": "18-2-0", "source": "Fiche UFC", "compare": null, "ncSource": null},
-    "Cesar Almeida": {"nc": null, "url": "https://www.ufc.com/athlete/cesar-almeida", "note": "", "record": "7-3-0", "source": "Fiche UFC", "compare": null, "ncSource": null},
-    "Dina da Silva": {"nc": null, "url": "https://www.sherdog.com/fighter/Dina-da-Silva-Barbosa-311583", "note": "", "record": "3-2-0", "source": "Sherdog", "compare": null, "ncSource": null},
-    "Donte Johnson": {"nc": null, "url": "https://www.ufc.com/athlete/donte-johnson", "note": "", "record": "9-0-0", "source": "Fiche UFC", "compare": null, "ncSource": null},
-    "Islam Mamedov": {"nc": null, "url": "https://pflmma.com/all-fighter-roster", "note": "Palmarès à confirmer sur la fiche PFL.", "record": "0-0-0", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Kevin Holland": {"nc": 1, "url": "https://www.ufc.com/athlete/kevin-holland", "note": "", "record": "29-15-0", "source": "Fiche UFC", "compare": null, "ncSource": "https://www.ufc-fr.com/combattant-1827.html"},
-    "Macy Chiasson": {"nc": null, "url": "https://www.ufc.com/athlete/macy-chiasson", "note": "", "record": "11-6-0", "source": "Fiche UFC", "compare": null, "ncSource": null},
-    "Murtaza Talha": {"nc": null, "url": "https://www.sherdog.com/fighter/Murtaza-Talha-Ali-269171", "note": "", "record": "7-2-0", "source": "Sherdog", "compare": null, "ncSource": null},
-    "Sergio Cossio": {"nc": null, "url": "https://pflmma.com/all-fighter/sergio-cossio", "note": "", "record": "27-12-1", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Abror Atajonov": {"nc": null, "url": "https://pflmma.com/all-fighter-roster", "note": "Palmarès à confirmer sur la fiche PFL.", "record": "0-0-0", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Ali Bagautinov": {"nc": null, "url": "https://pflmma.com/all-fighter-roster", "note": "Palmarès à confirmer sur la fiche PFL.", "record": "0-0-0", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Arman Ashinyan": {"nc": null, "url": "https://pflmma.com/all-fighter-roster", "note": "Palmarès à confirmer sur la fiche PFL.", "record": "0-0-0", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Boris Atangana": {"nc": null, "url": "https://pflmma.com/all-fighter/boris-atangana", "note": "Palmarès professionnel confirmé par la fiche PFL.", "record": "9-0-0", "source": "PFL officiel", "compare": null, "ncSource": null},
-    "Charles Radtke": {"nc": null, "url": "https://www.ufc.com/athlete/charles-radtke", "note": "", "record": "12-5-0", "source": "Fiche UFC", "compare": null, "ncSource": null},
-    "Kayla Harrison": {"nc": null, "url": "https://www.ufc.com/athlete/kayla-harrison", "note": "", "record": "19-1-0", "source": "Fiche UFC", "compare": null, "ncSource": null},
-    "Marvin Caperan": {"nc": null, "url": "https://www.sherdog.com/fighter/Marvin-Caperan-425239", "note": "", "record": "1-0-0", "source": "Sherdog", "compare": null, "ncSource": null},
-    "Mohammad Yahya": {"nc": null, "url": "https://pflmma.com/all-fighter-roster", "note": "Palmarès à confirmer sur la fiche PFL.", "record": "0-0-0", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Nurullo Aliyev": {"nc": null, "url": "https://pflmma.com/all-fighter-roster", "note": "Palmarès à confirmer sur la fiche PFL.", "record": "0-0-0", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Said Magomedov": {"nc": null, "url": "https://pflmma.com/all-fighter-roster", "note": "Palmarès à confirmer sur la fiche PFL.", "record": "0-0-0", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Samuel Sanches": {"nc": null, "url": "https://thecagegrid.com/fighters/samuel-sanches", "note": "Divergence : CageGrid annonce 11-1-0 ; la fiche UFC affiche 1-0-0. Palmarès professionnel à confirmer.", "record": "11-1-0", "source": "CageGrid · à vérifier", "compare": "https://www.ufc.com/athlete/samuel-sanches", "ncSource": null},
-    "Tarek Suleiman": {"nc": null, "url": "https://pflmma.com/all-fighter-roster", "note": "Palmarès à confirmer sur la fiche PFL.", "record": "0-0-0", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Taylor Lapilus": {"nc": null, "url": "https://pflmma.com/europe-fighter/taylor-lapilus", "note": "Palmarès à confirmer sur la fiche PFL.", "record": "", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Mokhtar Benkaci": {"nc": null, "url": "https://pflmma.com/wt-fighter/mokhtar-benkaci", "note": "", "record": "25-10-0", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Omar El Dafrawy": {"nc": null, "url": "https://pflmma.com/all-fighter-roster", "note": "Palmarès à confirmer sur la fiche PFL.", "record": "0-0-0", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Melquizael Costa": {"nc": null, "url": "https://www.ufc.com/athlete/melquizael-costa", "note": "Divergence : fiche UFC 26-7-0 ; CageGrid 26-8-0. Valeur officielle affichée, à recouper.", "record": "26-7-0", "source": "Fiche UFC", "compare": "https://thecagegrid.com/fighters/melquizael-costa", "ncSource": null},
-    "Patrick Habirora": {"nc": null, "url": "https://pflmma.com/wt-fighter/patrick-habirora", "note": "", "record": "9-0-0", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Sarah Moussaddak": {"nc": null, "url": "https://www.sherdog.com/fighter/Sarah-Moussaddak-494111", "note": "", "record": "1-0-0", "source": "Sherdog", "compare": null, "ncSource": null},
-    "Stephen Thompson": {"nc": null, "url": "https://www.ufc.com/athlete/stephen-thompson", "note": "", "record": "17-9-1", "source": "Fiche UFC", "compare": null, "ncSource": null},
-    "Yousri Belgaroui": {"nc": null, "url": "https://www.ufc.com/athlete/yousri-belgaroui", "note": "", "record": "11-3-0", "source": "Fiche UFC", "compare": null, "ncSource": null},
-    "Ernesto Rodriguez": {"nc": null, "url": "https://pflmma.com/all-fighter/ernesto-rodriguez", "note": "", "record": "11-2-0", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Movlid Khaybulaev": {"nc": null, "url": "https://pflmma.com/all-fighter-roster", "note": "Palmarès à confirmer sur la fiche PFL.", "record": "0-0-0", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Terrance McKinney": {"nc": null, "url": "https://www.ufc.com/athlete/terrance-mckinney", "note": "", "record": "18-9-0", "source": "Fiche UFC", "compare": null, "ncSource": null},
-    "Ibragim Chuzhigaev": {"nc": null, "url": "https://www.sherdog.com/fighter/Ibragim-Chuzhigaev-98149", "note": "1 NC séparé", "record": "19-7-0", "source": "Sherdog", "compare": null, "ncSource": null},
-    "Mansur Abdul-Malik": {"nc": null, "url": "https://pflmma.com/all-fighter-roster", "note": "Palmarès à confirmer sur la fiche PFL.", "record": "0-0-0", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Sergei Bilostenniy": {"nc": null, "url": "https://pflmma.com/all-fighter-roster", "note": "Palmarès à confirmer sur la fiche PFL.", "record": "0-0-0", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Abdullah Al-Qahtani": {"nc": null, "url": "https://pflmma.com/wt-fighter/abdullah-al-qahtani", "note": "", "record": "10-2-0", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Nikodem Blazejewski": {"nc": null, "url": "https://www.sherdog.com/fighter/Nikodem-Blazejewski-509626", "note": "", "record": "0-1-0", "source": "Sherdog", "compare": null, "ncSource": null},
-    "Abdisalam Kubanychbek": {"nc": null, "url": "https://pflmma.com/all-fighter-roster", "note": "Palmarès à confirmer sur la fiche PFL.", "record": "0-0-0", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Biyoraslan Hazikhanov": {"nc": null, "url": "https://pflmma.com/all-fighter-roster", "note": "Palmarès à confirmer sur la fiche PFL.", "record": "0-0-0", "source": "Fiche PFL", "compare": null, "ncSource": null},
-    "Magomed Magomedkerimov": {"nc": null, "url": "https://pflmma.com/all-fighter-roster", "note": "Palmarès à confirmer sur la fiche PFL.", "record": "0-0-0", "source": "Fiche PFL", "compare": null, "ncSource": null}
+    "Juan Diaz": {
+      "nc": null,
+      "url": "https://www.ufc.com/athlete/juan-diaz",
+      "note": "",
+      "record": "16-1-1",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": null
+    },
+    "Ciryl Gane": {
+      "nc": null,
+      "url": "https://www.ufc.com/athlete/ciryl-gane",
+      "note": "",
+      "record": "14-2-0",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": null
+    },
+    "Drew Dober": {
+      "nc": 1,
+      "url": "https://www.ufc.com/athlete/drew-dober",
+      "note": "",
+      "record": "29-15-0",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": "https://www.ufc-fr.com/combattant-612.html"
+    },
+    "Evan Elder": {
+      "nc": null,
+      "url": "https://www.ufc.com/athlete/evan-elder",
+      "note": "",
+      "record": "10-2-0",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": null
+    },
+    "Jim Miller": {
+      "nc": 1,
+      "url": "https://www.ufc.com/athlete/jim-miller",
+      "note": "",
+      "record": "39-19-0",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": "https://www.ufc-fr.com/combat-9100.html"
+    },
+    "Josh Hokit": {
+      "nc": null,
+      "url": "https://www.ufc.com/athlete/josh-hokit",
+      "note": "",
+      "record": "10-0-0",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": null
+    },
+    "Rhys McKee": {
+      "nc": null,
+      "url": "https://pflmma.com/index.php/wt-fighter/rhys-mckee",
+      "note": "",
+      "record": "15-7-1",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Bilal Hasan": {
+      "nc": 1,
+      "url": "https://www.ufc.com/athlete/bilal-hasan",
+      "note": "",
+      "record": "10-0-0",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": "https://www.ufc-fr.com/combat-9084.html"
+    },
+    "Jason Ponet": {
+      "nc": null,
+      "url": "https://pflmma.com/all-fighter-roster",
+      "note": "Palmarès à confirmer sur la fiche PFL.",
+      "record": "0-0-0",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Luis Gurule": {
+      "nc": null,
+      "url": "https://www.ufc.com/athlete/luis-gurule",
+      "note": "",
+      "record": "11-4-0",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": null
+    },
+    "Nimo Djagbo": {
+      "nc": null,
+      "url": "https://www.sherdog.com/fighter/Nimo-Djagbo-425229",
+      "note": "",
+      "record": "1-0-0",
+      "source": "Sherdog",
+      "compare": null,
+      "ncSource": null
+    },
+    "Ranam Wehbe": {
+      "nc": null,
+      "url": "https://www.sherdog.com/fighter/Roman-Wehbe-19922",
+      "note": "",
+      "record": "7-7-0",
+      "source": "Sherdog",
+      "compare": null,
+      "ncSource": null
+    },
+    "Alatengheili": {
+      "nc": null,
+      "url": "https://www.ufc.com/athlete/heili-alateng",
+      "note": "",
+      "record": "18-10-2",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": null
+    },
+    "Amanda Nunes": {
+      "nc": null,
+      "url": "https://www.ufc.com/athlete/amanda-nunes",
+      "note": "",
+      "record": "23-5-0",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": null
+    },
+    "Bia Mesquita": {
+      "nc": null,
+      "url": "https://www.ufc.com/athlete/bia-mesquita",
+      "note": "",
+      "record": "8-0-0",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": null
+    },
+    "Chris Duncan": {
+      "nc": null,
+      "url": "https://www.ufc.com/athlete/chris-duncan",
+      "note": "",
+      "record": "15-3-0",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": null
+    },
+    "Jared Gordon": {
+      "nc": null,
+      "url": "https://www.ufc.com/athlete/jared-gordon",
+      "note": "",
+      "record": "21-9-0",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": null
+    },
+    "Tariq Ismail": {
+      "nc": null,
+      "url": "https://pflmma.com/wt-fighter/tariq-ismail",
+      "note": "",
+      "record": "8-2-0",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Uroš Medić": {
+      "nc": null,
+      "url": "https://www.ufc.com/athlete/uros-medic",
+      "note": "",
+      "record": "14-3-0",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": null
+    },
+    "Vadim Nemkov": {
+      "nc": null,
+      "url": "https://pflmma.com/all-fighter/vadim-nemkov",
+      "note": "",
+      "record": "28-2-0",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Caio Borralho": {
+      "nc": null,
+      "url": "https://www.ufc.com/athlete/caio-borralho",
+      "note": "",
+      "record": "18-2-0",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": null
+    },
+    "Cesar Almeida": {
+      "nc": null,
+      "url": "https://www.ufc.com/athlete/cesar-almeida",
+      "note": "",
+      "record": "7-3-0",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": null
+    },
+    "Dina da Silva": {
+      "nc": null,
+      "url": "https://www.sherdog.com/fighter/Dina-da-Silva-Barbosa-311583",
+      "note": "",
+      "record": "3-2-0",
+      "source": "Sherdog",
+      "compare": null,
+      "ncSource": null
+    },
+    "Donte Johnson": {
+      "nc": null,
+      "url": "https://www.ufc.com/athlete/donte-johnson",
+      "note": "",
+      "record": "9-0-0",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": null
+    },
+    "Islam Mamedov": {
+      "nc": null,
+      "url": "https://pflmma.com/all-fighter-roster",
+      "note": "Palmarès à confirmer sur la fiche PFL.",
+      "record": "0-0-0",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Kevin Holland": {
+      "nc": 1,
+      "url": "https://www.ufc.com/athlete/kevin-holland",
+      "note": "",
+      "record": "29-15-0",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": "https://www.ufc-fr.com/combattant-1827.html"
+    },
+    "Macy Chiasson": {
+      "nc": null,
+      "url": "https://www.ufc.com/athlete/macy-chiasson",
+      "note": "",
+      "record": "11-6-0",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": null
+    },
+    "Murtaza Talha": {
+      "nc": null,
+      "url": "https://www.sherdog.com/fighter/Murtaza-Talha-Ali-269171",
+      "note": "",
+      "record": "7-2-0",
+      "source": "Sherdog",
+      "compare": null,
+      "ncSource": null
+    },
+    "Sergio Cossio": {
+      "nc": null,
+      "url": "https://pflmma.com/all-fighter/sergio-cossio",
+      "note": "",
+      "record": "27-12-1",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Abror Atajonov": {
+      "nc": null,
+      "url": "https://pflmma.com/all-fighter-roster",
+      "note": "Palmarès à confirmer sur la fiche PFL.",
+      "record": "0-0-0",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Ali Bagautinov": {
+      "nc": null,
+      "url": "https://pflmma.com/all-fighter-roster",
+      "note": "Palmarès à confirmer sur la fiche PFL.",
+      "record": "0-0-0",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Arman Ashinyan": {
+      "nc": null,
+      "url": "https://pflmma.com/all-fighter-roster",
+      "note": "Palmarès à confirmer sur la fiche PFL.",
+      "record": "0-0-0",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Charles Radtke": {
+      "nc": null,
+      "url": "https://www.ufc.com/athlete/charles-radtke",
+      "note": "",
+      "record": "12-5-0",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": null
+    },
+    "Kayla Harrison": {
+      "nc": null,
+      "url": "https://www.ufc.com/athlete/kayla-harrison",
+      "note": "",
+      "record": "19-1-0",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": null
+    },
+    "Marvin Caperan": {
+      "nc": null,
+      "url": "https://www.sherdog.com/fighter/Marvin-Caperan-425239",
+      "note": "",
+      "record": "1-0-0",
+      "source": "Sherdog",
+      "compare": null,
+      "ncSource": null
+    },
+    "Mohammad Yahya": {
+      "nc": null,
+      "url": "https://pflmma.com/all-fighter-roster",
+      "note": "Palmarès à confirmer sur la fiche PFL.",
+      "record": "0-0-0",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Nurullo Aliyev": {
+      "nc": null,
+      "url": "https://pflmma.com/all-fighter-roster",
+      "note": "Palmarès à confirmer sur la fiche PFL.",
+      "record": "0-0-0",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Said Magomedov": {
+      "nc": null,
+      "url": "https://pflmma.com/all-fighter-roster",
+      "note": "Palmarès à confirmer sur la fiche PFL.",
+      "record": "0-0-0",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Samuel Sanches": {
+      "nc": null,
+      "url": "https://thecagegrid.com/fighters/samuel-sanches",
+      "note": "Divergence : CageGrid annonce 11-1-0 ; la fiche UFC affiche 1-0-0. Palmarès professionnel à confirmer.",
+      "record": "11-1-0",
+      "source": "CageGrid · à vérifier",
+      "compare": "https://www.ufc.com/athlete/samuel-sanches",
+      "ncSource": null
+    },
+    "Tarek Suleiman": {
+      "nc": null,
+      "url": "https://pflmma.com/all-fighter-roster",
+      "note": "Palmarès à confirmer sur la fiche PFL.",
+      "record": "0-0-0",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Taylor Lapilus": {
+      "nc": null,
+      "url": "https://pflmma.com/europe-fighter/taylor-lapilus",
+      "note": "Palmarès à confirmer sur la fiche PFL.",
+      "record": "",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Mokhtar Benkaci": {
+      "nc": null,
+      "url": "https://pflmma.com/wt-fighter/mokhtar-benkaci",
+      "note": "",
+      "record": "25-10-0",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Omar El Dafrawy": {
+      "nc": null,
+      "url": "https://pflmma.com/all-fighter-roster",
+      "note": "Palmarès à confirmer sur la fiche PFL.",
+      "record": "0-0-0",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Melquizael Costa": {
+      "nc": null,
+      "url": "https://www.ufc.com/athlete/melquizael-costa",
+      "note": "Divergence : fiche UFC 26-7-0 ; CageGrid 26-8-0. Valeur officielle affichée, à recouper.",
+      "record": "26-7-0",
+      "source": "Fiche UFC",
+      "compare": "https://thecagegrid.com/fighters/melquizael-costa",
+      "ncSource": null
+    },
+    "Patrick Habirora": {
+      "nc": null,
+      "url": "https://pflmma.com/wt-fighter/patrick-habirora",
+      "note": "",
+      "record": "9-0-0",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Sarah Moussaddak": {
+      "nc": null,
+      "url": "https://www.sherdog.com/fighter/Sarah-Moussaddak-494111",
+      "note": "",
+      "record": "1-0-0",
+      "source": "Sherdog",
+      "compare": null,
+      "ncSource": null
+    },
+    "Stephen Thompson": {
+      "nc": null,
+      "url": "https://www.ufc.com/athlete/stephen-thompson",
+      "note": "",
+      "record": "17-9-1",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": null
+    },
+    "Yousri Belgaroui": {
+      "nc": null,
+      "url": "https://www.ufc.com/athlete/yousri-belgaroui",
+      "note": "",
+      "record": "11-3-0",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": null
+    },
+    "Ernesto Rodriguez": {
+      "nc": null,
+      "url": "https://pflmma.com/all-fighter/ernesto-rodriguez",
+      "note": "",
+      "record": "11-2-0",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Movlid Khaybulaev": {
+      "nc": null,
+      "url": "https://pflmma.com/all-fighter-roster",
+      "note": "Palmarès à confirmer sur la fiche PFL.",
+      "record": "0-0-0",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Terrance McKinney": {
+      "nc": null,
+      "url": "https://www.ufc.com/athlete/terrance-mckinney",
+      "note": "",
+      "record": "18-9-0",
+      "source": "Fiche UFC",
+      "compare": null,
+      "ncSource": null
+    },
+    "Ibragim Chuzhigaev": {
+      "nc": null,
+      "url": "https://www.sherdog.com/fighter/Ibragim-Chuzhigaev-98149",
+      "note": "1 NC séparé",
+      "record": "19-7-0",
+      "source": "Sherdog",
+      "compare": null,
+      "ncSource": null
+    },
+    "Mansur Abdul-Malik": {
+      "nc": null,
+      "url": "https://pflmma.com/all-fighter-roster",
+      "note": "Palmarès à confirmer sur la fiche PFL.",
+      "record": "0-0-0",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Sergei Bilostenniy": {
+      "nc": null,
+      "url": "https://pflmma.com/all-fighter-roster",
+      "note": "Palmarès à confirmer sur la fiche PFL.",
+      "record": "0-0-0",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Abdullah Al-Qahtani": {
+      "nc": null,
+      "url": "https://pflmma.com/wt-fighter/abdullah-al-qahtani",
+      "note": "",
+      "record": "10-2-0",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Nikodem Blazejewski": {
+      "nc": null,
+      "url": "https://www.sherdog.com/fighter/Nikodem-Blazejewski-509626",
+      "note": "",
+      "record": "0-1-0",
+      "source": "Sherdog",
+      "compare": null,
+      "ncSource": null
+    },
+    "Abdisalam Kubanychbek": {
+      "nc": null,
+      "url": "https://pflmma.com/all-fighter-roster",
+      "note": "Palmarès à confirmer sur la fiche PFL.",
+      "record": "0-0-0",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Biyoraslan Hazikhanov": {
+      "nc": null,
+      "url": "https://pflmma.com/all-fighter-roster",
+      "note": "Palmarès à confirmer sur la fiche PFL.",
+      "record": "0-0-0",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Magomed Magomedkerimov": {
+      "nc": null,
+      "url": "https://pflmma.com/all-fighter-roster",
+      "note": "Palmarès à confirmer sur la fiche PFL.",
+      "record": "0-0-0",
+      "source": "Fiche PFL",
+      "compare": null,
+      "ncSource": null
+    },
+    "Boris Atangana": {
+      "nc": null,
+      "url": "https://pflmma.com/all-fighter/boris-atangana",
+      "note": "Palmarès professionnel confirmé par la fiche PFL.",
+      "record": "9-0-0",
+      "source": "PFL officiel",
+      "compare": null,
+      "ncSource": null
+    },
+    "Bryan Battle": {
+      "nc": null,
+      "url": "https://pflmma.com/all-fighter/bryan-battle",
+      "note": "Palmarès professionnel confirmé par la fiche PFL.",
+      "record": "13-3-0",
+      "source": "PFL officiel",
+      "compare": null,
+      "ncSource": null
+    }
   }
 }
