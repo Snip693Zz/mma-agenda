@@ -1,7 +1,9 @@
 name: Vérifier l'agenda
 on:
   push:
-    paths: ['index.html', 'app.js', 'mma-data.json', 'tests/**', '.github/workflows/verify.yml']
+    paths: ['**/*.html', '**/*.js', '**/*.css', 'mma-data.json', 'tests/**', '.github/workflows/verify.yml']
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -10,20 +12,21 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - id: sources
-        run: |
-          if test -f index.html && test -f app.js && test -f mma-data.json; then
-            echo 'ready=true' >> "$GITHUB_OUTPUT"
-          else
-            echo 'Application non déposée : tests non exécutés.' >> "$GITHUB_STEP_SUMMARY"
-          fi
       - uses: actions/setup-node@v4
-        if: steps.sources.outputs.ready == 'true'
         with:
           node-version: '22'
-      - if: steps.sources.outputs.ready == 'true'
+      - name: Vérifier les fichiers et la syntaxe
         run: |
+          test -s index.html
+          test -s app.js
+          test -s month-nav.js
+          test -s supabase-sync.js
+          test -s mma-data.json
           node --check app.js
+          node --check month-nav.js
+          node --check supabase-sync.js
+      - name: Tests navigateur
+        run: |
           npm install --no-save --package-lock=false @playwright/test@1.56.1
           npx playwright install --with-deps chromium
           npx playwright test --config=tests/playwright.config.cjs
