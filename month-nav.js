@@ -22,14 +22,8 @@
   function updateLabels(){
     const current=parseTitle(title.textContent);
     if(!current)return;
-    prevLabel.textContent='';
-    nextLabel.textContent='';
-    prevLabel.append(arrowLeft.cloneNode(true));
-    nextLabel.append(arrowRight.cloneNode(true));
-    const label=monthName(current.year,current.month-1);
-    const label2=monthName(current.year,current.month+1);
-    prevLabel.setAttribute('aria-label','Aller à '+label);
-    nextLabel.setAttribute('aria-label','Aller à '+label2);
+    prev.setAttribute('aria-label','Aller à '+monthName(current.year,current.month-1));
+    next.setAttribute('aria-label','Aller à '+monthName(current.year,current.month+1));
   }
   const arrowLeft=document.createElementNS('http://www.w3.org/2000/svg','svg');
   arrowLeft.setAttribute('viewBox','0 0 24 24');
@@ -39,25 +33,19 @@
   arrowRight.setAttribute('viewBox','0 0 24 24');
   arrowRight.setAttribute('aria-hidden','true');
   arrowRight.innerHTML='<path d="M9 5l7 7-7 7"/>';
-  const prevLabel=document.createElement('button');
-  prevLabel.type='button';
-  prevLabel.className='monthnav';
-  prevLabel.setAttribute('aria-label','Aller au mois précédent');
-  const nextLabel=document.createElement('button');
-  nextLabel.type='button';
-  nextLabel.className='monthnav';
-  nextLabel.setAttribute('aria-label','Aller au mois suivant');
+  prev.innerHTML='';
+  next.innerHTML='';
+  prev.append(arrowLeft);
+  next.append(arrowRight);
   const center=document.createElement('div');
   center.className='month-center';
   center.append(title,count,today);
   bar.innerHTML='';
-  bar.append(prevLabel,center,nextLabel);
-  prevLabel.addEventListener('click',()=>prev.click());
-  nextLabel.addEventListener('click',()=>next.click());
+  bar.append(prev,center,next);
   const observer=new MutationObserver(updateLabels);
   observer.observe(title,{childList:true,characterData:true,subtree:true});
   updateLabels();
   const style=document.createElement('style');
-  style.textContent=`.monthbar{display:flex;align-items:center;justify-content:space-between;gap:10px}.monthnav{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--raised);border:1px solid var(--line);color:var(--ink);font-size:13px;font-weight:600;padding:10px 14px;border-radius:14px;white-space:nowrap;transition:border-color .18s,background .18s,transform .18s}.monthnav:hover{border-color:var(--accent);background:var(--panel)}.monthnav:active{transform:scale(.98)}.monthnav svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.month-center{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center}.month-center h2{margin:0;font-size:clamp(18px,4.5vw,23px);font-weight:650;letter-spacing:-.03em;line-height:1.2;text-align:center;white-space:nowrap}.month-center small{color:var(--muted);font-size:11px;line-height:1.3}.month-center .today{font-size:12px;min-height:30px;padding:3px 10px;margin-top:2px}@media(max-width:520px){.monthnav{width:44px;height:44px;padding:0;border-radius:14px}.monthnav svg{width:22px;height:22px}}`;
+  style.textContent=`.monthbar{display:flex;align-items:center;justify-content:space-between;gap:10px}.monthbar .iconbtn{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;background:var(--raised);border:1px solid var(--line);color:var(--ink);width:44px;height:44px;padding:0;border-radius:14px;transition:border-color .18s,background .18s,transform .18s}.monthbar .iconbtn:hover{border-color:var(--accent);background:var(--panel)}.monthbar .iconbtn:active{transform:scale(.98)}.monthbar .iconbtn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.month-center{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center}.month-center h2{margin:0;font-size:clamp(18px,4.5vw,23px);font-weight:650;letter-spacing:-.03em;line-height:1.2;text-align:center;white-space:nowrap}.month-center small{color:var(--muted);font-size:11px;line-height:1.3}.month-center .today{font-size:12px;min-height:30px;padding:3px 10px;margin-top:2px}`;
   document.head.append(style);
 })();
