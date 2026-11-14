@@ -4,8 +4,8 @@ from collector.ufc_proposals import build
 URL='https://www.ufc.com/event/example'
 def observed(pairs,status='parsed'):
  return {'source_url':URL,'status':status,'issues':[],'fights':[{'fighters':p,'source_kind':'official','source_url':URL} for p in pairs]}
-def metadata(): return {'events':[{'source_url':URL,'source_kind':'official','method':'ufc_hero_timestamp','title':'UFC','date':'2027-01-01','start_at_utc':'2027-01-02T02:00:00+00:00'}]}
-def baseline(pairs): return {'events':[{'id':'existing','org':'UFC','url':URL,'title':'Titre à préserver','cards':[{'fights':pairs,'start':'2027-01-02T02:00:00Z'}]}],'fighterRecords':{}}
+def metadata(): return {'events':[{'source_url':URL,'source_kind':'official','method':'ufc_hero_timestamp','title':'Titre à préserver','date':'2027-01-01','start_at_utc':'2027-01-02T02:00:00+00:00'}]}
+def baseline(pairs): return {'events':[{'id':'existing','org':'UFC','url':URL,'title':'Titre à préserver','date':'2027-01-01','cards':[{'fights':pairs,'start':'2027-01-02T02:00:00Z'}]}],'fighterRecords':{}}
 def report(event): return {'events':[event],'errors':[]}
 class ProposalTests(unittest.TestCase):
  def test_existing_event_unchanged(self):
