@@ -33,14 +33,19 @@ class ReconciliationTests(unittest.TestCase):
         second=reconcile_event(projected_to_live(projected),details)
         self.assertEqual(second['status'],'unchanged',second['issues'])
         self.assertEqual(second['action_counts'],{})
+    def test_no_exploitable_card_is_watch_only(self):
+        live,details=fixtures();details['status']='needs_review';details['issues']=['Aucune carte exploitable']
+        entry=reconcile_event(live,details)
+        self.assertEqual(entry['status'],'watch_only',entry['issues'])
+        self.assertEqual(entry['action_counts'],{})
     def test_missing_or_added_fight_blocks(self):
         live,details=fixtures()
-        missing=copy.deepcopy(details); missing['cards'][0]['fights']=[]
+        missing=copy.deepcopy(details);missing['cards'][0]['fights']=[]
         self.assertEqual(reconcile_event(live,missing)['status'],'blocked')
-        added=copy.deepcopy(details); added['cards'][0]['fights'].append(['New','Other'])
+        added=copy.deepcopy(details);added['cards'][0]['fights'].append(['New','Other'])
         self.assertEqual(reconcile_event(live,added)['status'],'blocked')
     def test_invalid_details_blocks(self):
-        live,details=fixtures(); details['status']='needs_review'
+        live,details=fixtures();details['status']='needs_review';details['issues']=['Extraction invalide']
         entry=reconcile_event(live,details)
         self.assertEqual(entry['status'],'blocked')
         self.assertEqual(entry['action_counts'],{})
@@ -57,7 +62,7 @@ class ReconciliationTests(unittest.TestCase):
         self.assertEqual(event['cards'][0]['fights'][1]['position'],1)
     def test_reconcile_rejects_invalid_baseline(self):
         with self.assertRaises(ValueError):
-            reconcile({},{})
+            reconcile({},{});
 
 if __name__=='__main__':
     unittest.main()

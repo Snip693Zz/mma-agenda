@@ -7,8 +7,13 @@ import re
 import unicodedata
 from urllib.parse import urlsplit
 
+OFFICIAL_SOURCE_LABEL = 'Fiche officielle UFC'
+
 def digest(value):
     return hashlib.sha256(json.dumps(value,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+
+def source_matches(value,address):
+    return value == address or value == OFFICIAL_SOURCE_LABEL
 
 def pair(a,b):
     if any(not isinstance(n,str) or not n.strip() for n in (a,b)):
@@ -81,7 +86,7 @@ def plan_reallocation(event,details):
         next_position=max(positions,default=-1)+1
         desired={}
         for source in details['cards']:
-            candidates=[c for c in projected['cards'] if c.get('is_active') is not False and c['name']==source['name'] and c.get('source')==address and c.get('extra',{}).get('allocation')!='unassigned']
+            candidates=[c for c in projected['cards'] if c.get('is_active') is not False and c['name']==source['name'] and source_matches(c.get('source'),address) and c.get('extra',{}).get('allocation')!='unassigned']
             if len(candidates)>1:
                 raise ValueError('Carte cible ambiguë')
             if candidates:

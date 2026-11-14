@@ -38,7 +38,11 @@ def reconcile_event(live_event, details):
     try:
         event = to_planner_event(live_event)
         result = plan_reallocation(event, details)
-        entry.update({'event_id': result.get('event_id'), 'source_url': details.get('source_url'), 'source_sha256': details.get('source_sha256'), 'baseline_sha256': result.get('baseline_sha256'), 'details_sha256': result.get('details_sha256'), 'status': STATUS_MAP.get(result.get('status'), 'blocked'), 'issues': list(result.get('issues') or []), 'action_counts': action_counts(result.get('actions')), 'preserved_fights': result.get('preserved_fights')})
+        status = STATUS_MAP.get(result.get('status'), 'blocked')
+        issues = list(result.get('issues') or [])
+        if status == 'blocked' and any('Aucune carte exploitable' in issue for issue in issues):
+            status = 'watch_only'
+        entry.update({'event_id': result.get('event_id'), 'source_url': details.get('source_url'), 'source_sha256': details.get('source_sha256'), 'baseline_sha256': result.get('baseline_sha256'), 'details_sha256': result.get('details_sha256'), 'status': status, 'issues': issues, 'action_counts': action_counts(result.get('actions')), 'preserved_fights': result.get('preserved_fights')})
     except (KeyError, TypeError, ValueError, AttributeError) as error:
         entry.update({'status': 'blocked', 'issues': [str(error)], 'action_counts': {}, 'preserved_fights': None})
     return entry
