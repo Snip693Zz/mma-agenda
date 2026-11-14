@@ -22,9 +22,10 @@ def iso(value):
     if isinstance(value,dt.datetime): return value.isoformat()
     return str(value)
 
-def export():
-    c=client()
+def export(source_client=None):
+    c=source_client if source_client is not None else client()
     events=rows(c,'events'); cards=rows(c,'event_cards'); fights=rows(c,'fights'); fighters=rows(c,'fighters')
+    if not events: raise ValueError('Export vide refuse pour proteger le fichier de secours')
     active={(x['event_id'],x['position']) for x in cards if x.get('is_active',True)}
     by_card=collections.defaultdict(list)
     for f in fights:
