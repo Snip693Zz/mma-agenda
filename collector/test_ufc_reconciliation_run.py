@@ -9,7 +9,7 @@ CARDS={'generated_at':'2026-11-14T06:00:00Z','events':[{'status':'parsed','sourc
 
 class RunnerTests(unittest.TestCase):
     def test_collect_details_uses_official_pages(self):
-        details,errors=collect_details(CARDS,lambda address:HTML)
+        details,errors=collect_details(CARDS,lambda address:HTML,extract=lambda html,address:DETAILS)
         self.assertEqual(list(details),[URL])
         self.assertEqual(details[URL]['status'],'parsed')
         self.assertEqual(errors,[])
@@ -23,7 +23,7 @@ class RunnerTests(unittest.TestCase):
             self.assertFalse(report['entries'][0]['ready_to_publish'])
             self.assertNotIn('projected_event',report['entries'][0])
     def test_missing_page_is_reported_without_crash(self):
-        details,errors=collect_details(CARDS,lambda address:None)
+        details,errors=collect_details(CARDS,lambda address:None,extract=lambda html,address:DETAILS)
         self.assertEqual(details,{})
         self.assertEqual(errors[0]['phase'],'ufc_details')
     def test_invalid_page_is_reported_without_crash(self):
@@ -34,9 +34,8 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual(errors[0]['phase'],'ufc_details')
     def test_run_collects_errors_without_writes(self):
         class Client:
-            baseline=BASELINE
-            def get(self,address): return HTML
-        report=run(Client(),lambda address:HTML,extract=lambda html,address:DETAILS,reconciler=lambda baseline,details:{'mode':'ufc_daily_reconciliation','database_writes':False,'automatic_publication':False,'entries':[{'status':'unchanged','issues':[]}],'errors':[]})
+            pass
+        report=run(Client(),lambda address:HTML,extract=lambda html,address:DETAILS,reconciler=lambda baseline,details:{'mode':'ufc_daily_reconciliation','database_writes':False,'automatic_publication':False,'entries':[{'status':'unchanged','issues':[]}],'errors':[]},load_baseline=lambda client:BASELINE,collect_cards=lambda baseline:CARDS)
         self.assertEqual(report['entries'][0]['status'],'unchanged')
         self.assertTrue(report['database_read'])
         self.assertFalse(report['database_writes'])
@@ -44,17 +43,18 @@ class RunnerTests(unittest.TestCase):
         self.assertFalse(report['entries'][0]['ready_to_publish'])
     def test_run_records_details_failure_safely(self):
         class Client:
-            baseline=BASELINE
-            def get(self,address): return HTML
+            pass
         def extract(html,address):
             raise RuntimeError('network')
-        report=run(Client(),lambda address:HTML,extract=extract,reconciler=lambda baseline,details:{'mode':'ufc_daily_reconciliation','database_writes':False,'automatic_publication':False,'entries':[],'errors':[]})
+        report=run(Client(),lambda address:HTML,extract=extract,reconciler=lambda baseline,details:{'mode':'ufc_daily_reconciliation','database_writes':False,'automatic_publication':False,'entries':[],'errors':[]},load_baseline=lambda client:BASELINE,collect_cards=lambda baseline:CARDS)
         self.assertEqual(report['errors'][0]['phase'],'ufc_details')
         self.assertFalse(report['database_writes'])
     def test_run_records_baseline_failure_safely(self):
-        class Failing:
-            def get(self,address): return HTML
-        report=run(Failing(),lambda address:HTML,extract=lambda html,address:DETAILS,reconciler=lambda baseline,details:{'entries':[],'errors':[]})
+        class Client:
+            pass
+        def load_baseline(client):
+            raise RuntimeError('database')
+        report=run(Client(),lambda address:HTML,extract=lambda html,address:DETAILS,reconciler=lambda baseline,details:{'entries':[],'errors':[]},load_baseline=load_baseline,collect_cards=lambda baseline:CARDS)
         self.assertEqual(report['errors'][0]['phase'],'supabase_read')
         self.assertFalse(report['database_writes'])
 

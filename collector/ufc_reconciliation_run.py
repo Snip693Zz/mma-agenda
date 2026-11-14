@@ -57,14 +57,14 @@ def build_report(baseline, cards, html_by_url, extract=extract_details, reconcil
         entry['auto_publishable'] = False
     return report
 
-def run(client, fetch_html, extract=extract_details, reconciler=reconcile):
+def run(client, fetch_html, extract=extract_details, reconciler=reconcile, load_baseline=load_live, collect_cards=collect_reviewed):
     report = {'mode': 'ufc_daily_reconciliation', 'database_read': False, 'database_writes': False, 'fallback_writes': False, 'automatic_publication': False, 'entries': [], 'errors': []}
     phase = 'supabase_read'
     try:
-        baseline = load_live(client)
+        baseline = load_baseline(client)
         report['database_read'] = True
         phase = 'ufc_collection'
-        cards = collect_reviewed(baseline)
+        cards = collect_cards(baseline)
         report['cards_generated_at'] = cards.get('generated_at')
         report['errors'].extend(cards.get('errors') or [])
         phase = 'ufc_details'
