@@ -114,7 +114,7 @@ dialog{max-width:820px}
     if(!eventBody)return;
     eventBody.querySelectorAll('.card-time').forEach(block=>{
       const label=block.querySelector('b');
-      block.classList.toggle('is-unknown',!!label&&label.textContent.trim()==='Horaire non confirmé');
+      block.classList.toggle('is-unknown',!!label&&['Horaire non confirmé','Horaire à confirmer'].includes(label.textContent.trim()));
     });
   }
   if(eventBody){
@@ -144,4 +144,46 @@ dialog{max-width:820px}
     const calendarObserver=new MutationObserver(enhanceCalendar);
     calendarObserver.observe(calendar,{childList:true,subtree:true});
   }
+
+  /* Étape 5 — libellés et finitions, sans toucher au chargement */
+  function setLabel(selector,from,to,root=document){
+    root.querySelectorAll(selector).forEach(node=>{
+      if(node.textContent.trim()===from)node.textContent=to;
+    });
+  }
+  setLabel('#returnSample','Voir les soirées de test','Revenir aux soirées');
+  setLabel('.calendar-note','Une soirée, un titre. Ouvre l’événement pour retrouver les cartes et leurs horaires après minuit.','Ouvre une soirée pour consulter les combats et les horaires, y compris après minuit.');
+  const snapshotLabel=document.querySelector('.snapshot>span:not(.tag)');
+  if(snapshotLabel)snapshotLabel.textContent='Horaires en heure de Paris';
+  function finishDetails(){
+    if(!eventBody)return;
+    setLabel('.card-time b','Horaire non confirmé','Horaire à confirmer',eventBody);
+    setLabel('.card-time span','À VÉRIFIER SUR LA SOURCE','Consulter la source officielle',eventBody);
+    setLabel('.card-date','Début non renseigné dans la source.','Horaire non renseigné dans les données disponibles.',eventBody);
+    setLabel('.sources>summary','Sources et dernière vérification','Sources et vérification',eventBody);
+    setLabel('.sources>p.small','', '',eventBody);
+    eventBody.querySelectorAll('.card-actions button[data-export]').forEach(button=>{
+      if(button.disabled)button.title='Export indisponible : horaire à confirmer';
+    });
+  }
+  if(eventBody){
+    finishDetails();
+    const finishObserver=new MutationObserver(finishDetails);
+    finishObserver.observe(eventBody,{childList:true,subtree:true,characterData:true});
+  }
+  const finishStyle=document.createElement('style');
+  finishStyle.textContent=`
+#loadStatus{width:min(1120px,calc(100% - 48px));margin:0 auto 20px;padding:0!important;font-size:12px;color:var(--muted);line-height:1.6}
+#eventBody .card-actions{gap:10px 16px}
+#eventBody .card-actions a,#eventBody .card-actions button{min-height:44px;max-width:100%;line-height:1.5}
+#eventBody button:disabled{opacity:.65;cursor:not-allowed;border-style:dashed}
+#eventBody summary{min-height:44px;line-height:1.6;overflow-wrap:anywhere}
+#eventBody summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.event-time{color:var(--accent)}
+.status-chip.ok{background:var(--accent-bg);color:var(--accent)}
+.status-chip.partial{background:var(--amber-bg);color:var(--amber)}
+.status-chip.todo{background:var(--raised);color:var(--muted)}
+@media(max-width:640px){#loadStatus{width:calc(100% - 32px)}#eventBody .card-actions{align-items:flex-start}}
+@media(max-width:360px){#loadStatus{width:calc(100% - 24px)}}`;
+  document.head.append(finishStyle);
 })();
