@@ -1,0 +1,33 @@
+name: Diagnostic des sources PFL sans secrets
+on:
+  push:
+    branches: [fix/pfl-source-validation]
+    paths:
+      - 'collector/pfl_source_capture.py'
+      - 'collector/pfl_source_probe.py'
+      - '.github/workflows/pfl-source-capture.yml'
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Tester le diagnostic et la capture sans reseau
+        working-directory: collector
+        run: python -m unittest test_pfl_source_probe test_pfl_source_capture -v
+      - name: Capturer trois pages officielles en lecture seule
+        run: python -m collector.pfl_source_capture
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pfl-source-capture
+          path: reports/pfl-source-capture/
+          retention-days: 7
+          if-no-files-found: warn
