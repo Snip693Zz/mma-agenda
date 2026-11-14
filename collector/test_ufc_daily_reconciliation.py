@@ -33,23 +33,20 @@ class ReconciliationTests(unittest.TestCase):
         second=reconcile_event(projected_to_live(projected),details)
         self.assertEqual(second['status'],'unchanged',second['issues'])
         self.assertEqual(second['action_counts'],{})
-    def test_no_exploitable_card_is_watch_only(self):
-        live,details=fixtures();details['status']='needs_review';details['issues']=['Aucune carte exploitable']
-        entry=reconcile_event(live,details)
-        self.assertEqual(entry['status'],'watch_only',entry['issues'])
-        self.assertEqual(entry['action_counts'],{})
+    def test_non_parsed_details_are_watch_only(self):
+        live,details=fixtures()
+        for status,issues in [('needs_review',['Aucune carte exploitable']),('needs_review',['Page UFC en direct : structure non exploitable']),('error',['Extraction indisponible'])]:
+            payload=copy.deepcopy(details);payload['status']=status;payload['issues']=issues
+            entry=reconcile_event(live,payload)
+            self.assertEqual(entry['status'],'watch_only',entry['issues'])
+            self.assertEqual(entry['action_counts'],{})
+            self.assertEqual(entry['issues'],issues)
     def test_missing_or_added_fight_blocks(self):
         live,details=fixtures()
         missing=copy.deepcopy(details);missing['cards'][0]['fights']=[]
         self.assertEqual(reconcile_event(live,missing)['status'],'blocked')
         added=copy.deepcopy(details);added['cards'][0]['fights'].append(['New','Other'])
         self.assertEqual(reconcile_event(live,added)['status'],'blocked')
-    def test_invalid_details_blocks(self):
-        live,details=fixtures();details['status']='needs_review';details['issues']=['Extraction invalide']
-        entry=reconcile_event(live,details)
-        self.assertEqual(entry['status'],'blocked')
-        self.assertEqual(entry['action_counts'],{})
-        self.assertNotIn('projected_event',entry)
     def test_missing_details_is_watch_only(self):
         live,_=fixtures()
         report=reconcile({'events':[live]},{})
