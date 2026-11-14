@@ -58,17 +58,22 @@ def build(cards,baseline,catalog):
    entry['reason']='URL invalide ou rapprochement ambigu';continue
   previous=known.get(address,[None])[0]
   if previous: entry['existing_id']=previous['id'];entry['existing_sha256']=digest(previous)
-  if observed.get('status')=='pending_card':
+  pending=observed.get('status')=='pending_card'
+  if pending:
    if previous and any(c.get('fights') for c in previous.get('cards',[])): entry['reason']='Combats existants absents du relevé';continue
-   entry['type']='watch_only';entry['reason']='Carte en attente, aucune création ou suppression proposée';continue
-  if observed.get('status')!='parsed' or observed.get('issues'):
+   evidence=observed.get('pending_evidence') or {}
+   verified=(evidence.get('visible_placeholder')=='TBD vs TBD' and evidence.get('event_metadata_checked') is True and evidence.get('athlete_links_found') is False and evidence.get('structured_fighter_fields_found') is False and observed.get('html_rows')==0 and observed.get('fights')==[] and not observed.get('issues'))
+   if previous or not verified:
+    entry['type']='watch_only';entry['reason']='Carte en attente, aucune création ou suppression proposée';continue
+   entry['pending_evidence']=copy.deepcopy(evidence)
+  if observed.get('status') not in ('parsed','pending_card') or observed.get('issues'):
    entry['reason']='Extraction non validée';continue
   try:
    new={}
    for fight in observed.get('fights',[]):
     if fight.get('source_kind')!='official' or canonical(fight.get('source_url'))!=address: raise ValueError('Provenance incohérente')
     new[pair_key(fight['fighters'])]=fight['fighters']
-   if not new: raise ValueError('Aucun combat exploitable')
+   if not new and not pending: raise ValueError('Aucun combat exploitable')
    old={pair_key(pair):pair for c in previous.get('cards',[]) for pair in c.get('fights',[])} if previous else {}
   except (KeyError,TypeError,ValueError) as error:
    entry['reason']=str(error);continue
@@ -113,13 +118,17 @@ def build(cards,baseline,catalog):
    if not isinstance(date,str) or dt.date.fromisoformat(date).isoformat()!=date: raise ValueError()
   except ValueError:
    entry['reason']='Date officielle non établie';continue
+  if pending and (date < dt.datetime.now(dt.timezone.utc).date().isoformat() or not isinstance(meta.get('title'),str) or not re.search(r'\bUFC\b',meta['title'],re.I)):
+   entry['reason']='Annonce sans combats : date passée ou titre officiel absent';continue
   proposed_id='ufc-auto-'+hashlib.sha256(address.encode()).hexdigest()[:12]
   if any(e['id']==proposed_id for e in baseline['events']):
    entry['reason']='Identifiant proposé déjà utilisé';continue
   entry['type']='create_event_proposal'
   entry['metadata_evidence']=copy.deepcopy(meta)
   entry['checks_before_publication']=['Relire les données Supabase actuelles','Confirmer ou compléter le lieu et le titre','Vérifier les cartes et leurs horaires sans utiliser l’heure d’en-tête par défaut','Valider explicitement le lot']
-  entry['draft_event']={'id':proposed_id,'org':'UFC','title':meta.get('title') or 'UFC','date':date,'place':meta.get('place') or 'Lieu à confirmer','official':False,'url':address,'officialCardUrl':address,'note':'Combats issus de la fiche officielle UFC. Répartition et horaires des cartes à confirmer ; aucun palmarès ajouté.','cards':[{'name':'Combats officiels — répartition à confirmer','start':None,'level':'official','source':address,'fights':list(new.values())}]}
+  entry['draft_event']={'id':proposed_id,'org':'UFC','title':meta.get('title') or 'UFC','date':date,'place':meta.get('place') or 'Lieu à confirmer','official':False,'url':address,'officialCardUrl':address,'note':'Combats issus de la fiche officielle UFC. Répartition et horaires des cartes à confirmer ; aucun palmarès ajouté.','cards':[] if pending else [{'name':'Combats officiels — répartition à confirmer','start':None,'level':'official','source':address,'fights':list(new.values())}]}
+  if pending:
+   entry['draft_event']['note']='Événement annoncé sur la fiche officielle UFC ; combats et horaires des cartes non annoncés.'
  result['summary']=dict(collections.Counter(e['type'] for e in result['entries']))
  return result
 
@@ -135,7 +144,7 @@ def live(baseline):
  cards=collect_reviewed(baseline);catalog={'events':[]};client=None
  today=dt.datetime.now(dt.timezone.utc).date().isoformat()
  for event in cards['events']:
-  if event['status']!='parsed': continue
+  if event['status'] not in ('parsed','pending_card'): continue
   try:
    if client is None: client=Client('https://www.ufc.com/events')
    metadata,issues,_=ufc_html(client.get(event['source_url']),event['source_url'],today)
