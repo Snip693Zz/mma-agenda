@@ -24,7 +24,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: python collector/ufc_reconciliation_run.py --output reports/ufc-reconciliation.json
+        run: python -m collector.ufc_reconciliation_run --output reports/ufc-reconciliation.json
       - name: Conserver le rapport de rapprochement
         if: always()
         uses: actions/upload-artifact@v4
