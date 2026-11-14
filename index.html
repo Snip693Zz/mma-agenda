@@ -48,6 +48,19 @@ body{transition:background-color .2s,color .2s}
 .org-pills{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .org-pill{padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.15);background:transparent;color:inherit;font-size:12px;font-weight:600;cursor:pointer}
 .org-pill[aria-pressed="true"]{background:#7ee2b8;color:#06251a;border-color:#7ee2b8}
+/* Couleurs des filtres, assorties aux badges de la liste */
+#orgPills .org-pill{border-color:var(--line);color:var(--ink);background:var(--panel)}
+#orgPills .org-pill[data-org="UFC"]{--org-color:#1f6feb;--org-text:#9bc5ff}
+#orgPills .org-pill[data-org="PFL"]{--org-color:#d1242f;--org-text:#ffabb2}
+#orgPills .org-pill[data-org="ARES"]{--org-color:#0a7d33;--org-text:#93e3b0}
+#orgPills .org-pill[data-org="HEXAGONE"]{--org-color:#b7791f;--org-text:#f2d09a;--org-on:#1b1307}
+:root[data-theme=light] #orgPills .org-pill[data-org="UFC"]{--org-text:#174fa8}
+:root[data-theme=light] #orgPills .org-pill[data-org="PFL"]{--org-text:#a21c25}
+:root[data-theme=light] #orgPills .org-pill[data-org="ARES"]{--org-text:#086329}
+:root[data-theme=light] #orgPills .org-pill[data-org="HEXAGONE"]{--org-text:#785013}
+#orgPills .org-pill[data-org]:not([data-org=""]){color:var(--org-text,var(--ink));border-color:var(--org-color,var(--line));background:color-mix(in srgb,var(--org-color,var(--line)) 12%,var(--panel))}
+#orgPills .org-pill[data-org]:not([data-org=""])[aria-pressed="true"]{background:var(--org-color,var(--raised));color:var(--org-on,#fff);border-color:var(--org-color,var(--line));box-shadow:0 0 0 2px var(--panel),0 0 0 3px var(--org-color,var(--line))}
+#orgPills .org-pill[data-org=""][aria-pressed="true"]{background:var(--accent);color:var(--onaccent);border-color:var(--accent);box-shadow:0 0 0 2px var(--panel),0 0 0 3px var(--accent)}
 </style></head><body>
 <a class="skip" href="#main">Aller au calendrier</a><div class="topbar"><nav class="wrap nav" aria-label="Navigation principale"><div class="brand"><span class="brandmark" aria-hidden="true">◇</span>MMA Agenda<small>Édition personnelle</small></div><div class="nav-actions"><label class="hidden" for="theme">Apparence</label><select class="theme-control" id="theme" aria-label="Apparence"><option value="dark">Sombre</option><option value="light">Clair</option><option value="auto">Système</option></select><button class="iconbtn quiet" id="about" aria-label="À propos du prototype"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg></button></div></nav></div>
 <header class="wrap hero"><div class="eyebrow">L’essentiel du MMA</div><h1>Les grandes soirées.<br>En toute simplicité.</h1><p>Ton calendrier, les horaires des cartes et les sources. Rien de plus que ce qui compte.</p><div class="snapshot"><span class="tag mint">V5 · DÉCOUVERTE AUTOMATIQUE</span><span>Données synchronisées · Europe/Paris</span></div></header><p id="loadStatus" role="status" style="padding:0 1rem">Chargement des données intégrées…</p>
