@@ -1,15 +1,18 @@
-import json
 import unittest
 from types import SimpleNamespace
 from publisher_run import eligible_proposals, run
 
 def report(): return {'mode':'read_only','database_read':True,'errors':[],'published':[]}
 def journal(): return {'status':'recorded','agenda_writes':False,'receipt':{'run_id':'run','agenda_writes':False}}
+def proposal(id='p',kind='add_fight',status='pending',run_id='run'):
+    return dict(id=id,kind=kind,status=status,event_id='e',ingest_run_id=run_id)
+
 class Query:
-    def __init__(self,rows): self.rows = rows
+    def __init__(self,rows): self.rows = list(rows)
     def select(self,*a): return self
     def eq(self,column,value): self.rows = [r for r in self.rows if r.get(column) == value]; return self
-    def order(self,*a): return self
+    def in_(self,column,values): self.rows = [r for r in self.rows if r.get(column) in values]; return self
+    def order(self,column): self.rows = sorted(self.rows,key=lambda r:r[column]); return self
     def range(self,start,end): self.rows = self.rows[start:end+1]; return self
     def execute(self): return SimpleNamespace(data=self.rows)
 class Rpc:
@@ -27,15 +30,14 @@ class RunTests(unittest.TestCase):
         out = run(client,report(),journal())
         self.assertEqual(out['status'],'no_eligible_proposals'); self.assertEqual(out['published_count'],0); self.assertFalse(client.calls)
     def test_watch_only_not_called(self):
-        client = Client({'proposals':[{'id':'w','kind':'watch_only','status':'pending','event_id':None,'ingest_run_id':'run'}]})
-        out = run(client,report(),journal())
-        self.assertEqual(out['status'],'no_eligible_proposals'); self.assertFalse(client.calls)
+        client = Client({'proposals':[proposal(kind='watch_only')]})
+        self.assertEqual(run(client,report(),journal())['status'],'no_eligible_proposals'); self.assertFalse(client.calls)
     def test_add_fight_proposal_called(self):
-        client = Client({'proposals':[{'id':'p','kind':'add_fight','status':'pending','event_id':'e','ingest_run_id':'run'}]},{'p':{'status':'disabled','agenda_writes':False,'journal_writes':False}})
+        client = Client({'proposals':[proposal()]},{'p':{'status':'disabled','agenda_writes':False,'journal_writes':False}})
         out = run(client,report(),journal())
         self.assertEqual(out['status'],'not_published'); self.assertEqual(client.calls,[('publish_ufc_add_fights_v1',{'p_proposal_id':'p'})]); self.assertEqual(out['results'][0]['kind'],'add_fight'); self.assertEqual(out['results'][0]['status'],'disabled')
     def test_published_result_detected(self):
-        client = Client({'proposals':[{'id':'p','kind':'add_fight','status':'pending','event_id':'e','ingest_run_id':'run'}]},{'p':{'status':'published','agenda_writes':True,'journal_writes':True,'card_position':1,'inserted_fights':[{'id':'f'}]}})
+        client = Client({'proposals':[proposal()]},{'p':{'status':'published','agenda_writes':True,'journal_writes':True,'card_position':1,'inserted_fights':[{'id':'f'}]}})
         out = run(client,report(),journal())
         self.assertEqual(out['status'],'published'); self.assertEqual(out['published_count'],1); self.assertTrue(out['agenda_writes']); self.assertTrue(out['journal_writes'])
     def test_bad_journal_refused(self):
@@ -44,5 +46,22 @@ class RunTests(unittest.TestCase):
     def test_bad_report_refused(self):
         client = Client({'proposals':[]}); r = report(); r['errors'] = ['x']
         with self.assertRaises(ValueError): run(client,r,journal())
+    def test_update_event_disabled(self):
+        client = Client({'proposals':[proposal(kind='update_event')]},{'p':{'status':'disabled','agenda_writes':False,'journal_writes':False}})
+        out = run(client,report(),journal())
+        self.assertEqual(client.calls,[('publish_ufc_update_event_v1',{'p_proposal_id':'p'})]); self.assertEqual(out['status'],'not_published'); self.assertFalse(out['agenda_writes'])
+    def test_update_event_result_preserved(self):
+        changes = [{'field':'place','from':'A','to':'B'}]
+        client = Client({'proposals':[proposal(kind='update_event')]},{'p':{'status':'published','agenda_writes':True,'journal_writes':True,'applied_updates':changes}})
+        out = run(client,report(),journal())
+        self.assertEqual(out['published_count'],1); self.assertEqual(out['results'][0]['applied_updates'],changes)
+    def test_other_runs_statuses_and_kinds_excluded(self):
+        rows = [proposal('a'),proposal('b','update_event'),proposal('c','watch_only'),proposal('d','create_event'),proposal('e',status='published'),proposal('f',run_id='other'),proposal('g',status='blocked')]
+        client = Client({'proposals':rows})
+        self.assertEqual([p['id'] for p in eligible_proposals(client,'run')],['a','b']); self.assertFalse(client.calls)
+    def test_pagination(self):
+        rows = [proposal(str(i).zfill(4),kind='update_event' if i%2 else 'add_fight') for i in range(501)]
+        client = Client({'proposals':rows})
+        self.assertEqual(eligible_proposals(client,'run'),rows); self.assertEqual(len(client.rows['proposals']),501)
 
 if __name__ == '__main__': unittest.main()
