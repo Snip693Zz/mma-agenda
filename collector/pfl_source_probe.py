@@ -2,6 +2,7 @@
 import argparse
 import hashlib
 import json
+import re
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
@@ -22,6 +23,7 @@ class Probe(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.address, self.links, self.headings, self.scripts = address, set(), [], []
         self.heading, self.parts = None, []
+        self.jsonld, self.script_parts = [], None
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
@@ -37,12 +39,20 @@ class Probe(HTMLParser):
             self.heading, self.parts = tag, []
         if tag == 'script':
             self.scripts.append({k: attrs[k] for k in ('type', 'src', 'id') if k in attrs})
+            if attrs.get('type', '').lower().strip() == 'application/ld+json':
+                self.script_parts = []
 
     def handle_data(self, data):
-        if self.heading:
+        if self.script_parts is not None:
+            self.script_parts.append(data)
+        elif self.heading:
             self.parts.append(data)
 
     def handle_endtag(self, tag):
+        if tag == 'script' and self.script_parts is not None:
+            raw = ''.join(self.script_parts)
+            self.jsonld.append({'text': raw[:3500], 'truncated': len(raw) > 3500})
+            self.script_parts = None
         if tag == self.heading:
             self.headings.append({'tag': tag, 'text': ' '.join(' '.join(self.parts).split())})
             self.heading, self.parts = None, []
@@ -53,12 +63,31 @@ def inspect_html(html, address):
     probe = Probe(address)
     probe.feed(html)
     probe.close()
-    return {'schema_version': 1, 'mode': 'diagnostic_only',
+    is_event = urlsplit(address).path.startswith('/event/')
+    samples = []
+    if is_event:
+        patterns = (r'<[^>]*(?:fighter|bout|fight[-_]card)[^>]*>',
+                    r'<[^>]*(?:datetime|og:title|canonical|event[-_]date)[^>]*>')
+        offsets = set()
+        for pattern in patterns:
+            for match in re.finditer(pattern, html, re.IGNORECASE):
+                if any(abs(match.start() - previous) < 500 for previous in offsets):
+                    continue
+                offsets.add(match.start())
+                samples.append({'offset': match.start(), 'html': html[max(0, match.start()-100):match.start()+900]})
+                if len(samples) == 6:
+                    break
+            if len(samples) == 6:
+                break
+    return {'schema_version': 2, 'mode': 'diagnostic_only',
             'database_writes': False, 'automatic_publication': False,
             'source_url': address, 'source_sha256': hashlib.sha256(html.encode('utf-8')).hexdigest(),
-            'headings': probe.headings, 'event_links': sorted(probe.links),
-            'scripts': probe.scripts, 'status': 'unvalidated',
-            'warning': 'Signaux bruts uniquement : aucune identite, date ou carte validee.'}
+            'heading_count': len(probe.headings), 'event_link_count': len(probe.links),
+            'headings': [{'tag': h['tag'], 'text': h['text'][:250]} for h in probe.headings[:20]],
+            'event_links': sorted(probe.links)[:40], 'scripts': probe.scripts[:20],
+            'jsonld_samples': probe.jsonld[:2] if is_event else [],
+            'html_samples': samples, 'status': 'unvalidated',
+            'warning': 'Extraits bornes, potentiellement incomplets : aucune identite, date ou carte validee.'}
 
 
 def main():
