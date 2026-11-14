@@ -52,6 +52,22 @@ def load_live(client, page_size=500):
         raise ValueError('Lecture des événements vide')
     return {'events': list(events.values()), 'fighterRecords': {}}
 
+def title_diagnostic(entry, baseline, catalog):
+    try:
+        from .ufc_proposals import canonical
+    except ImportError:
+        from ufc_proposals import canonical
+    previous = next((e for e in baseline.get('events', []) if e.get('id') == entry.get('existing_id')), None)
+    address = canonical(entry.get('source_url'))
+    titles = []
+    for group in catalog.get('events', []):
+        for item in group.get('observations', [group]):
+            if address and canonical(item.get('source_url')) == address and item.get('source_kind') == 'official' and item.get('method') == 'ufc_hero_timestamp':
+                title = item.get('title')
+                if title not in titles:
+                    titles.append(title)
+    return {'existing_title': previous.get('title') if previous else None, 'observed_title': titles[0] if len(titles) == 1 else None, 'observed_titles': titles}
+
 def run(client, collect, compare):
     report = {'mode': 'read_only', 'database_read': False, 'database_writes': False, 'fallback_writes': False, 'automatic_publication': False, 'generated_at': dt.datetime.now(dt.timezone.utc).isoformat(), 'entries': [], 'published': [], 'errors': []}
     phase = 'supabase_read'
@@ -70,6 +86,8 @@ def run(client, collect, compare):
             entry['requires_review'] = True
             entry['ready_to_publish'] = False
             entry['auto_publishable'] = False
+            if entry.get('type') in ('blocked', 'review_discrepancy'):
+                entry.update(title_diagnostic(entry, baseline, catalog))
     except Exception as error:
         report['errors'].append({'phase': phase, 'exception_type': type(error).__name__, 'reason': 'Échec de validation ; détails sensibles non enregistrés'})
     return report
@@ -79,7 +97,7 @@ def diagnostic_lines(report):
     for entry in report.get('entries', []):
         if entry.get('type') not in ('blocked', 'review_discrepancy'):
             continue
-        lines.append({'status': entry.get('type'), 'source_url': entry.get('source_url'), 'existing_id': entry.get('existing_id'), 'reason': entry.get('reason'), 'new_pairs': entry.get('new_pairs', []), 'existing_not_observed': entry.get('existing_not_observed', [])})
+        lines.append({'status': entry.get('type'), 'source_url': entry.get('source_url'), 'existing_id': entry.get('existing_id'), 'reason': entry.get('reason'), 'existing_title': entry.get('existing_title'), 'observed_title': entry.get('observed_title'), 'observed_titles': entry.get('observed_titles', []), 'new_pairs': entry.get('new_pairs', []), 'existing_not_observed': entry.get('existing_not_observed', [])})
     for error in report.get('errors', []):
         lines.append({'status': 'error', 'error': error})
     return lines
