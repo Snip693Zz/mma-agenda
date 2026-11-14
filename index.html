@@ -30,24 +30,16 @@ body{transition:background-color .2s,color .2s}
 .record-audit summary{font-size:12px}.record-audit p{margin:12px 0}
 @media(max-width:380px){.fighter-name{font-size:12px}.fighter-record b{font-size:17px}.fighter-record{gap:3px}.bout{gap:6px!important}}
 @media(prefers-reduced-motion:reduce){body{transition:none}}
-/* Étape 1 — hiérarchie des soirées */
-.badge-org{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.4px;text-transform:uppercase}
-.badge-org.ufc{background:#1f6feb;color:#fff}
-.badge-org.pfl{background:#d1242f;color:#fff}
-.badge-org.ares{background:#0a7d33;color:#fff}
-.badge-org.hexagone{background:#b7791f;color:#fff}
-.badge-org.autre{background:#57606a;color:#fff}
-.event-time{font-weight:600;font-size:13px;color:#7ee2b8}
-.event-place{font-size:12px;opacity:.75}
-.status-chip{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px}
-.status-chip.ok{background:rgba(46,160,67,.15);color:#3fb950}
-.status-chip.partial{background:rgba(210,153,34,.15);color:#d29922}
-.status-chip.todo{background:rgba(139,148,158,.15);color:#8b949e}
+
+/* Étape 2 — filtres en pastilles */
+.org-pills{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.org-pill{padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.15);background:transparent;color:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.org-pill[aria-pressed="true"]{background:#7ee2b8;color:#06251a;border-color:#7ee2b8}
 </style></head><body>
 <a class="skip" href="#main">Aller au calendrier</a><div class="topbar"><nav class="wrap nav" aria-label="Navigation principale"><div class="brand"><span class="brandmark" aria-hidden="true">◇</span>MMA Agenda<small>Édition personnelle</small></div><div class="nav-actions"><label class="hidden" for="theme">Apparence</label><select class="theme-control" id="theme" aria-label="Apparence"><option value="dark">Sombre</option><option value="light">Clair</option><option value="auto">Système</option></select><button class="iconbtn quiet" id="about" aria-label="À propos du prototype"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg></button></div></nav></div>
 <header class="wrap hero"><div class="eyebrow">L’essentiel du MMA</div><h1>Les grandes soirées.<br>En toute simplicité.</h1><p>Ton calendrier, les horaires des cartes et les sources. Rien de plus que ce qui compte.</p><div class="snapshot"><span class="tag mint">V5 · DÉCOUVERTE AUTOMATIQUE</span><span>Données synchronisées · Europe/Paris</span></div></header><p id="loadStatus" role="status" style="padding:0 1rem">Chargement des données intégrées…</p>
 <main class="wrap" id="main"><section class="overview" aria-label="Aperçu de la sélection"><div class="metric"><span>Événements</span><strong id="nEvents">…</strong><small>Dans la sélection</small></div><div class="metric"><span>Combats renseignés</span><strong id="nFights">…</strong><small>Couverture partielle</small></div><div class="metric"><span>Fiches combattants</span><strong id="nFighters">…</strong><small>Dans la base</small></div><div class="metric"><span>Favoris</span><strong id="nFav">0</strong><small>Sur cet appareil</small></div></section>
-<div class="controls"><div class="filter-group"><label class="select-label"><select id="org" aria-label="Filtrer par organisation"><option value="">Toutes les organisations</option><option value="UFC">UFC</option><option value="ARES">ARES</option><option value="HEXAGONE">Hexagone MMA</option></select></label><button id="favFilter" aria-pressed="false">☆ Favoris</button></div><div class="segmented" role="group" aria-label="Vue"><button id="listBtn" aria-pressed="false">Liste</button><button id="monthBtn" aria-pressed="true">Calendrier</button></div></div>
+<div class="controls"><div class="filter-group"><div id="orgPills" class="org-pills" role="group" aria-label="Filtrer par organisation"></div><button id="favFilter" aria-pressed="false">☆ Favoris</button></div><div class="segmented" role="group" aria-label="Vue"><button id="listBtn" aria-pressed="false">Liste</button><button id="monthBtn" aria-pressed="true">Calendrier</button></div></div>
 <div class="resultline"><span id="result" aria-live="polite"></span><button id="exportAll" class="export quiet" title="Copie ponctuelle des cartes avec horaires officiels">Exporter les cartes (.ics) ↗</button></div>
 <section id="monthView"><div class="calendar-shell"><div class="monthbar"><div class="month-title"><h2 id="monthTitle"></h2><small id="monthCount"></small></div><div class="month-actions"><button class="today quiet" id="today">Aujourd’hui</button><button class="iconbtn quiet" id="prev" aria-label="Mois précédent"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg></button><button class="iconbtn quiet" id="next" aria-label="Mois suivant"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg></button></div></div><div id="calendar" class="calendar"></div><p class="calendar-note">Une soirée, un titre. Ouvre l’événement pour retrouver les cartes et leurs horaires après minuit.</p></div><div id="monthEmpty" class="empty hidden"><h3>Aucune soirée renseignée ce mois-ci.</h3><p class="small">Aucune soirée de la sélection n’est prévue ce mois-ci.</p><button id="returnSample">Voir les soirées de test</button></div></section>
 <section id="listView" class="hidden"><div class="section-head"><h2>Les soirées</h2></div><div id="eventList" class="event-list"></div></section>
