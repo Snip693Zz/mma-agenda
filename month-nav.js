@@ -182,7 +182,7 @@ dialog{max-width:820px}
 .event-time{color:var(--accent)}
 .status-chip.ok{background:var(--accent-bg);color:var(--accent)}
 .status-chip.partial{background:var(--amber-bg);color:var(--amber)}
-.status-chip.todo{background:var(--raised);color:var(--muted)}
+.status-chip.todo{background:var(--amber-bg);color:var(--amber);border:1px solid color-mix(in srgb,var(--amber) 35%,transparent);font-weight:600}
 @media(max-width:640px){#loadStatus{width:calc(100% - 32px)}#eventBody .card-actions{align-items:flex-start}}
 @media(max-width:360px){#loadStatus{width:calc(100% - 24px)}}`;
   document.head.append(finishStyle);
