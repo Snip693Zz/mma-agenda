@@ -254,9 +254,33 @@
       "note": "Combats issus de la fiche officielle UFC. Répartition et horaires des cartes à confirmer ; aucun palmarès ajouté.",
       "cards": [
         {
-          "name": "Combats officiels — répartition à confirmer",
+          "name": "Préliminaires",
           "level": "official",
-          "start": null,
+          "start": "2026-11-21T15:00:00+00:00",
+          "fights": [
+            [
+              "Aleksandre Topuria",
+              "Santiago Luna"
+            ],
+            [
+              "Shamil Gaziev",
+              "Tallison Teixeira"
+            ],
+            [
+              "Amir Albazi",
+              "Alessandro Costa"
+            ],
+            [
+              "Jake Matthews",
+              "Tahir Abdullayev"
+            ]
+          ],
+          "source": "https://www.ufc.com/event/ufc-fight-night-november-21-2026"
+        },
+        {
+          "name": "Carte principale",
+          "level": "official",
+          "start": "2026-11-21T18:00:00+00:00",
           "fights": [
             [
               "Jiří Procházka",
@@ -277,29 +301,13 @@
             [
               "Jared Cannonier",
               "Ikram Aliskerov"
-            ],
-            [
-              "Aleksandre Topuria",
-              "Santiago Luna"
-            ],
-            [
-              "Shamil Gaziev",
-              "Tallison Teixeira"
-            ],
-            [
-              "Amir Albazi",
-              "Alessandro Costa"
-            ],
-            [
-              "Jake Matthews",
-              "Tahir Abdullayev"
             ]
           ],
           "source": "https://www.ufc.com/event/ufc-fight-night-november-21-2026"
         }
       ],
-      "place": "Lieu à confirmer",
-      "title": "UFC Fight Night",
+      "place": "ABHA Arena, Doha, Qatar",
+      "title": "UFC Fight Night — Prochazka vs Stirling",
       "boxUrl": null,
       "official": false,
       "verified": "2026-11-12",
@@ -587,7 +595,7 @@
         }
       ],
       "place": "Lieu à confirmer",
-      "title": "UFC 336",
+      "title": "UFC 336 — Van vs Kape",
       "boxUrl": null,
       "official": false,
       "verified": "2026-11-12",
