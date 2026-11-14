@@ -23,9 +23,14 @@ class RunnerTests(unittest.TestCase):
             self.assertFalse(report['entries'][0]['ready_to_publish'])
             self.assertNotIn('projected_event',report['entries'][0])
     def test_missing_page_is_reported_without_crash(self):
-        details,errors=collect_details(CARDS,lambda address:None,extract=lambda html,address:DETAILS)
+        def extract(html,address):
+            if html is None:
+                raise ValueError('Page UFC absente')
+            return DETAILS
+        details,errors=collect_details(CARDS,lambda address:None,extract=extract)
         self.assertEqual(details,{})
         self.assertEqual(errors[0]['phase'],'ufc_details')
+        self.assertEqual(errors[0]['exception_type'],'ValueError')
     def test_invalid_page_is_reported_without_crash(self):
         def extract(html,address):
             raise ValueError('invalid')
