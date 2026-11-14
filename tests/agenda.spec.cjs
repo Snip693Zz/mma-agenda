@@ -1,5 +1,13 @@
 const { test, expect } = require('@playwright/test');
 const seed = require('../mma-data.json');
+const seedCounts = {
+  events: String(seed.events.length),
+  fights: String(seed.events.reduce((total, event) => total + event.cards.reduce((count, card) => count + card.fights.length, 0), 0)),
+  fighters: String(Object.keys(seed.fighterRecords).length),
+  list: seed.events.length,
+};
+const embeddedCounts = { events: '8', fights: '61', fighters: '59', list: 8 };
+const paginationExtra = 450;
 const base = 'http://127.0.0.1:8765';
 const api = 'https://wxrxjwfktdviiasixupk.supabase.co/rest/v1/';
 async function expectLoadStatus(page, success) {
@@ -18,7 +26,7 @@ for (const mode of ['absent', 'invalide', 'valide']) {
     await page.route(api + '**', route => route.abort());
     if (mode === 'absent') await page.route('**/mma-data.json', route => route.fulfill({ status: 404, body: 'Absent' }));
     if (mode === 'invalide') await page.route('**/mma-data.json', route => route.fulfill({ contentType: 'application/json', body: '{"events":[{}],"fighterRecords":{}}' }));
-    const expected = mode === 'valide' ? { events: '11', fights: '78', fighters: '61', list: 11 } : { events: '8', fights: '61', fighters: '59', list: 8 };
+    const expected = mode === 'valide' ? seedCounts : embeddedCounts;
     await page.goto(base);
     await expect(page.locator('#calendar button[data-open]').first()).toBeVisible();
     await expect(page.locator('#nEvents')).toHaveText(expected.events);
@@ -60,7 +68,7 @@ for (const mode of ['valide', 'refuse', 'incoherent', 'vide', 'pagination']) {
     tables.events.find(e => e.id === 'ufc334').title = 'UFC 334 — TEST SUPABASE';
     if (mode === 'incoherent') tables.fights[0].event_id = 'evenement-inexistant';
     if (mode === 'vide') tables.events = [];
-    if (mode === 'pagination') for (let i = 0; i < 450; i++) tables.fighters.push({ name: `Test pagination ${i}`, record: '', url: '', source: 'Test uniquement', note: '', extra: {} });
+    if (mode === 'pagination') for (let i = 0; i < paginationExtra; i++) tables.fighters.push({ name: `Test pagination ${i}`, record: '', url: '', source: 'Test uniquement', note: '', extra: {} });
     await page.route('**/mma-data.json', route => route.fulfill({ status: 404, body: 'Absent' }));
     await page.route(api + '**', route => {
       const request = route.request(), url = new URL(request.url()), table = url.pathname.split('/').pop();
@@ -78,13 +86,14 @@ for (const mode of ['valide', 'refuse', 'incoherent', 'vide', 'pagination']) {
     const result = await page.evaluate(() => window.mmaSupabaseSync);
     const success = ['valide', 'pagination'].includes(mode);
     const fallback = !success;
+    const expected = fallback ? embeddedCounts : { ...seedCounts, fighters: String(Number(seedCounts.fighters) + (mode === 'pagination' ? paginationExtra : 0)) };
     expect(result.ok).toBe(success);
     await expectLoadStatus(page, success);
-    await expect(page.locator('#nEvents')).toHaveText(fallback ? '8' : '11');
-    await expect(page.locator('#nFights')).toHaveText(fallback ? '61' : '78');
-    await expect(page.locator('#nFighters')).toHaveText(fallback ? '59' : (mode === 'pagination' ? '511' : '61'));
+    await expect(page.locator('#nEvents')).toHaveText(expected.events);
+    await expect(page.locator('#nFights')).toHaveText(expected.fights);
+    await expect(page.locator('#nFighters')).toHaveText(expected.fighters);
     await page.locator('#listBtn').click();
-    await expect(page.locator('#eventList [data-open]')).toHaveCount(fallback ? 8 : 11);
+    await expect(page.locator('#eventList [data-open]')).toHaveCount(expected.list);
     if (success) await expect(page.locator('#eventList')).toContainText('TEST SUPABASE');
     else await expect(page.locator('#eventList')).not.toContainText('TEST SUPABASE');
     expect(requests.length).toBeGreaterThanOrEqual(mode === 'pagination' ? 5 : 4);

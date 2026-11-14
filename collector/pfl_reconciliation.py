@@ -21,7 +21,7 @@ from update_reconciliation import compare_event, summarize
 
 PFL_HOSTS = {'pflmma.com', 'www.pflmma.com'}
 TAG_RE = re.compile(r'<[^>]+>')
-NOISE = ('pfl record', 'career record', 'professional record', 'winner', 'method', 'round', 'time')
+NOISE = ('pfl record', 'career record', 'professional record', 'winner', 'method', 'round', 'time', 'faceoff', 'face-off')
 
 
 def clean_text(value: str) -> str:
