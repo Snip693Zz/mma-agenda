@@ -25,6 +25,19 @@ def pair_key(pair):
  if not all(key) or key[0]==key[1]: raise ValueError('Combattants non distincts')
  return key
 
+def title_action(current, observed):
+ if not isinstance(observed,str) or not observed.strip(): return 'keep'
+ current=(current or '').strip();observed=observed.strip()
+ if current==observed: return 'keep'
+ def norm(value): return ' '.join(re.sub(r'[^a-z0-9]+',' ',unicodedata.normalize('NFKD',value).encode('ascii','ignore').decode().casefold()).split())
+ old=norm(current);new=norm(observed)
+ if old==new: return 'keep'
+ header=re.fullmatch(r'(?:polymarket )?(ufc (?:[0-9]+|fight night))',new)
+ if header and (old==header[1] or old.startswith(header[1]+' ')):
+  return 'incomplete'
+ if current.casefold() in observed.casefold(): return 'refine'
+ return 'review'
+
 def build(cards,baseline,catalog):
  result={'mode':'proposals_only','database_writes':False,'database_read':False,'fallback_writes':False,'automatic_publication':False,'baseline_source':'mma-data.json, pas la base Supabase en direct','baseline_sha256':digest(baseline),'cards_generated_at':cards.get('generated_at'),'generated_at':dt.datetime.now(dt.timezone.utc).isoformat(),'entries':[],'errors':copy.deepcopy(cards.get('errors',[]))}
  known={};metadata={}
@@ -70,18 +83,20 @@ def build(cards,baseline,catalog):
     entry['type']='review_discrepancy'
     if date_change and not missing: entry['reason']='Changement de date à valider'
     continue
-   if added:
-    entry['type']='add_fights_proposal'
-    continue
    updates=[]
    if meta:
     title=meta.get('title');place=meta.get('place')
-    if isinstance(title,str) and title.strip() and title.strip()!=previous.get('title'):
-     if (previous.get('title') or '').strip().casefold() not in title.strip().casefold():
-      entry['type']='review_discrepancy';entry['reason']='Changement de titre non confirmé';continue
+    action=title_action(previous.get('title'),title)
+    entry['title_comparison']={'action':action,'existing_title':previous.get('title'),'observed_title':title}
+    if action=='review':
+     entry['type']='review_discrepancy';entry['reason']='Changement de titre non confirmé';continue
+    if action=='refine':
      updates.append({'field':'title','current_value':previous.get('title'),'proposed_value':title.strip()})
     if isinstance(place,str) and place.strip() and place.strip()!=previous.get('place'):
      updates.append({'field':'place','current_value':previous.get('place'),'proposed_value':place.strip()})
+   if added:
+    entry['type']='add_fights_proposal'
+    continue
    if updates:
     entry['type']='update_event_proposal'
     entry['updates']=updates
