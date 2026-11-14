@@ -56,12 +56,30 @@ class RunTests(unittest.TestCase):
         out = run(client,report(),journal())
         self.assertEqual(out['published_count'],1); self.assertEqual(out['results'][0]['applied_updates'],changes)
     def test_other_runs_statuses_and_kinds_excluded(self):
-        rows = [proposal('a'),proposal('b','update_event'),proposal('c','watch_only'),proposal('d','create_event'),proposal('e',status='published'),proposal('f',run_id='other'),proposal('g',status='blocked')]
+        rows = [proposal('a'),proposal('b','update_event'),proposal('c','watch_only'),proposal('d','create_event'),proposal('e',status='published'),proposal('f',run_id='other'),proposal('g',status='blocked'),proposal('h','review_discrepancy')]
         client = Client({'proposals':rows})
-        self.assertEqual([p['id'] for p in eligible_proposals(client,'run')],['a','b']); self.assertFalse(client.calls)
+        self.assertEqual([p['id'] for p in eligible_proposals(client,'run')],['a','b','d']); self.assertFalse(client.calls)
     def test_pagination(self):
-        rows = [proposal(str(i).zfill(4),kind='update_event' if i%2 else 'add_fight') for i in range(501)]
+        kinds=['add_fight','update_event','create_event']
+        rows = [proposal(str(i).zfill(4),kind=kinds[i%3]) for i in range(501)]
         client = Client({'proposals':rows})
         self.assertEqual(eligible_proposals(client,'run'),rows); self.assertEqual(len(client.rows['proposals']),501)
+    def test_create_event_disabled(self):
+        client=Client({'proposals':[proposal(kind='create_event')]},{'p':{'status':'disabled','agenda_writes':False,'journal_writes':False}})
+        out=run(client,report(),journal())
+        self.assertEqual(client.calls,[('publish_ufc_create_event_v1',{'p_proposal_id':'p'})]);self.assertEqual(out['status'],'not_published');self.assertFalse(out['agenda_writes']);self.assertEqual(out['published_count'],0)
+    def test_create_event_without_fights(self):
+        client=Client({'proposals':[proposal(kind='create_event')]},{'p':{'status':'published','event_id':'created','agenda_writes':True,'journal_writes':True,'inserted_fights':[]}})
+        out=run(client,report(),journal())
+        self.assertEqual(out['published_count'],1);self.assertEqual(out['results'][0]['event_id'],'created');self.assertEqual(out['results'][0]['inserted_fights'],[])
+    def test_create_event_duplicate_not_published(self):
+        client=Client({'proposals':[proposal(kind='create_event')]},{'p':{'status':'duplicate_requires_review','agenda_writes':False,'journal_writes':False}})
+        out=run(client,report(),journal())
+        self.assertEqual(out['status'],'not_published');self.assertEqual(out['published_count'],0);self.assertFalse(out['agenda_writes'])
+    def test_mixed_kinds_route_to_separate_rpcs(self):
+        rows=[proposal('a'),proposal('b','update_event'),proposal('c','create_event')]
+        client=Client({'proposals':rows},{p['id']:{'status':'disabled','agenda_writes':False,'journal_writes':False} for p in rows})
+        out=run(client,report(),journal())
+        self.assertEqual([name for name,args in client.calls],['publish_ufc_add_fights_v1','publish_ufc_update_event_v1','publish_ufc_create_event_v1']);self.assertFalse(out['agenda_writes'])
 
 if __name__ == '__main__': unittest.main()

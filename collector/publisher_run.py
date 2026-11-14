@@ -3,7 +3,7 @@ import json
 import os
 from pathlib import Path
 
-RPCS = {'add_fight': 'publish_ufc_add_fights_v1', 'update_event': 'publish_ufc_update_event_v1'}
+RPCS = {'add_fight': 'publish_ufc_add_fights_v1', 'update_event': 'publish_ufc_update_event_v1', 'create_event': 'publish_ufc_create_event_v1'}
 
 def require(value):
     if not value:
@@ -36,7 +36,7 @@ def run(client,report,journal):
     for proposal in proposals:
         response = client.rpc(RPCS[proposal['kind']],{'p_proposal_id':proposal['id']}).execute()
         result = response.data if isinstance(response.data,dict) else {}
-        results.append({'proposal_id':proposal['id'],'kind':proposal['kind'],'status':result.get('status','unknown'),'agenda_writes':result.get('agenda_writes',False),'journal_writes':result.get('journal_writes',False),'card_position':result.get('card_position'),'inserted_fights':result.get('inserted_fights',[]),'applied_updates':result.get('applied_updates',[])})
+        results.append({'proposal_id':proposal['id'],'kind':proposal['kind'],'event_id':result.get('event_id',proposal.get('event_id')),'status':result.get('status','unknown'),'agenda_writes':result.get('agenda_writes',False),'journal_writes':result.get('journal_writes',False),'card_position':result.get('card_position'),'inserted_fights':result.get('inserted_fights',[]),'applied_updates':result.get('applied_updates',[])})
     published = [r for r in results if r['status'] == 'published']
     status = 'published' if published else ('no_eligible_proposals' if not results else 'not_published')
     return {'status':status,'run_id':run_id,'mode':'publisher_run','agenda_writes':any(r.get('agenda_writes') for r in results),'journal_writes':any(r.get('journal_writes') for r in results),'results':results,'published_count':len(published)}
