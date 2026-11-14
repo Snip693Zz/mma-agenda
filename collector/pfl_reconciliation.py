@@ -24,7 +24,7 @@ except ImportError:
 try:
     from .update_reconciliation import compare_event, summarize
 except ImportError:
- try:
+try:
     from .update_reconciliation import compare_event, summarize
 except ImportError:
     from update_reconciliation import compare_event, summarize   
