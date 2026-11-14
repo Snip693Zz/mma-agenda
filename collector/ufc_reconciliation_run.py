@@ -73,6 +73,16 @@ def run(client, fetch_html, extract=extract_details, reconciler=reconcile, load_
         report.setdefault('errors', []).append({'phase': phase, 'exception_type': type(error).__name__, 'reason': 'Échec de rapprochement ; détails sensibles non enregistrés'})
     return report
 
+def diagnostic_lines(report):
+    lines = []
+    for entry in report.get('entries', []):
+        if entry.get('status') != 'blocked':
+            continue
+        lines.append({'status': 'blocked', 'event_id': entry.get('event_id'), 'source_url': entry.get('source_url'), 'issues': entry.get('issues', []), 'action_counts': entry.get('action_counts', {}), 'preserved_fights': entry.get('preserved_fights')})
+    for error in report.get('errors', []):
+        lines.append({'status': 'error', 'error': error})
+    return lines
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--output', default='reports/ufc-reconciliation.json')
@@ -98,6 +108,8 @@ def main():
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
     print(json.dumps({'mode': report['mode'], 'summary': report.get('summary', {}), 'errors': len(report.get('errors', [])), 'database_writes': False}))
+    for line in diagnostic_lines(report):
+        print(json.dumps(line, ensure_ascii=False))
     return 2 if report.get('errors') or any(entry.get('status') == 'blocked' for entry in report.get('entries', [])) else 0
 
 if __name__ == '__main__':
