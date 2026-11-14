@@ -17,11 +17,14 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
+from source_validation import assess_source
 from update_reconciliation import compare_event, summarize
 
 PFL_HOSTS = {'pflmma.com', 'www.pflmma.com'}
 TAG_RE = re.compile(r'<[^>]+>')
 NOISE = ('pfl record', 'career record', 'professional record', 'winner', 'method', 'round', 'time', 'faceoff', 'face-off')
+DATE_RE = re.compile(r'\b(\d{1,2})\s+(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+(\d{4})\b', re.IGNORECASE)
+MONTHS = {'janvier': 1, 'février': 2, 'mars': 3, 'avril': 4, 'mai': 5, 'juin': 6, 'juillet': 7, 'août': 8, 'septembre': 9, 'octobre': 10, 'novembre': 11, 'décembre': 12}
 
 
 def clean_text(value: str) -> str:
@@ -56,6 +59,35 @@ def extract_fights(html: str) -> list[dict]:
     return fights
 
 
+def extract_event_date(html: str) -> str | None:
+    if not isinstance(html, str):
+        return None
+    match = DATE_RE.search(html)
+    if not match:
+        return None
+    day, month, year = match.groups()
+    month_number = MONTHS.get(month.lower())
+    if not month_number:
+        return None
+    return f'{int(year):04d}-{month_number:02d}-{int(day):02d}'
+
+
+def extract_event_identity(html: str, event: dict) -> bool:
+    if not isinstance(html, str):
+        return False
+    title = str(event.get('title') or '').strip()
+    if len(title) < 3:
+        return False
+    normalized_page = re.sub(r'\s+', ' ', TAG_RE.sub(' ', html)).casefold()
+    return title.casefold() in normalized_page
+
+
+def has_structured_card(html: str) -> bool:
+    if not isinstance(html, str):
+        return False
+    return bool(re.search(r'\b(?:fight\s*card|bout\s*card|carte\s*des\s*combats)\b', html, re.IGNORECASE))
+
+
 def fetch_page(url: str, timeout: int = 20) -> str:
     parsed = urlsplit(url)
     if parsed.scheme != 'https' or parsed.hostname not in PFL_HOSTS or parsed.username or parsed.password:
@@ -75,13 +107,23 @@ def fetch_page(url: str, timeout: int = 20) -> str:
 def reconcile_event(event: dict, existing_fights: list[dict], html: str) -> dict:
     observed = extract_fights(html)
     source_kind = 'official' if event.get('official') else 'secondary'
+    validation = assess_source(
+        str(event.get('date') or ''),
+        extract_event_date(html) or '',
+        identity_verified=extract_event_identity(html, event),
+        structured_card=has_structured_card(html),
+        fight_count=len(observed),
+    )
     payload_event = dict(event)
     payload_event['source_kind'] = source_kind
-    proposals = [] if not observed else compare_event(payload_event, existing_fights, observed)
+    proposals = []
+    if validation['can_reconcile'] and observed:
+        proposals = compare_event(payload_event, existing_fights, observed)
     return {
         'event_id': event.get('id'),
         'event': event.get('title'),
         'source_url': event.get('url'),
+        'source_validation': validation,
         'observed_fights': observed,
         'proposals': proposals,
         'summary': summarize(proposals),
