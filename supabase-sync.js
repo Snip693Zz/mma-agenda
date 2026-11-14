@@ -6,9 +6,25 @@ if (!window.mmaSupabaseSync) window.mmaSupabaseSync = (async () => {
   const statusEl = document.querySelector('#loadStatus');
   const controller = new AbortController();
   let timeout;
+  function renderLoadStatus(state) {
+    statusEl.dataset.state = state;
+    statusEl.setAttribute('role', 'status');
+    statusEl.setAttribute('aria-live', 'polite');
+    const label = state === 'synced' ? 'Données synchronisées' : 'Affichage des données de secours';
+    const dot = document.createElement('span');
+    dot.className = 'sync-dot';
+    dot.setAttribute('aria-hidden', 'true');
+    Object.assign(dot.style, { display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', marginRight: '8px', verticalAlign: 'middle', backgroundColor: state === 'synced' ? '#22c55e' : '#f59e0b' });
+    statusEl.replaceChildren(dot, document.createTextNode(label));
+  }
   function fallbackReady() {
     return new Promise((resolve, reject) => {
-      const done = () => /mma-data\.json chargé|intégrées conservées/.test(statusEl.textContent);
+      const done = () => {
+        const text = statusEl.textContent;
+        if (!/mma-data\.json chargé|intégrées conservées/.test(text)) return false;
+        statusEl.dataset.fallbackSource = /mma-data\.json chargé/.test(text) ? 'json' : 'embedded';
+        return true;
+      };
       if (done()) return resolve();
       const observer = new MutationObserver(() => { if (done()) { clearTimeout(timer); observer.disconnect(); resolve(); } });
       const timer = setTimeout(() => { observer.disconnect(); reject(Error('Chargement de secours non terminé')); }, 7500);
@@ -142,6 +158,7 @@ if (!window.mmaSupabaseSync) window.mmaSupabaseSync = (async () => {
   });
   try {
     await fallbackReady();
+    statusEl.textContent = 'Synchronisation en cours…';
     timeout = setTimeout(() => controller.abort(), 12000);
     const next = snapshot(await Promise.all([
       rows('events', 'event_date.asc,id.asc'),
@@ -160,11 +177,11 @@ if (!window.mmaSupabaseSync) window.mmaSupabaseSync = (async () => {
     } catch (error) {
       data = oldData; fighterRecords = oldProfiles; activeOrg = oldOrg; renderOrgPills(); render(); throw error;
     }
-    statusEl.textContent = 'Données : Supabase chargé en lecture seule';
+    renderLoadStatus('synced');
     loadPflReports();
     return { ok: true };
   } catch (error) {
-    statusEl.textContent += ' · Supabase indisponible : données de secours conservées';
+    renderLoadStatus('fallback');
     return { ok: false, error: error.message };
   } finally { clearTimeout(timeout); controller.abort(); }
 })();

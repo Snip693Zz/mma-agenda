@@ -2,6 +2,15 @@ const { test, expect } = require('@playwright/test');
 const seed = require('../mma-data.json');
 const base = 'http://127.0.0.1:8765';
 const api = 'https://wxrxjwfktdviiasixupk.supabase.co/rest/v1/';
+async function expectLoadStatus(page, success) {
+  const status = page.locator('#loadStatus');
+  await expect(status).toHaveText(success ? 'Données synchronisées' : 'Affichage des données de secours');
+  await expect(status).toHaveAttribute('data-state', success ? 'synced' : 'fallback');
+  await expect(status).toHaveAttribute('role', 'status');
+  await expect(status.locator('.sync-dot')).toBeVisible();
+  await expect(status.locator('.sync-dot')).toHaveAttribute('aria-hidden', 'true');
+  await expect(status.locator('.sync-dot')).toHaveCSS('background-color', success ? 'rgb(34, 197, 94)' : 'rgb(245, 158, 11)');
+}
 for (const mode of ['absent', 'invalide', 'valide']) {
   test(`Affichage mobile et JSON ${mode}`, async ({ page }) => {
     const errors = [];
@@ -15,7 +24,8 @@ for (const mode of ['absent', 'invalide', 'valide']) {
     await expect(page.locator('#nEvents')).toHaveText(expected.events);
     await expect(page.locator('#nFights')).toHaveText(expected.fights);
     await expect(page.locator('#nFighters')).toHaveText(expected.fighters);
-    await expect(page.locator('#loadStatus')).toContainText(mode === 'valide' ? 'mma-data.json chargé' : 'intégrées conservées');
+    await expectLoadStatus(page, false);
+    await expect(page.locator('#loadStatus')).toHaveAttribute('data-fallback-source', mode === 'valide' ? 'json' : 'embedded');
     await page.locator('#listBtn').click();
     await expect(page.locator('#listView')).toBeVisible();
     await expect(page.locator('#eventList [data-open]')).toHaveCount(expected.list);
@@ -69,7 +79,7 @@ for (const mode of ['valide', 'refuse', 'incoherent', 'vide', 'pagination']) {
     const success = ['valide', 'pagination'].includes(mode);
     const fallback = !success;
     expect(result.ok).toBe(success);
-    await expect(page.locator('#loadStatus')).toContainText(success ? 'Supabase chargé en lecture seule' : 'données de secours conservées');
+    await expectLoadStatus(page, success);
     await expect(page.locator('#nEvents')).toHaveText(fallback ? '8' : '11');
     await expect(page.locator('#nFights')).toHaveText(fallback ? '61' : '78');
     await expect(page.locator('#nFighters')).toHaveText(fallback ? '59' : (mode === 'pagination' ? '511' : '61'));
