@@ -3,7 +3,7 @@ from daily_refresh import build
 URL='https://www.ufc.com/event/example'
 def observed(pairs,status='parsed'):return {'source_url':URL,'status':status,'issues':[],'fights':[{'fighters':p,'source_kind':'official','source_url':URL} for p in pairs]}
 def metadata(title='UFC',place=None,date='2027-01-01',kind='official'):return {'events':[{'source_url':URL,'source_kind':kind,'method':'ufc_hero_timestamp','title':title,'place':place,'date':date,'start_at_utc':'2027-01-02T02:00:00+00:00','start_at_paris':'2027-01-02T03:00:00+01:00'}]}
-def live(pairs,title='UFC',place='Ancienne salle',event_date='2027-01-01'):return {'events':[{'id':'existing','url':URL,'official_card_url':URL,'title':title,'place':place,'event_date':event_date,'cards':[{'position':0,'fights':pairs}]}],'fighterRecords':{}}
+def live(pairs=[],title='UFC',place='Ancienne salle',event_date='2027-01-01'):return {'events':[{'id':'existing','url':URL,'official_card_url':URL,'title':title,'place':place,'event_date':event_date,'cards':[{'position':0,'fights':pairs}]}],'fighterRecords':{}}
 def report(event):return {'events':[event],'errors':[]}
 class DailyTests(unittest.TestCase):
  def test_new_event_is_auto_publishable_without_card_time(self):
