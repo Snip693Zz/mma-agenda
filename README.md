@@ -1,0 +1,1 @@
+Diagnostic UFC temporaire. Aucun fichier de cette branche ne doit être fusionné dans main. Le HTML est conservé comme texte non fiable, jamais exécuté. latest contient la dernière capture validée ; le ZIP reste disponible dans GitHub Actions.

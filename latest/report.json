@@ -1,0 +1,2005 @@
+{
+  "schema_version": 1,
+  "mode": "diagnostic_only",
+  "database_writes": false,
+  "automatic_publication": false,
+  "source_url": "https://www.ufc.com/event/ufc-fight-night-november-21-2026",
+  "source_sha256": "450cae7dfec6c9c4f642590373d3142cb8ba2bce6c44e00c0b260f4a535924dd",
+  "headings": [
+    {
+      "tag": "h2",
+      "text": "Main navigation"
+    },
+    {
+      "tag": "h1",
+      "text": "UFC Fight Night"
+    },
+    {
+      "tag": "h1",
+      "text": "UFC Fight Night"
+    },
+    {
+      "tag": "h3",
+      "text": "Main Card"
+    },
+    {
+      "tag": "h3",
+      "text": "Prelims"
+    },
+    {
+      "tag": "h3",
+      "text": "Early Prelims"
+    },
+    {
+      "tag": "h2",
+      "text": "Get the advance word"
+    },
+    {
+      "tag": "h2",
+      "text": "How to Watch"
+    },
+    {
+      "tag": "h2",
+      "text": "Footer"
+    }
+  ],
+  "signals": [
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-hero",
+      "timestamp": null,
+      "text": "Previous Next UFC Fight Night Prochazka vs Stirling Follow live Buy Tickets How to Watch Sat, Nov 21 / 1:00 PM EST ABHA Arena, Doha Qatar UFC Fight Night Sat, Nov 21 / 1:00 PM EST Sat, Nov 21 / 1:00 PM EST . ABHA Arena, Doha Qatar How to watch"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-hero__image",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-hero__overlay",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-hero__container",
+      "timestamp": null,
+      "text": "UFC Fight Night Prochazka vs Stirling Follow live Buy Tickets How to Watch Sat, Nov 21 / 1:00 PM EST ABHA Arena, Doha Qatar"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-hero__content ",
+      "timestamp": null,
+      "text": "UFC Fight Night Prochazka vs Stirling Follow live Buy Tickets How to Watch Sat, Nov 21 / 1:00 PM EST ABHA Arena, Doha Qatar"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-hero__header",
+      "timestamp": null,
+      "text": "UFC Fight Night Prochazka vs Stirling"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-hero__headline-prefix",
+      "timestamp": null,
+      "text": "UFC Fight Night"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-hero__headline is-large-text",
+      "timestamp": null,
+      "text": "Prochazka vs Stirling"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-hero__actions",
+      "timestamp": null,
+      "text": "Follow live Buy Tickets How to Watch"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-hero__bottom-text",
+      "timestamp": null,
+      "text": "Sat, Nov 21 / 1:00 PM EST ABHA Arena, Doha Qatar"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-hero__headline-suffix tz-change-inner",
+      "timestamp": "1795284000",
+      "text": "Sat, Nov 21 / 1:00 PM EST"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-hero__text",
+      "timestamp": null,
+      "text": "ABHA Arena, Doha Qatar"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "field field--name-venue field--type-entity-reference field--label-hidden field__item",
+      "timestamp": null,
+      "text": "ABHA Arena, Doha Qatar"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "hero-fixed-bar",
+      "timestamp": null,
+      "text": "UFC Fight Night Sat, Nov 21 / 1:00 PM EST Sat, Nov 21 / 1:00 PM EST . ABHA Arena, Doha Qatar How to watch"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "hero-fixed-bar__title-wrapper",
+      "timestamp": null,
+      "text": "UFC Fight Night Sat, Nov 21 / 1:00 PM EST"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "hero-fixed-bar__image",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "hero-fixed-bar__title",
+      "timestamp": null,
+      "text": "UFC Fight Night Sat, Nov 21 / 1:00 PM EST"
+    },
+    {
+      "tag": "span",
+      "id": null,
+      "class": "hero-fixed-bar__date--mobile tz-change-inner",
+      "timestamp": "1795284000",
+      "text": "Sat, Nov 21 / 1:00 PM EST"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "hero-fixed-bar__description",
+      "timestamp": null,
+      "text": "Sat, Nov 21 / 1:00 PM EST . ABHA Arena, Doha Qatar"
+    },
+    {
+      "tag": "span",
+      "id": null,
+      "class": "hero-fixed-bar__date tz-change-inner",
+      "timestamp": "1795284000",
+      "text": "Sat, Nov 21 / 1:00 PM EST"
+    },
+    {
+      "tag": "span",
+      "id": null,
+      "class": "hero-fixed-bar__place",
+      "timestamp": null,
+      "text": "ABHA Arena, Doha Qatar"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "field field--name-venue field--type-entity-reference field--label-hidden field__item",
+      "timestamp": null,
+      "text": "ABHA Arena, Doha Qatar"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-hero__end",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "fight-card",
+      "timestamp": null,
+      "text": "Main Card Prelims Early Prelims Main Card Main Card Sat, Nov 21 / 1:00 PM Watch On Paramount+ #2 Light Heavyweight Bout #5 #2 Light Heavyweight Bout #5 #2 #5 Live now Jiří Procházka vs Navajo Stirling Round Time Method #5 Jiří Procházka Light Heavyweight Bout Navajo Stirling Czechia +115 odds -135 New Zealand Round Time Method #4 Featherweight Bout #9 #4 Featherweight Bout #9 #4 #9 Live now Aljamain Sterling vs Kevin Vallejos Round Time Method #9 Aljamain Sterling Featherweight Bout Kevin Vallejos United States - odds - Argentina Round Time Method #14 Lightweight Bout #14 Lightweight Bout #14 Live now Dan Hooker vs Brian Ortega Round Time Method Dan Hooker Lightweight Bout Brian Ortega New Zealand - odds - United States Round Time Method #5 Flyweight Bout #7 #5 Flyweight Bout #7 #5 #7 Live now Kyoji Horiguchi vs Asu Almabayev Round Time Method #7 Kyoji Horiguchi Flyweight Bout Asu Almabayev Japan - odds - Kazakhstan Round Time Method #12 Middleweight Bout #13 #12 Middleweight Bout #13 #12 #13 Live now Jared Cannonier vs Ikram Aliskerov Round Time Method #13 Jared Cannonier Middleweight Bout Ikram Aliskerov United States - odds - Russia Round Time Method Prelims Prelims Sat, Nov 21 / 10:00 AM Watch On Paramount+ Bantamweight Bout Bantamweight Bout Live now Aleksandre Topuria vs Santiago Luna Round Time Method Aleksandre Topuria Bantamweight Bout Santiago Luna Georgia - odds - Mexico Round Time Method Heavyweight Bout Heavyweight Bout Live now Shamil Gaziev vs Tallison Teixeira Round Time Method Shamil Gaziev Heavyweight Bout Tallison Teixeira Bahrain - odds - Brazil Round Time Method #9 Flyweight Bout #9 Flyweight Bout #9 Live now Amir Albazi vs Alessandro Costa Round Time Method Amir Albazi Flyweight Bout Alessandro Costa Iraq - odds - Brazil Round Time Method Welterweight Bout Welterweight Bout Live now Jake Matthews vs Tahir Abdullayev Round Time Method Jake Matthews Welterweight Bout Tahir Abdullayev Australia - odds - Azerbaijan Round Time Method Early Prelims"
+    },
+    {
+      "tag": "div",
+      "id": "main-card",
+      "class": "main-card",
+      "timestamp": null,
+      "text": "Main Card Main Card Sat, Nov 21 / 1:00 PM Watch On Paramount+ #2 Light Heavyweight Bout #5 #2 Light Heavyweight Bout #5 #2 #5 Live now Jiří Procházka vs Navajo Stirling Round Time Method #5 Jiří Procházka Light Heavyweight Bout Navajo Stirling Czechia +115 odds -135 New Zealand Round Time Method #4 Featherweight Bout #9 #4 Featherweight Bout #9 #4 #9 Live now Aljamain Sterling vs Kevin Vallejos Round Time Method #9 Aljamain Sterling Featherweight Bout Kevin Vallejos United States - odds - Argentina Round Time Method #14 Lightweight Bout #14 Lightweight Bout #14 Live now Dan Hooker vs Brian Ortega Round Time Method Dan Hooker Lightweight Bout Brian Ortega New Zealand - odds - United States Round Time Method #5 Flyweight Bout #7 #5 Flyweight Bout #7 #5 #7 Live now Kyoji Horiguchi vs Asu Almabayev Round Time Method #7 Kyoji Horiguchi Flyweight Bout Asu Almabayev Japan - odds - Kazakhstan Round Time Method #12 Middleweight Bout #13 #12 Middleweight Bout #13 #12 #13 Live now Jared Cannonier vs Ikram Aliskerov Round Time Method #13 Jared Cannonier Middleweight Bout Ikram Aliskerov United States - odds - Russia Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-event-fight-card-broadcaster__container",
+      "timestamp": null,
+      "text": "Main Card Sat, Nov 21 / 1:00 PM Watch On Paramount+"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-event-fight-card-broadcaster__desktop-wrapper",
+      "timestamp": null,
+      "text": "Main Card Sat, Nov 21 / 1:00 PM Watch On Paramount+"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-event-fight-card-broadcaster__card-title",
+      "timestamp": null,
+      "text": "Main Card"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-event-fight-card-broadcaster__mobile-wrapper",
+      "timestamp": null,
+      "text": "Sat, Nov 21 / 1:00 PM"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-event-fight-card-broadcaster__time tz-change-inner",
+      "timestamp": "1795284000",
+      "text": "Sat, Nov 21 / 1:00 PM"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "field field--name-fight-card-time-main field--type-datetime field--label-hidden field__item",
+      "timestamp": null,
+      "text": "Sat, Nov 21 / 1:00 PM"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-event-fight-card-broadcaster__name",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-event-fight-card-broadcaster__link",
+      "timestamp": null,
+      "text": "Watch On Paramount+"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "node node--type-fight node--view-mode-card-event ds-1col clearfix",
+      "timestamp": null,
+      "text": "#2 Light Heavyweight Bout #5 #2 Light Heavyweight Bout #5 #2 #5 Live now Jiří Procházka vs Navajo Stirling Round Time Method #5 Jiří Procházka Light Heavyweight Bout Navajo Stirling Czechia +115 odds -135 New Zealand Round Time Method"
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "image-style-event-fight-card-upper-body-of-standing-athlete",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "image-style-event-fight-card-upper-body-of-standing-athlete",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "node node--type-fight node--view-mode-card-event ds-1col clearfix",
+      "timestamp": null,
+      "text": "#4 Featherweight Bout #9 #4 Featherweight Bout #9 #4 #9 Live now Aljamain Sterling vs Kevin Vallejos Round Time Method #9 Aljamain Sterling Featherweight Bout Kevin Vallejos United States - odds - Argentina Round Time Method"
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "image-style-event-fight-card-upper-body-of-standing-athlete",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "image-style-event-fight-card-upper-body-of-standing-athlete",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "node node--type-fight node--view-mode-card-event ds-1col clearfix",
+      "timestamp": null,
+      "text": "#14 Lightweight Bout #14 Lightweight Bout #14 Live now Dan Hooker vs Brian Ortega Round Time Method Dan Hooker Lightweight Bout Brian Ortega New Zealand - odds - United States Round Time Method"
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "image-style-event-fight-card-upper-body-of-standing-athlete",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "image-style-event-fight-card-upper-body-of-standing-athlete",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "node node--type-fight node--view-mode-card-event ds-1col clearfix",
+      "timestamp": null,
+      "text": "#5 Flyweight Bout #7 #5 Flyweight Bout #7 #5 #7 Live now Kyoji Horiguchi vs Asu Almabayev Round Time Method #7 Kyoji Horiguchi Flyweight Bout Asu Almabayev Japan - odds - Kazakhstan Round Time Method"
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "image-style-event-fight-card-upper-body-of-standing-athlete",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "image-style-event-fight-card-upper-body-of-standing-athlete",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "node node--type-fight node--view-mode-card-event ds-1col clearfix",
+      "timestamp": null,
+      "text": "#12 Middleweight Bout #13 #12 Middleweight Bout #13 #12 #13 Live now Jared Cannonier vs Ikram Aliskerov Round Time Method #13 Jared Cannonier Middleweight Bout Ikram Aliskerov United States - odds - Russia Round Time Method"
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "image-style-event-fight-card-upper-body-of-standing-athlete",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "image-style-event-fight-card-upper-body-of-standing-athlete",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": "prelims-card",
+      "class": "fight-card-prelims",
+      "timestamp": null,
+      "text": "Prelims Prelims Sat, Nov 21 / 10:00 AM Watch On Paramount+ Bantamweight Bout Bantamweight Bout Live now Aleksandre Topuria vs Santiago Luna Round Time Method Aleksandre Topuria Bantamweight Bout Santiago Luna Georgia - odds - Mexico Round Time Method Heavyweight Bout Heavyweight Bout Live now Shamil Gaziev vs Tallison Teixeira Round Time Method Shamil Gaziev Heavyweight Bout Tallison Teixeira Bahrain - odds - Brazil Round Time Method #9 Flyweight Bout #9 Flyweight Bout #9 Live now Amir Albazi vs Alessandro Costa Round Time Method Amir Albazi Flyweight Bout Alessandro Costa Iraq - odds - Brazil Round Time Method Welterweight Bout Welterweight Bout Live now Jake Matthews vs Tahir Abdullayev Round Time Method Jake Matthews Welterweight Bout Tahir Abdullayev Australia - odds - Azerbaijan Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-event-fight-card-broadcaster__container",
+      "timestamp": null,
+      "text": "Prelims Sat, Nov 21 / 10:00 AM Watch On Paramount+"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-event-fight-card-broadcaster__desktop-wrapper",
+      "timestamp": null,
+      "text": "Prelims Sat, Nov 21 / 10:00 AM Watch On Paramount+"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-event-fight-card-broadcaster__card-title",
+      "timestamp": null,
+      "text": "Prelims"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-event-fight-card-broadcaster__mobile-wrapper",
+      "timestamp": null,
+      "text": "Sat, Nov 21 / 10:00 AM"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-event-fight-card-broadcaster__time tz-change-inner",
+      "timestamp": "1795273200",
+      "text": "Sat, Nov 21 / 10:00 AM"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "field field--name-fight-card-time-prelims field--type-datetime field--label-hidden field__item",
+      "timestamp": null,
+      "text": "Sat, Nov 21 / 10:00 AM"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-event-fight-card-broadcaster__name",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-event-fight-card-broadcaster__link",
+      "timestamp": null,
+      "text": "Watch On Paramount+"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "node node--type-fight node--view-mode-card-event ds-1col clearfix",
+      "timestamp": null,
+      "text": "Bantamweight Bout Bantamweight Bout Live now Aleksandre Topuria vs Santiago Luna Round Time Method Aleksandre Topuria Bantamweight Bout Santiago Luna Georgia - odds - Mexico Round Time Method"
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "image-style-event-fight-card-upper-body-of-standing-athlete",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "image-style-event-fight-card-upper-body-of-standing-athlete",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "node node--type-fight node--view-mode-card-event ds-1col clearfix",
+      "timestamp": null,
+      "text": "Heavyweight Bout Heavyweight Bout Live now Shamil Gaziev vs Tallison Teixeira Round Time Method Shamil Gaziev Heavyweight Bout Tallison Teixeira Bahrain - odds - Brazil Round Time Method"
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "image-style-event-fight-card-upper-body-of-standing-athlete",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "image-style-event-fight-card-upper-body-of-standing-athlete",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "node node--type-fight node--view-mode-card-event ds-1col clearfix",
+      "timestamp": null,
+      "text": "#9 Flyweight Bout #9 Flyweight Bout #9 Live now Amir Albazi vs Alessandro Costa Round Time Method Amir Albazi Flyweight Bout Alessandro Costa Iraq - odds - Brazil Round Time Method"
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "image-style-event-fight-card-upper-body-of-standing-athlete",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "image-style-event-fight-card-upper-body-of-standing-athlete",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "node node--type-fight node--view-mode-card-event ds-1col clearfix",
+      "timestamp": null,
+      "text": "Welterweight Bout Welterweight Bout Live now Jake Matthews vs Tahir Abdullayev Round Time Method Jake Matthews Welterweight Bout Tahir Abdullayev Australia - odds - Azerbaijan Round Time Method"
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "image-style-event-fight-card-upper-body-of-standing-athlete",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "image-style-event-fight-card-upper-body-of-standing-athlete",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": "early-prelims",
+      "class": "fight-card-prelims-early",
+      "timestamp": null,
+      "text": "Early Prelims"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-cards-load-more c-cards-load-more--black",
+      "timestamp": null,
+      "text": "Get the advance word"
+    },
+    {
+      "tag": "h2",
+      "id": null,
+      "class": "e-t2 c-cards-load-more__title",
+      "timestamp": null,
+      "text": "Get the advance word"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-cards-load-more__list",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": "main-card-id",
+      "class": "c-how-to-watch--event-main-card-list",
+      "timestamp": null,
+      "text": "Start Times Prelims 10:00 AM EST Watch On Paramount+ Main Card 1:00 PM EST Watch On Paramount+"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-how-to-watch__title--event-main-card-list",
+      "timestamp": null,
+      "text": "Start Times"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-viewing-option__fight-card",
+      "timestamp": null,
+      "text": "Prelims"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-viewing-option__time tz-change-inner",
+      "timestamp": "1795273200",
+      "text": "10:00 AM EST"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-viewing-option__fight-card",
+      "timestamp": null,
+      "text": "Main Card"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-viewing-option__time tz-change-inner",
+      "timestamp": "1795284000",
+      "text": "1:00 PM EST"
+    },
+    {
+      "tag": "div",
+      "id": "tickets-card-id",
+      "class": "watch-subsection c-how-to-watch--event-tickets",
+      "timestamp": null,
+      "text": "Tickets Thu, Oct 8 5:00 AM EDT Presale - UFC Fight Club Thu, Oct 8 5:00 AM EDT Presale - UFC Newsletter Fri, Oct 9 5:00 AM EDT On Sale - Public Available"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticket__date tz-change-inner",
+      "timestamp": "1791450000",
+      "text": "Thu, Oct 8"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticket__time tz-change-inner",
+      "timestamp": "1791450000",
+      "text": "5:00 AM EDT"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticket__date tz-change-inner",
+      "timestamp": "1791450000",
+      "text": "Thu, Oct 8"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticket__time tz-change-inner",
+      "timestamp": "1791450000",
+      "text": "5:00 AM EDT"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticket__date tz-change-inner",
+      "timestamp": "1791536400",
+      "text": "Fri, Oct 9"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticket__time tz-change-inner",
+      "timestamp": "1791536400",
+      "text": "5:00 AM EDT"
+    },
+    {
+      "tag": "div",
+      "id": "download-card-id",
+      "class": "c-how-to-watch--event-download-card",
+      "timestamp": null,
+      "text": "Watch On-the-Go Download the UFC Mobile App for past & live fights and more!"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-how-to-watch__title--event-download-card",
+      "timestamp": null,
+      "text": "Watch On-the-Go"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "watch-phone-container c-how-to-watch__watch-phone-container--event-download-card",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-how-to-watch__description--event-download-card",
+      "timestamp": null,
+      "text": "Download the UFC Mobile App for past & live fights and more!"
+    },
+    {
+      "tag": "div",
+      "id": "main-card-id",
+      "class": "c-how-to-watch--event-main-card-list",
+      "timestamp": null,
+      "text": "Start Times Prelims 10:00 AM EST Watch On Paramount+ Main Card 1:00 PM EST Watch On Paramount+"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-how-to-watch__title--event-main-card-list",
+      "timestamp": null,
+      "text": "Start Times"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-viewing-option__fight-card",
+      "timestamp": null,
+      "text": "Prelims"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-viewing-option__time tz-change-inner",
+      "timestamp": "1795273200",
+      "text": "10:00 AM EST"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-viewing-option__fight-card",
+      "timestamp": null,
+      "text": "Main Card"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-viewing-option__time tz-change-inner",
+      "timestamp": "1795284000",
+      "text": "1:00 PM EST"
+    },
+    {
+      "tag": "div",
+      "id": "tickets-card-id",
+      "class": "watch-subsection c-how-to-watch--event-tickets",
+      "timestamp": null,
+      "text": "Tickets Thu, Oct 8 5:00 AM EDT Presale - UFC Fight Club Thu, Oct 8 5:00 AM EDT Presale - UFC Newsletter Fri, Oct 9 5:00 AM EDT On Sale - Public Available"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticket__date tz-change-inner",
+      "timestamp": "1791450000",
+      "text": "Thu, Oct 8"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticket__time tz-change-inner",
+      "timestamp": "1791450000",
+      "text": "5:00 AM EDT"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticket__date tz-change-inner",
+      "timestamp": "1791450000",
+      "text": "Thu, Oct 8"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticket__time tz-change-inner",
+      "timestamp": "1791450000",
+      "text": "5:00 AM EDT"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticket__date tz-change-inner",
+      "timestamp": "1791536400",
+      "text": "Fri, Oct 9"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticket__time tz-change-inner",
+      "timestamp": "1791536400",
+      "text": "5:00 AM EDT"
+    },
+    {
+      "tag": "div",
+      "id": "download-card-id",
+      "class": "c-how-to-watch--event-download-card",
+      "timestamp": null,
+      "text": "Watch On-the-Go Download the UFC Mobile App for past & live fights and more!"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-how-to-watch__title--event-download-card",
+      "timestamp": null,
+      "text": "Watch On-the-Go"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "watch-phone-container c-how-to-watch__watch-phone-container--event-download-card",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-how-to-watch__description--event-download-card",
+      "timestamp": null,
+      "text": "Download the UFC Mobile App for past & live fights and more!"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker__fightcard-wrapper",
+      "timestamp": null,
+      "text": "Jake Matthews vs Tahir Abdullayev LIVE NOW Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard ",
+      "timestamp": null,
+      "text": "Jake Matthews vs Tahir Abdullayev LIVE NOW Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__content",
+      "timestamp": null,
+      "text": "Jake Matthews vs Tahir Abdullayev LIVE NOW"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__athletes",
+      "timestamp": null,
+      "text": "Jake Matthews vs Tahir Abdullayev"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__red_corner_name",
+      "timestamp": null,
+      "text": "Jake Matthews"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__vs",
+      "timestamp": null,
+      "text": "vs"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__blue_corner_name",
+      "timestamp": null,
+      "text": "Tahir Abdullayev"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__red_corner",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__thumbnail",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__outcome",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__blue_corner",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__thumbnail",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__outcome",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__live",
+      "timestamp": null,
+      "text": "LIVE NOW"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__results",
+      "timestamp": null,
+      "text": "Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__round",
+      "timestamp": null,
+      "text": "Round"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__time",
+      "timestamp": null,
+      "text": "Time"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__method",
+      "timestamp": null,
+      "text": "Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker__fightcard-wrapper",
+      "timestamp": null,
+      "text": "Amir Albazi vs Alessandro Costa #9 LIVE NOW Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard ",
+      "timestamp": null,
+      "text": "Amir Albazi vs Alessandro Costa #9 LIVE NOW Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__content",
+      "timestamp": null,
+      "text": "Amir Albazi vs Alessandro Costa #9 LIVE NOW"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__athletes",
+      "timestamp": null,
+      "text": "Amir Albazi vs Alessandro Costa"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__red_corner_name",
+      "timestamp": null,
+      "text": "Amir Albazi"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__vs",
+      "timestamp": null,
+      "text": "vs"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__blue_corner_name",
+      "timestamp": null,
+      "text": "Alessandro Costa"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__red_corner",
+      "timestamp": null,
+      "text": "#9"
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__thumbnail",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__rank",
+      "timestamp": null,
+      "text": "#9"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__outcome",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__blue_corner",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__thumbnail",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__outcome",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__live",
+      "timestamp": null,
+      "text": "LIVE NOW"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__results",
+      "timestamp": null,
+      "text": "Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__round",
+      "timestamp": null,
+      "text": "Round"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__time",
+      "timestamp": null,
+      "text": "Time"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__method",
+      "timestamp": null,
+      "text": "Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker__fightcard-wrapper",
+      "timestamp": null,
+      "text": "Shamil Gaziev vs Tallison Teixeira LIVE NOW Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard ",
+      "timestamp": null,
+      "text": "Shamil Gaziev vs Tallison Teixeira LIVE NOW Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__content",
+      "timestamp": null,
+      "text": "Shamil Gaziev vs Tallison Teixeira LIVE NOW"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__athletes",
+      "timestamp": null,
+      "text": "Shamil Gaziev vs Tallison Teixeira"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__red_corner_name",
+      "timestamp": null,
+      "text": "Shamil Gaziev"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__vs",
+      "timestamp": null,
+      "text": "vs"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__blue_corner_name",
+      "timestamp": null,
+      "text": "Tallison Teixeira"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__red_corner",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__thumbnail",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__outcome",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__blue_corner",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__thumbnail",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__outcome",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__live",
+      "timestamp": null,
+      "text": "LIVE NOW"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__results",
+      "timestamp": null,
+      "text": "Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__round",
+      "timestamp": null,
+      "text": "Round"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__time",
+      "timestamp": null,
+      "text": "Time"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__method",
+      "timestamp": null,
+      "text": "Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker__fightcard-wrapper",
+      "timestamp": null,
+      "text": "Aleksandre Topuria vs Santiago Luna LIVE NOW Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard ",
+      "timestamp": null,
+      "text": "Aleksandre Topuria vs Santiago Luna LIVE NOW Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__content",
+      "timestamp": null,
+      "text": "Aleksandre Topuria vs Santiago Luna LIVE NOW"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__athletes",
+      "timestamp": null,
+      "text": "Aleksandre Topuria vs Santiago Luna"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__red_corner_name",
+      "timestamp": null,
+      "text": "Aleksandre Topuria"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__vs",
+      "timestamp": null,
+      "text": "vs"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__blue_corner_name",
+      "timestamp": null,
+      "text": "Santiago Luna"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__red_corner",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__thumbnail",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__outcome",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__blue_corner",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__thumbnail",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__outcome",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__live",
+      "timestamp": null,
+      "text": "LIVE NOW"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__results",
+      "timestamp": null,
+      "text": "Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__round",
+      "timestamp": null,
+      "text": "Round"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__time",
+      "timestamp": null,
+      "text": "Time"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__method",
+      "timestamp": null,
+      "text": "Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker__fightcard-wrapper",
+      "timestamp": null,
+      "text": "Jared Cannonier vs Ikram Aliskerov #12 #13 LIVE NOW Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard ",
+      "timestamp": null,
+      "text": "Jared Cannonier vs Ikram Aliskerov #12 #13 LIVE NOW Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__content",
+      "timestamp": null,
+      "text": "Jared Cannonier vs Ikram Aliskerov #12 #13 LIVE NOW"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__athletes",
+      "timestamp": null,
+      "text": "Jared Cannonier vs Ikram Aliskerov"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__red_corner_name",
+      "timestamp": null,
+      "text": "Jared Cannonier"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__vs",
+      "timestamp": null,
+      "text": "vs"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__blue_corner_name",
+      "timestamp": null,
+      "text": "Ikram Aliskerov"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__red_corner",
+      "timestamp": null,
+      "text": "#12"
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__thumbnail",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__rank",
+      "timestamp": null,
+      "text": "#12"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__outcome",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__blue_corner",
+      "timestamp": null,
+      "text": "#13"
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__thumbnail",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__rank",
+      "timestamp": null,
+      "text": "#13"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__outcome",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__live",
+      "timestamp": null,
+      "text": "LIVE NOW"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__results",
+      "timestamp": null,
+      "text": "Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__round",
+      "timestamp": null,
+      "text": "Round"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__time",
+      "timestamp": null,
+      "text": "Time"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__method",
+      "timestamp": null,
+      "text": "Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker__fightcard-wrapper",
+      "timestamp": null,
+      "text": "Kyoji Horiguchi vs Asu Almabayev #5 #7 LIVE NOW Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard ",
+      "timestamp": null,
+      "text": "Kyoji Horiguchi vs Asu Almabayev #5 #7 LIVE NOW Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__content",
+      "timestamp": null,
+      "text": "Kyoji Horiguchi vs Asu Almabayev #5 #7 LIVE NOW"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__athletes",
+      "timestamp": null,
+      "text": "Kyoji Horiguchi vs Asu Almabayev"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__red_corner_name",
+      "timestamp": null,
+      "text": "Kyoji Horiguchi"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__vs",
+      "timestamp": null,
+      "text": "vs"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__blue_corner_name",
+      "timestamp": null,
+      "text": "Asu Almabayev"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__red_corner",
+      "timestamp": null,
+      "text": "#5"
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__thumbnail",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__rank",
+      "timestamp": null,
+      "text": "#5"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__outcome",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__blue_corner",
+      "timestamp": null,
+      "text": "#7"
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__thumbnail",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__rank",
+      "timestamp": null,
+      "text": "#7"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__outcome",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__live",
+      "timestamp": null,
+      "text": "LIVE NOW"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__results",
+      "timestamp": null,
+      "text": "Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__round",
+      "timestamp": null,
+      "text": "Round"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__time",
+      "timestamp": null,
+      "text": "Time"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__method",
+      "timestamp": null,
+      "text": "Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker__fightcard-wrapper",
+      "timestamp": null,
+      "text": "Dan Hooker vs Brian Ortega #14 LIVE NOW Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard ",
+      "timestamp": null,
+      "text": "Dan Hooker vs Brian Ortega #14 LIVE NOW Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__content",
+      "timestamp": null,
+      "text": "Dan Hooker vs Brian Ortega #14 LIVE NOW"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__athletes",
+      "timestamp": null,
+      "text": "Dan Hooker vs Brian Ortega"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__red_corner_name",
+      "timestamp": null,
+      "text": "Dan Hooker"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__vs",
+      "timestamp": null,
+      "text": "vs"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__blue_corner_name",
+      "timestamp": null,
+      "text": "Brian Ortega"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__red_corner",
+      "timestamp": null,
+      "text": "#14"
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__thumbnail",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__rank",
+      "timestamp": null,
+      "text": "#14"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__outcome",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__blue_corner",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__thumbnail",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__outcome",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__live",
+      "timestamp": null,
+      "text": "LIVE NOW"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__results",
+      "timestamp": null,
+      "text": "Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__round",
+      "timestamp": null,
+      "text": "Round"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__time",
+      "timestamp": null,
+      "text": "Time"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__method",
+      "timestamp": null,
+      "text": "Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker__fightcard-wrapper",
+      "timestamp": null,
+      "text": "Aljamain Sterling vs Kevin Vallejos #4 #9 LIVE NOW Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard ",
+      "timestamp": null,
+      "text": "Aljamain Sterling vs Kevin Vallejos #4 #9 LIVE NOW Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__content",
+      "timestamp": null,
+      "text": "Aljamain Sterling vs Kevin Vallejos #4 #9 LIVE NOW"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__athletes",
+      "timestamp": null,
+      "text": "Aljamain Sterling vs Kevin Vallejos"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__red_corner_name",
+      "timestamp": null,
+      "text": "Aljamain Sterling"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__vs",
+      "timestamp": null,
+      "text": "vs"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__blue_corner_name",
+      "timestamp": null,
+      "text": "Kevin Vallejos"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__red_corner",
+      "timestamp": null,
+      "text": "#4"
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__thumbnail",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__rank",
+      "timestamp": null,
+      "text": "#4"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__outcome",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__blue_corner",
+      "timestamp": null,
+      "text": "#9"
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__thumbnail",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__rank",
+      "timestamp": null,
+      "text": "#9"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__outcome",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__live",
+      "timestamp": null,
+      "text": "LIVE NOW"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__results",
+      "timestamp": null,
+      "text": "Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__round",
+      "timestamp": null,
+      "text": "Round"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__time",
+      "timestamp": null,
+      "text": "Time"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__method",
+      "timestamp": null,
+      "text": "Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker__fightcard-wrapper",
+      "timestamp": null,
+      "text": "Jiří Procházka vs Navajo Stirling #2 #5 LIVE NOW Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard ",
+      "timestamp": null,
+      "text": "Jiří Procházka vs Navajo Stirling #2 #5 LIVE NOW Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__content",
+      "timestamp": null,
+      "text": "Jiří Procházka vs Navajo Stirling #2 #5 LIVE NOW"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__athletes",
+      "timestamp": null,
+      "text": "Jiří Procházka vs Navajo Stirling"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__red_corner_name",
+      "timestamp": null,
+      "text": "Jiří Procházka"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__vs",
+      "timestamp": null,
+      "text": "vs"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__blue_corner_name",
+      "timestamp": null,
+      "text": "Navajo Stirling"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__red_corner",
+      "timestamp": null,
+      "text": "#2"
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__thumbnail",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__rank",
+      "timestamp": null,
+      "text": "#2"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__outcome",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__blue_corner",
+      "timestamp": null,
+      "text": "#5"
+    },
+    {
+      "tag": "img",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__thumbnail",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__rank",
+      "timestamp": null,
+      "text": "#5"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__outcome",
+      "timestamp": null,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__live",
+      "timestamp": null,
+      "text": "LIVE NOW"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__results",
+      "timestamp": null,
+      "text": "Round Time Method"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__round",
+      "timestamp": null,
+      "text": "Round"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__time",
+      "timestamp": null,
+      "text": "Time"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-listing-ticker-fightcard__method",
+      "timestamp": null,
+      "text": "Method"
+    }
+  ],
+  "fight_rows": 9,
+  "warning": "Signaux bruts : aucune affectation de carte ou horaire validée.",
+  "collected_at": "2026-11-14T04:24:47.733570+00:00",
+  "status": "captured"
+}
