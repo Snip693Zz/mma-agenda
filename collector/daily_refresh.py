@@ -10,6 +10,10 @@ import re
 import unicodedata
 from pathlib import Path
 from urllib.parse import urlsplit,urlunsplit
+try:
+ from .update_reconciliation import compare_event
+except ImportError:
+ from update_reconciliation import compare_event
 
 def sha(value): return hashlib.sha256(value if isinstance(value,bytes) else json.dumps(value,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()
 def canonical(value):
@@ -24,6 +28,19 @@ def pair_key(pair):
  key=tuple(sorted(norm(n) for n in pair))
  if not all(key) or key[0]==key[1]: raise ValueError('Combattants non distincts')
  return key
+
+def metadata_updates(previous,meta):
+ updates=[]
+ current_title=previous.get('title') or '';observed_title=meta.get('title') or ''
+ if current_title and observed_title and observed_title!=current_title and observed_title.casefold().find(current_title.casefold())>=0:
+  updates.append(('title',observed_title,'auto_publishable'))
+ current_place=previous.get('place') or '';observed_place=meta.get('place') or ''
+ if current_place and observed_place and observed_place!=current_place:
+  updates.append(('place',observed_place,'auto_publishable'))
+ current_date=previous.get('event_date');observed_date=meta.get('date')
+ if current_date and observed_date and observed_date!=current_date:
+  updates.append(('event_date',observed_date,'blocked'))
+ return updates
 
 def supabase_client():
  from supabase import create_client
@@ -75,6 +92,10 @@ def build(cards,live,catalog):
    entry['status']='blocked' if missing else 'auto_publishable' if added else 'pending'
    entry['event_id']=previous['id'];entry['auto_publishable']=bool(added) and not missing
    if added: entry['payload']={'event_id':previous['id'],'card_position':0,'fights':added}
+   metas=list(metadata.get(address,{}).values())
+   if len(metas)==1:
+    for field,value,status in metadata_updates(previous,metas[0]):
+     result['entries'].append({'source_url':address,'kind':'update_event','status':status,'auto_publishable':status=='auto_publishable','event_id':previous['id'],'deletions_allowed':False,'payload':{'event_id':previous['id'],'values':{field:value}},'reason':f'{field} modifié sur la source officielle' if status=='auto_publishable' else f'{field} modifié sur la source officielle : revue requise'})
    continue
   metas=list(metadata.get(address,{}).values())
   if len(metas)!=1: entry['reason']='Métadonnées officielles absentes ou ambiguës';continue
@@ -101,6 +122,8 @@ def publish(client,result):
    event_id=payload['event_id'];existing=client.table('fights').select('position').eq('event_id',event_id).eq('card_position',0).execute().data
    start=max([r['position'] for r in existing],default=-1)+1
    for offset,pair in enumerate(payload['fights']):client.table('fights').upsert({'event_id':event_id,'card_position':0,'position':start+offset,'fighter_a':pair[0],'fighter_b':pair[1]}).execute()
+  elif entry['kind']=='update_event':
+   client.table('events').update(payload['values']).eq('id',payload['event_id']).execute()
   entry['status']='published';result['published'].append({'kind':entry['kind'],'source_url':entry['source_url'],'event_id':entry.get('event_id'),'fights':entry.get('new_pairs',[])})
  return result
 
