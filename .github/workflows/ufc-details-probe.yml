@@ -6,6 +6,8 @@ on:
     paths:
       - collector/ufc_details_probe.py
       - collector/test_ufc_details_probe.py
+      - collector/ufc_event_details.py
+      - collector/test_ufc_event_details.py
       - .github/workflows/ufc-details-probe.yml
 permissions:
   contents: read
@@ -23,8 +25,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Tester les protections du diagnostic
-        run: python -m unittest discover -s collector -p 'test_ufc_details_probe.py' -v
+      - name: Tester les protections du diagnostic et de l’extracteur
+        run: |
+          python -m unittest discover -s collector -p 'test_ufc_details_probe.py' -v
+          python -m unittest discover -s collector -p 'test_ufc_event_details.py' -v
       - name: Vérifier la compatibilité avec les tests UFC existants
         run: |
           python -m unittest discover -s collector -p 'test_ufc_cards.py' -v
@@ -32,6 +36,12 @@ jobs:
           python -m unittest discover -s collector -p 'test_ufc_proposals.py' -v
       - name: Capturer la page officielle sans écriture dans l’agenda
         run: python collector/ufc_details_probe.py
+      - name: Extraire les cartes et horaires de la capture réelle
+        run: |
+          python collector/ufc_event_details.py \
+            --html reports/ufc-details-probe/source.html \
+            --url https://www.ufc.com/event/ufc-fight-night-november-21-2026 \
+            --output reports/ufc-details-probe/details.json
       - name: Conserver les preuves et le diagnostic
         if: always()
         uses: actions/upload-artifact@v4
@@ -80,7 +90,7 @@ jobs:
           import hashlib, json, os
           from pathlib import Path
           source = Path(os.environ['DIAGNOSTIC_INPUT'])
-          for name in ('report.json', 'source.html'):
+          for name in ('report.json', 'source.html', 'details.json'):
               path = source / name
               if path.is_symlink() or not path.is_file() or path.stat().st_size > 10000000:
                   raise ValueError('Fichier de diagnostic invalide')
@@ -90,21 +100,26 @@ jobs:
           digest = hashlib.sha256(html).hexdigest()
           if report.get('source_sha256') != digest or report.get('status') != 'captured' or report.get('mode') != 'diagnostic_only' or report.get('database_writes') is not False or report.get('automatic_publication') is not False:
               raise ValueError('Diagnostic incomplet ou empreinte invalide')
+          raw_details = (source / 'details.json').read_bytes()
+          details = json.loads(raw_details)
+          if details.get('source_sha256') != digest or details.get('source_url') != report.get('source_url') or details.get('status') != 'parsed' or details.get('mode') != 'details_read_only' or details.get('database_writes') is not False or details.get('automatic_publication') is not False or details.get('issues') != []:
+              raise ValueError('Extraction non validée ou incohérente avec la capture')
           target = Path('latest')
           target.mkdir(exist_ok=True)
           (target / 'report.json').write_bytes(raw_report)
           (target / 'source.html.txt').write_bytes(html)
-          manifest = {'source_commit': os.environ['SOURCE_COMMIT'], 'run_id': os.environ['GITHUB_RUN_ID'], 'run_attempt': os.environ['GITHUB_RUN_ATTEMPT'], 'run_url': os.environ['GITHUB_SERVER_URL'] + '/' + os.environ['GITHUB_REPOSITORY'] + '/actions/runs/' + os.environ['GITHUB_RUN_ID'], 'source_url': report['source_url'], 'collected_at': report['collected_at'], 'source_sha256': digest, 'report_sha256': hashlib.sha256(raw_report).hexdigest()}
+          (target / 'details.json').write_bytes(raw_details)
+          manifest = {'source_commit': os.environ['SOURCE_COMMIT'], 'run_id': os.environ['GITHUB_RUN_ID'], 'run_attempt': os.environ['GITHUB_RUN_ATTEMPT'], 'run_url': os.environ['GITHUB_SERVER_URL'] + '/' + os.environ['GITHUB_REPOSITORY'] + '/actions/runs/' + os.environ['GITHUB_RUN_ID'], 'source_url': report['source_url'], 'collected_at': report['collected_at'], 'source_sha256': digest, 'report_sha256': hashlib.sha256(raw_report).hexdigest(), 'details_sha256': hashlib.sha256(raw_details).hexdigest()}
           (target / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-          Path('README.md').write_text('Diagnostic UFC temporaire. Aucun fichier de cette branche ne doit être fusionné dans main. Le HTML est conservé comme texte non fiable, jamais exécuté. latest contient la dernière capture validée ; le ZIP reste disponible dans GitHub Actions.\n', encoding='utf-8')
+          Path('README.md').write_text('Diagnostic UFC temporaire. Aucun fichier de cette branche ne doit être fusionné dans main. Le HTML est conservé comme texte non fiable, jamais exécuté. latest contient la dernière capture et extraction validées ; le ZIP reste disponible dans GitHub Actions. Aucun résultat ne constitue une publication dans Supabase.\n', encoding='utf-8')
           PY
       - name: Enregistrer uniquement dans la branche de diagnostic
         working-directory: diagnostic-store
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -- README.md latest/report.json latest/source.html.txt latest/manifest.json
+          git add -- README.md latest/report.json latest/source.html.txt latest/details.json latest/manifest.json
           if ! git diff --cached --quiet; then
-            git commit -m 'chore: actualiser le diagnostic UFC'
+            git commit -m 'chore: actualiser le diagnostic et l’extraction UFC'
             git push origin HEAD:refs/heads/diagnostics/ufc-details
           fi
