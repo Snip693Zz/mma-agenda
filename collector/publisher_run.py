@@ -3,8 +3,7 @@ import json
 import os
 from pathlib import Path
 
-RPC = 'publish_ufc_add_fights_v1'
-KIND = 'add_fight'
+RPCS = {'add_fight': 'publish_ufc_add_fights_v1', 'update_event': 'publish_ufc_update_event_v1'}
 
 def require(value):
     if not value:
@@ -20,9 +19,9 @@ def eligible_proposals(client,run_id):
     rows = []
     offset = 0
     while True:
-        batch = client.table('proposals').select('id,kind,status,event_id,ingest_run_id').eq('ingest_run_id',run_id).eq('kind',KIND).eq('status','pending').order('id').range(offset,offset+499).execute().data
+        batch = client.table('proposals').select('id,kind,status,event_id,ingest_run_id').eq('ingest_run_id',run_id).in_('kind',list(RPCS)).eq('status','pending').order('id').range(offset,offset+499).execute().data
         require(isinstance(batch,list))
-        require(all(p['kind'] == KIND and p['status'] == 'pending' and p['ingest_run_id'] == run_id for p in batch))
+        require(all(p['kind'] in RPCS and p['status'] == 'pending' and p['ingest_run_id'] == run_id for p in batch))
         rows.extend(batch)
         if len(batch) < 500:
             break
@@ -35,9 +34,9 @@ def run(client,report,journal):
     proposals = eligible_proposals(client,run_id)
     results = []
     for proposal in proposals:
-        response = client.rpc(RPC,{'p_proposal_id':proposal['id']}).execute()
+        response = client.rpc(RPCS[proposal['kind']],{'p_proposal_id':proposal['id']}).execute()
         result = response.data if isinstance(response.data,dict) else {}
-        results.append({'proposal_id':proposal['id'],'kind':proposal['kind'],'status':result.get('status','unknown'),'agenda_writes':result.get('agenda_writes',False),'journal_writes':result.get('journal_writes',False),'card_position':result.get('card_position'),'inserted_fights':result.get('inserted_fights',[])})
+        results.append({'proposal_id':proposal['id'],'kind':proposal['kind'],'status':result.get('status','unknown'),'agenda_writes':result.get('agenda_writes',False),'journal_writes':result.get('journal_writes',False),'card_position':result.get('card_position'),'inserted_fights':result.get('inserted_fights',[]),'applied_updates':result.get('applied_updates',[])})
     published = [r for r in results if r['status'] == 'published']
     status = 'published' if published else ('no_eligible_proposals' if not results else 'not_published')
     return {'status':status,'run_id':run_id,'mode':'publisher_run','agenda_writes':any(r.get('agenda_writes') for r in results),'journal_writes':any(r.get('journal_writes') for r in results),'results':results,'published_count':len(published)}

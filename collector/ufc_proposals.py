@@ -62,8 +62,33 @@ def build(cards,baseline,catalog):
   added=[new[k] for k in sorted(new.keys()-old.keys())];missing=[old[k] for k in sorted(old.keys()-new.keys())]
   entry['observed_fights']=list(new.values());entry['new_pairs']=added;entry['existing_not_observed']=missing;entry['coverage']='partial'
   if previous:
-   entry['type']='review_discrepancy' if missing else 'add_fights_proposal' if added else 'unchanged'
    entry['preserve_existing_cards']=True
+   metas=list(metadata.get(address,{}).values())
+   meta=metas[0] if len(metas)==1 else None
+   date_change=bool(meta and isinstance(meta.get('date'),str) and meta['date'].strip() and meta['date'].strip()!=previous.get('date'))
+   if missing or date_change:
+    entry['type']='review_discrepancy'
+    if date_change and not missing: entry['reason']='Changement de date à valider'
+    continue
+   if added:
+    entry['type']='add_fights_proposal'
+    continue
+   updates=[]
+   if meta:
+    title=meta.get('title');place=meta.get('place')
+    if isinstance(title,str) and title.strip() and title.strip()!=previous.get('title'):
+     if (previous.get('title') or '').strip().casefold() not in title.strip().casefold():
+      entry['type']='review_discrepancy';entry['reason']='Changement de titre non confirmé';continue
+     updates.append({'field':'title','current_value':previous.get('title'),'proposed_value':title.strip()})
+    if isinstance(place,str) and place.strip() and place.strip()!=previous.get('place'):
+     updates.append({'field':'place','current_value':previous.get('place'),'proposed_value':place.strip()})
+   if updates:
+    entry['type']='update_event_proposal'
+    entry['updates']=updates
+    entry['metadata_evidence']=copy.deepcopy(meta)
+    entry['checks_before_publication']=['Relire les données Supabase actuelles','Confirmer le titre ou le lieu sur la fiche officielle','Valider explicitement le lot']
+    continue
+   entry['type']='unchanged'
    continue
   metas=list(metadata.get(address,{}).values())
   if len(metas)!=1:
