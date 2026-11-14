@@ -27,7 +27,10 @@ class PFLSafetyTests(unittest.TestCase):
 
     def test_missing_existing_fight_remains_blocked(self):
         existing = [{'fighter_a': 'Old A', 'fighter_b': 'Old B'}]
-        report = reconcile_event(EVENT, existing, VALID)
+        event = dict(EVENT, date='2026-12-19')
+        html = '<h1>PFL Test</h1><p>Fight Card</p><p>19 décembre 2026</p>' + VALID
+        report = reconcile_event(event, existing, html)
+        self.assertIs(report['source_validation']['can_reconcile'], True)
         self.assertEqual(report['summary']['blocked'], 1)
         self.assertEqual(existing, [{'fighter_a': 'Old A', 'fighter_b': 'Old B'}])
 
