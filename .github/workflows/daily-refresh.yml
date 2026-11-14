@@ -38,6 +38,8 @@ jobs:
       - name: Installer les dépendances
         run: python -m pip install --upgrade pip && pip install supabase pytest
       - name: Tester la collecte, le journal, le publieur, la synchronisation et le rapprochement
+        env:
+          PYTHONPATH: collector
         run: |
           python -m unittest discover -s collector -p 'test_daily_refresh_readonly.py' -v
           python -m unittest discover -s collector -p 'test_journal_ufc_report.py' -v
