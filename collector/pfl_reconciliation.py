@@ -17,7 +17,10 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
-from source_validation import assess_source
+try:
+    from .source_validation import assess_source
+except ImportError:
+    from source_validation import assess_source
 from update_reconciliation import compare_event, summarize
 
 PFL_HOSTS = {'pflmma.com', 'www.pflmma.com'}
