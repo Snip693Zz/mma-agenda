@@ -150,15 +150,15 @@ if (!window.mmaSupabaseSync) window.mmaSupabaseSync = (async () => {
       rows('fighters', 'name.asc')
     ]));
     const oldData = data, oldProfiles = fighterRecords;
-    const org = document.querySelector('#org'), oldOptions = org.innerHTML, oldOrg = org.value;
+    const oldOrg = activeOrg;
     try {
       if (opened) { document.querySelector('#eventDialog').close(); opened = null; }
       data = next.events; fighterRecords = next.fighterRecords;
-      org.innerHTML = '<option value="">Toutes les organisations</option>' + [...new Set(data.map(e => e.org))].map(o => `<option value="${esc(o)}">${esc(o)}</option>`).join('');
-      org.value = [...org.options].some(o => o.value === oldOrg) ? oldOrg : '';
+      activeOrg = data.some(e => e.org === oldOrg) ? oldOrg : '';
+      renderOrgPills();
       render();
     } catch (error) {
-      data = oldData; fighterRecords = oldProfiles; org.innerHTML = oldOptions; org.value = oldOrg; render(); throw error;
+      data = oldData; fighterRecords = oldProfiles; activeOrg = oldOrg; renderOrgPills(); render(); throw error;
     }
     statusEl.textContent = 'Données : Supabase chargé en lecture seule';
     loadPflReports();
