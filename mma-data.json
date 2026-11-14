@@ -571,6 +571,20 @@
       "officialCardUrl": "https://pflmma.com/event/pfl-lyon"
     },
     {
+      "id": "ufc-auto-44db8830cbf5",
+      "org": "UFC",
+      "url": "https://www.ufc.com/event/ufc-fight-night-january-16-2027",
+      "date": "2027-01-16",
+      "note": "Annonce officielle UFC ; répartition et horaires des cartes à confirmer.",
+      "cards": [],
+      "place": "Lieu à confirmer",
+      "title": "UFC Fight Night",
+      "boxUrl": null,
+      "official": false,
+      "verified": "2026-11-14",
+      "officialCardUrl": "https://www.ufc.com/event/ufc-fight-night-january-16-2027"
+    },
+    {
       "id": "ufc-auto-91c8979e4e5a",
       "org": "UFC",
       "url": "https://www.ufc.com/event/ufc-336",
