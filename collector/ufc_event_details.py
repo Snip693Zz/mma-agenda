@@ -128,7 +128,7 @@ def main():
     source, target = Path(args.html), Path(args.output)
     if target.resolve()==source.resolve() or 'reports' not in target.parts:
         parser.error('La sortie doit être un rapport distinct dans reports')
-    report = extract_details(source.read_text(encoding='utf-8'),args.url)
+    report = extract_details(source.read_bytes().decode('utf-8'),args.url)
     target.parent.mkdir(parents=True,exist_ok=True)
     target.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     return 0 if report['status']=='parsed' else 2

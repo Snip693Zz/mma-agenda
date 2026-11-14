@@ -1,5 +1,10 @@
+import hashlib
+import json
+import tempfile
 import unittest
-from collector.ufc_event_details import extract_details
+from pathlib import Path
+from unittest.mock import patch
+from collector.ufc_event_details import extract_details, main
 URL='https://www.ufc.com/event/test'
 
 def row(a='Alpha',b='Beta'):
@@ -46,6 +51,18 @@ class DetailsTests(unittest.TestCase):
         r=extract_details(html,URL)
         self.assertEqual(r['status'],'parsed')
         self.assertIsNone(r['cards'][0]['start'])
+    def test_cli_preserves_source_hash_for_all_newlines(self):
+        for newline in ('\n','\r\n','\r'):
+            with self.subTest(newline=repr(newline)), tempfile.TemporaryDirectory() as directory:
+                source=Path(directory)/'source.html'
+                output=Path(directory)/'reports'/'details.json'
+                raw=(page().replace('><','>'+newline+'<')+newline).encode('utf-8')
+                source.write_bytes(raw)
+                with patch('sys.argv',['ufc_event_details','--html',str(source),'--url',URL,'--output',str(output)]):
+                    self.assertEqual(main(),0)
+                report=json.loads(output.read_text(encoding='utf-8'))
+                self.assertEqual(report['source_sha256'],hashlib.sha256(raw).hexdigest())
+                self.assertEqual(source.read_bytes(),raw)
 
 if __name__=='__main__':
     unittest.main()
