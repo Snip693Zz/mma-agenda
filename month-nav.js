@@ -93,6 +93,36 @@ dialog{max-width:820px}
 @media(max-width:640px){.modal-body{padding:22px 16px 26px}.card{padding:14px;border-radius:14px}.bout{gap:8px}.fighter-name{font-size:13px}}`;
   document.head.append(detailStyle);
 
+  /* Correctif mobile : horaires et sources sans débordement */
+  const overflowStyle=document.createElement('style');
+  overflowStyle.textContent=`
+#eventBody .card-title>div{min-width:0;max-width:100%}
+#eventBody .card-title>div:first-child{flex:1 1 0}
+#eventBody .card-title .small{overflow-wrap:anywhere}
+#eventBody .card-time{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+#eventBody .card-time b{line-height:1.35}
+#eventBody .card-time.is-unknown b{font-size:14px;font-weight:500;color:var(--muted)}
+#eventBody .card-time span{display:block;font-size:10px;line-height:1.5;color:var(--muted)}
+@media(max-width:640px){
+#eventBody .card-title{flex-direction:column;align-items:stretch;gap:12px}
+#eventBody .card-title>div:first-child{flex:0 1 auto}
+#eventBody .card-time{text-align:left;width:100%}
+}`;
+  document.head.append(overflowStyle);
+  const eventBody=document.getElementById('eventBody');
+  function markUnknownTimes(){
+    if(!eventBody)return;
+    eventBody.querySelectorAll('.card-time').forEach(block=>{
+      const label=block.querySelector('b');
+      block.classList.toggle('is-unknown',!!label&&label.textContent.trim()==='Horaire non confirmé');
+    });
+  }
+  if(eventBody){
+    markUnknownTimes();
+    const timeObserver=new MutationObserver(markUnknownTimes);
+    timeObserver.observe(eventBody,{childList:true,subtree:true,characterData:true});
+  }
+
   function enhanceCalendar(){
     if(!calendar)return;
     calendar.querySelectorAll('.calendarEvent').forEach(button=>{
