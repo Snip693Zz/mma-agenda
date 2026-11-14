@@ -27,6 +27,8 @@ class PlanTests(unittest.TestCase):
         self.assertEqual(second['actions'],[])
     def test_official_source_label_matches_existing_card(self):
         event,details=fixtures()
+        event['title']=details['event_patch']['title']
+        event['place']=details['event_patch']['place']
         event['cards']=[{'event_id':'test','position':0,'name':'Préliminaires','start_at':'2026-11-21T15:00:00Z','level':'official','source':'Fiche officielle UFC','extra':{},'is_active':True,'fights':[{'event_id':'test','card_position':0,'position':0,'fighter_a':'Gamma','fighter_b':'Delta'}]},{'event_id':'test','position':1,'name':'Carte principale','start_at':'2026-11-21T18:00:00Z','level':'official','source':'Fiche officielle UFC','extra':{},'is_active':True,'fights':[{'event_id':'test','card_position':1,'position':0,'fighter_a':'Alpha','fighter_b':'Beta'}]}]
         result=plan_reallocation(event,details)
         self.assertEqual(result['status'],'unchanged',result['issues'])
