@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "mode": "details_read_only",
+  "database_writes": false,
+  "automatic_publication": false,
+  "source_url": "https://www.ufc.com/event/ufc-fight-night-november-21-2026",
+  "source_sha256": "450cae7dfec6c9c4f642590373d3142cb8ba2bce6c44e00c0b260f4a535924dd",
+  "status": "parsed",
+  "event_patch": {
+    "title": "UFC Fight Night — Prochazka vs Stirling",
+    "place": "ABHA Arena, Doha Qatar",
+    "date": "2026-11-21"
+  },
+  "cards": [
+    {
+      "name": "Préliminaires",
+      "start": "2026-11-21T15:00:00Z",
+      "level": "official",
+      "source": "https://www.ufc.com/event/ufc-fight-night-november-21-2026",
+      "fights": [
+        [
+          "Aleksandre Topuria",
+          "Santiago Luna"
+        ],
+        [
+          "Shamil Gaziev",
+          "Tallison Teixeira"
+        ],
+        [
+          "Amir Albazi",
+          "Alessandro Costa"
+        ],
+        [
+          "Jake Matthews",
+          "Tahir Abdullayev"
+        ]
+      ]
+    },
+    {
+      "name": "Carte principale",
+      "start": "2026-11-21T18:00:00Z",
+      "level": "official",
+      "source": "https://www.ufc.com/event/ufc-fight-night-november-21-2026",
+      "fights": [
+        [
+          "Jiří Procházka",
+          "Navajo Stirling"
+        ],
+        [
+          "Aljamain Sterling",
+          "Kevin Vallejos"
+        ],
+        [
+          "Dan Hooker",
+          "Brian Ortega"
+        ],
+        [
+          "Kyoji Horiguchi",
+          "Asu Almabayev"
+        ],
+        [
+          "Jared Cannonier",
+          "Ikram Aliskerov"
+        ]
+      ]
+    }
+  ],
+  "issues": []
+}
