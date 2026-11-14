@@ -71,6 +71,28 @@
 @media(max-width:360px){.cal-name{font-size:9px}.cal-sub{font-size:8.5px}}`;
   document.head.append(presentationStyle);
 
+  /* Étape 4 — fiches détaillées */
+  const detailStyle=document.createElement('style');
+  detailStyle.textContent=`
+dialog{max-width:820px}
+.modal-body{padding:30px 26px 34px}
+.event-meta{background:var(--raised);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0 0;font-size:13px;line-height:1.7}
+.detail-note{margin:18px 0 6px;padding:14px 16px;border-left:3px solid var(--accent);border-radius:10px;background:var(--raised)}
+.card{margin-top:18px;border:1px solid var(--line);border-radius:16px;padding:18px;background:var(--raised)}
+.card:first-of-type{margin-top:22px}
+.card-title{gap:14px;align-items:center}
+.card-title h3{font-size:16px}
+.card-time b{font-size:24px}
+.card-actions{margin:16px 0 4px}
+.bouts{margin-top:6px}
+.bout{padding:16px 0;gap:14px}
+.fighter-name{font-size:15px}
+.sources{margin-top:26px;background:var(--raised);border:1px solid var(--line);border-radius:16px;padding:16px}
+.sources summary{font-weight:600}
+.source-links{margin-top:10px;gap:16px}
+@media(max-width:640px){.modal-body{padding:22px 16px 26px}.card{padding:14px;border-radius:14px}.bout{gap:8px}.fighter-name{font-size:13px}}`;
+  document.head.append(detailStyle);
+
   function enhanceCalendar(){
     if(!calendar)return;
     calendar.querySelectorAll('.calendarEvent').forEach(button=>{
