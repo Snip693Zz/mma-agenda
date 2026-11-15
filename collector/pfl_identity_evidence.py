@@ -1,4 +1,5 @@
 """Validation hors ligne de preuves SportsEvent PFL ; aucune ecriture."""
+# Section diagnostics remain separate and do not alter identity validation.
 import re
 from datetime import datetime
 from urllib.parse import urlsplit
