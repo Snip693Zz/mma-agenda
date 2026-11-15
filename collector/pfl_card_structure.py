@@ -54,13 +54,22 @@ def extract_pairs(html, source_url):
               'source_url': source_url, 'event_identity_validated': False}
     tree = Tree(html)
     components = [n for n in tree.root.walk() if n.attrs.get('id') == 'fight_card_component']
-    if tree.malformed or len(components) != 1 or not components[0].closed:
+    if tree.malformed:
+        result['reason'] = 'missing_ambiguous_or_incomplete_component'
+        return result
+    if not components:
         result['reason'] = 'missing_ambiguous_or_incomplete_component'
         return result
     component = components[0]
+    if not component.closed:
+        result['reason'] = 'missing_ambiguous_or_incomplete_component'
+        return result
     nested_components = [n for n in component.walk() if n is not component and n.attrs.get('id') == 'fight_card_component']
     if nested_components:
         result['reason'] = 'nested_card_component'
+        return result
+    if len(components) > 1:
+        result['reason'] = 'missing_ambiguous_or_incomplete_component'
         return result
     rows = [n for n in component.walk() if 'matchupRow' in (n.attrs.get('class') or '').split()]
     result['row_count'] = len(rows)
@@ -87,10 +96,8 @@ def extract_pairs(html, source_url):
                 result['reason'] = 'invalid_fighter_url'
                 return result
             canonical = 'https://pflmma.com' + url.path.rstrip('/')
-            if canonical in fighters:
-                result['reason'] = 'duplicate_fighter_in_row'
-                return result
-            fighters.append(canonical)
+            if canonical not in fighters:
+                fighters.append(canonical)
         if len(fighters) != 2:
             result['reason'] = 'ambiguous_fighter_pair'
             return result
