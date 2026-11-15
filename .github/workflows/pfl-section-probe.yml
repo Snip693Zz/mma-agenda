@@ -114,6 +114,31 @@ jobs:
               report['events'].append(event)
           (root / 'section-report.json').write_text(json.dumps(report, indent=2))
           PY
+      - name: Verifier le resume compact
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path('reports/pfl-identity-evidence/section-report.json')
+          if not path.exists():
+              raise SystemExit('missing_section_report')
+          report = json.loads(path.read_text())
+          assert report['status'] == 'review_required', 'unexpected_report_status'
+          assert report['automatic_publication'] is False, 'automatic_publication_enabled'
+          assert report['database_writes'] is False, 'database_writes_enabled'
+          assert len(report['events']) == 2, 'unexpected_event_count'
+          lyon, chicago = report['events']
+          assert lyon['source_url'].endswith('/event/pfl-lyon'), 'wrong_lyon_url'
+          assert lyon['row_count'] == 10, f"unexpected_lyon_rows={lyon['row_count']}"
+          assert lyon['section_assignment_performed'] is False, 'lyon_section_assignment_performed'
+          assert any(m.get('id') == 'main-tab' for m in lyon['markers']), 'lyon_main_tab_marker_missing'
+          assert chicago['source_url'].endswith('/event/2026-chicago2'), 'wrong_chicago_url'
+          assert chicago['row_count'] == 13, f"unexpected_chicago_rows={chicago['row_count']}"
+          assert chicago['section_assignment_performed'] is False, 'chicago_section_assignment_performed'
+          assert len(json.dumps(report)) < 45000, 'report_too_large_for_single_comment'
+          print('compact section report checks passed')
+          PY
       - name: Restituer un resume compact dans la PR 4
         if: always()
         uses: actions/github-script@v7
