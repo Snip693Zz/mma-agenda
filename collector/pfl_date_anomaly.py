@@ -6,6 +6,9 @@ def classify(event):
     result = {'status': 'review_required', 'classification': 'not_applicable',
               'automatic_publication': False, 'database_writes': False,
               'date_repair_performed': False}
+    if not isinstance(event, dict):
+        result['reason'] = 'invalid_event'
+        return result
     start = event.get('startDate')
     end = event.get('endDate')
     if not isinstance(start, str) or not isinstance(end, str):
@@ -16,6 +19,9 @@ def classify(event):
         end_dt = datetime.fromisoformat(end.replace('Z', '+00:00'))
     except ValueError:
         result['reason'] = 'invalid_dates'
+        return result
+    if start_dt.utcoffset() is None or end_dt.utcoffset() is None:
+        result.update(reason='timezone_required', startDate=start, endDate=end)
         return result
     result.update(startDate=start, endDate=end,
                   start_offset=start_dt.utcoffset().total_seconds(),
