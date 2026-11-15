@@ -10,8 +10,10 @@ import json
 import re
 from html.parser import HTMLParser
 from typing import Any, Dict, Iterable, List, Optional, Tuple
+from urllib.parse import urljoin
 
 EVENT_URL = "https://pflmma.com/event/pfl-lyon"
+_BASE_URL = "https://pflmma.com/"
 _FIGHTER_URL = re.compile(r"^https://pflmma\.com/fighter/[a-z0-9-]+$")
 _SECTION_LABELS = {
     "main card": "main_card",
@@ -108,9 +110,10 @@ def _fighter_url(anchor: Dict[str, Any]) -> Optional[str]:
     url = anchor.get("href")
     if not isinstance(url, str):
         return None
-    if not _FIGHTER_URL.match(url):
+    normalized = urljoin(_BASE_URL, url)
+    if not _FIGHTER_URL.match(normalized):
         return None
-    return url
+    return normalized
 
 
 def _event_identity(document: Dict[str, Any]) -> Tuple[bool, str]:
