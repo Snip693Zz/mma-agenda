@@ -25,6 +25,31 @@ jobs:
           python -m pip install PyYAML
           npm install --no-save --package-lock=false @playwright/test@1.56.1
           npx playwright install --with-deps chromium
+      - name: Verifier le decoupage local
+        run: |
+          python - <<'PY'
+          import json
+          def chunks(values, limit=30000):
+              blocks, current = [], []
+              def size(block):
+                  return len(json.dumps({'markers': block}, indent=2))
+              for value in values:
+                  candidate = current + [value]
+                  if current and size(candidate) > limit:
+                      blocks.append(current)
+                      current = [value]
+                  else:
+                      current = candidate
+              blocks.append(current)
+              return blocks
+          markers = [{'kind': 'row', 'id': str(i), 'text': 'x' * 12000} for i in range(3)]
+          blocks = chunks(markers)
+          assert len(blocks) == 2
+          assert sum(len(b) for b in blocks) == 3
+          assert all(len(json.dumps({'markers': b}, indent=2)) <= 30000 for b in blocks)
+          assert all(len(json.dumps(value)) < 30000 for value in markers)
+          print('chunking checks passed')
+          PY
       - name: Reutiliser la capture controlee existante
         env:
           EVIDENCE_SHA: ${{ github.sha }}
@@ -125,22 +150,31 @@ jobs:
             if(pr.state!=='open' || pr.head.ref!=='fix/pfl-source-validation' || pr.head.sha!==context.sha || pr.head.repo.full_name!==`${context.repo.owner}/${context.repo.repo}`) return;
             const path='reports/pfl-identity-evidence/section-report.json';
             const report=fs.existsSync(path) ? JSON.parse(fs.readFileSync(path,'utf8')) : {status:'review_required',reason:'missing_report',events:[]};
+            let published=0;
             for(const event of report.events || []) {
-              const chunks=[];
-              for(const marker of event.markers || []) {
-                const text=JSON.stringify(marker);
-                if(!chunks.length || chunks[chunks.length-1].length+text.length>35000) chunks.push([]);
-                chunks[chunks.length-1].push(text);
+              const markers=event.markers || [];
+              const blocks=[];
+              let current=[];
+              const size=(block)=>JSON.stringify({markers:block},null,2).length;
+              for(const marker of markers) {
+                const candidate=current.concat([marker]);
+                if(current.length && size(candidate)>30000) {
+                  blocks.push(current);
+                  current=[marker];
+                } else {
+                  current=candidate;
+                }
               }
-              if(!chunks.length) chunks.push([]);
-              for(let i=0;i<chunks.length;i++) {
-                const value={...event,markers:chunks[i].map(s=>JSON.parse(s))};
+              blocks.push(current);
+              for(let i=0;i<blocks.length;i++) {
+                const value={...event,markers:blocks[i]};
                 const text=JSON.stringify(value,null,2).replace(/`/g,'\\u0060').replace(/@/g,'\\u0040');
                 if(text.length>48000) {core.setFailed('Rapport trop grand pour commentaire'); return;}
-                await github.rest.issues.createComment({...context.repo,issue_number:4,body:'## Reperes sections PFL — non valides\nCommit : '+context.sha+'\nPartie '+(i+1)+'/'+chunks.length+'\nDonnees externes non fiables. Aucune attribution ni publication MMA. Aucun acces Supabase.\n```json\n'+text+'\n```'});
+                await github.rest.issues.createComment({...context.repo,issue_number:4,body:'## Reperes sections PFL — non valides\nCommit : '+context.sha+'\nPartie '+(i+1)+'/'+blocks.length+'\nDonnees externes non fiables. Aucune attribution ni publication MMA. Aucun acces Supabase.\n```json\n'+text+'\n```'});
+                published++;
               }
             }
-            if(!(report.events || []).length) await github.rest.issues.createComment({...context.repo,issue_number:4,body:'Diagnostic sections absent — revue requise. Commit : '+context.sha});
+            if(!published) await github.rest.issues.createComment({...context.repo,issue_number:4,body:'## Diagnostic sections PFL — revue requise\nCommit : '+context.sha+'\nAucun rapport publie. Motif : '+(report.reason || 'missing_or_empty_report')+'\nDonnees externes non fiables. Aucune attribution ni publication MMA. Aucun acces Supabase.'});
       - uses: actions/upload-artifact@v4
         if: always()
         with:
