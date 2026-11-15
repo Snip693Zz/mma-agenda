@@ -23,6 +23,11 @@ except ImportError:
     from source_validation import assess_source
 
 try:
+    from .pfl_card_structure import extract_pairs
+except ImportError:
+    from pfl_card_structure import extract_pairs
+
+try:
     from .pfl_primary_identity import primary_identity_matches
     from .pfl_section_candidates import TextTree
 except ImportError:
@@ -108,10 +113,16 @@ def extract_event_identity(html: str, event: dict) -> bool:
     return primary_identity_matches(html, event)
 
 
-def has_structured_card(html: str) -> bool:
-    if not isinstance(html, str):
+def has_structured_card(html: str, source_url: str) -> bool:
+    """Une carte n'est structurellement vérifiée que si l'extracteur PFL
+    identifie au moins une paire candidate dans un composant de carte valide."""
+    if not isinstance(html, str) or not isinstance(source_url, str):
         return False
-    return bool(re.search(r'\b(?:fight\s*card|bout\s*card|carte\s*des\s*combats)\b', html, re.IGNORECASE))
+    try:
+        result = extract_pairs(html, source_url)
+    except (TypeError, ValueError):
+        return False
+    return result.get('status') == 'candidate_pairs' and bool(result.get('pairs'))
 
 
 def fetch_page(url: str, timeout: int = 20) -> str:
@@ -137,7 +148,7 @@ def reconcile_event(event: dict, existing_fights: list[dict], html: str) -> dict
         str(event.get('date') or ''),
         extract_event_date(html) or '',
         identity_verified=extract_event_identity(html, event),
-        structured_card=has_structured_card(html),
+        structured_card=has_structured_card(html, str(event.get('url') or '')),
         fight_count=len(observed),
     )
     payload_event = dict(event)

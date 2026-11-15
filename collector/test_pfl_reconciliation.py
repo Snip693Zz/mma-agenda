@@ -5,6 +5,17 @@ from pfl_reconciliation import extract_event_date, extract_fights, reconcile_eve
 HTML = """
 <html><body>
 <h1>PFL Lyon</h1>
+<p>19 décembre 2026</p>
+<div id="fight_card_component">
+  <div class="matchupRow">Boris Atangana vs. Bryan Battle <a href="/fighter/boris-atangana">Boris Atangana</a> <a href="/fighter/bryan-battle">Bryan Battle</a></div>
+  <div class="matchupRow">Denis Goltsov vs. Test Opponent <a href="/fighter/denis-goltsov">Denis Goltsov</a> <a href="/fighter/test-opponent">Test Opponent</a></div>
+</div>
+</body></html>
+"""
+
+PROMOTIONAL_HTML = """
+<html><body>
+<h1>PFL Lyon</h1>
 <p>Fight Card</p>
 <p>19 décembre 2026</p>
 <div>Boris Atangana vs. Bryan Battle</div>
@@ -16,7 +27,7 @@ EVENT = {'id': 'pfl-lyon', 'title': 'PFL Lyon', 'date': '2026-12-19', 'url': 'ht
 
 
 def test_extract_fights_finds_pairs():
-    fights = extract_fights(HTML)
+    fights = extract_fights(PROMOTIONAL_HTML)
     assert len(fights) == 2
     assert fights[0]['fighter_a'] == 'Boris Atangana'
     assert fights[0]['fighter_b'] == 'Bryan Battle'
@@ -26,7 +37,7 @@ def test_extract_event_date_parses_french_date():
     assert extract_event_date(HTML) == '2026-12-19'
 
 
-def test_valid_source_creates_add_proposals():
+def test_structured_source_creates_add_proposals():
     report = reconcile_event(EVENT, [], HTML)
     assert report['source_validation']['can_reconcile'] is True
     assert report['summary']['add_fight'] == 2
@@ -52,7 +63,13 @@ def test_missing_title_blocks_all_proposals():
 
 
 def test_missing_card_structure_blocks_all_proposals():
-    report = reconcile_event(EVENT, [], HTML.replace('Fight Card', ''))
+    report = reconcile_event(EVENT, [], HTML.replace('<div id="fight_card_component">', '<div>').replace('class="matchupRow"', ''))
+    assert report['source_validation']['reason'] == 'card_structure_unverified'
+    assert report['proposals'] == []
+
+
+def test_promotional_card_without_structure_blocks_all_proposals():
+    report = reconcile_event(EVENT, [], PROMOTIONAL_HTML)
     assert report['source_validation']['reason'] == 'card_structure_unverified'
     assert report['proposals'] == []
 
@@ -84,8 +101,9 @@ def test_date_in_event_heading_context_is_accepted():
         <p>19 décembre 2026</p>
       </section>
       <section>
-        <p>Fight Card</p>
-        <div>Boris Atangana vs. Bryan Battle</div>
+        <div id="fight_card_component">
+          <div class="matchupRow">Boris Atangana vs. Bryan Battle <a href="/fighter/boris-atangana">Boris Atangana</a> <a href="/fighter/bryan-battle">Bryan Battle</a></div>
+        </div>
       </section>
     </main>
     </body></html>
@@ -104,8 +122,9 @@ def test_date_without_event_context_blocks_proposals():
         <h1>PFL Lyon</h1>
       </section>
       <section>
-        <p>Fight Card</p>
-        <div>Boris Atangana vs. Bryan Battle</div>
+        <div id="fight_card_component">
+          <div class="matchupRow">Boris Atangana vs. Bryan Battle <a href="/fighter/boris-atangana">Boris Atangana</a> <a href="/fighter/bryan-battle">Bryan Battle</a></div>
+        </div>
       </section>
       <aside>
         <p>19 décembre 2026</p>
