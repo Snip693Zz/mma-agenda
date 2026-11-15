@@ -4,6 +4,11 @@ import re
 from datetime import datetime
 from urllib.parse import urlsplit
 
+try:
+    from .pfl_date_anomaly import classify
+except ImportError:
+    from pfl_date_anomaly import classify
+
 
 def validate_identity(events, source_url):
     result = {"status": "review_required", "reason": "", "source_url": source_url,
@@ -47,6 +52,7 @@ def validate_identity(events, source_url):
             if precision != end_precision:
                 return reject("incomparable_date_precision")
             if end <= start:
+                result["date_anomaly"] = classify(event)
                 return reject("end_not_after_start")
     except (ValueError, TypeError, OverflowError):
         return reject("invalid_event_date")
