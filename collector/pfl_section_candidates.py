@@ -28,7 +28,11 @@ def diagnose_sections(html, source_url):
         result['reason'] = structural['reason']
         return result
     tree = TextTree(html)
-    component = next(n for n in tree.root.walk() if n.attrs.get('id') == 'fight_card_component')
+    components = [n for n in tree.root.walk() if n.attrs.get('id') == 'fight_card_component']
+    if len(components) != 1:
+        result['reason'] = 'missing_ambiguous_or_incomplete_component'
+        return result
+    component = components[0]
     ids = Counter(n.attrs['id'] for n in component.walk() if n.attrs.get('id'))
 
     def visit(parent):
@@ -36,16 +40,18 @@ def diagnose_sections(html, source_url):
         for node in parent.children:
             classes = (node.attrs.get('class') or '').split()
             if 'matchupRow' in classes:
-                result['rows'].append(dict(row_index=len(result['rows']), row_id=node.attrs.get('id'), section=current, evidence=evidence))
+                result['rows'].append(dict(row_index=len(result['rows']), row_id=node.attrs.get('id'),
+                                           section=current, evidence=evidence))
                 continue
             if re.fullmatch(r'h[1-6]', node.tag):
                 text = ' '.join(heading_text(node).split())
                 main = bool(re.search(r'\bmain\s+card\b', text, re.I))
                 early = bool(re.search(r'\b(?:early\s+card|prelims?|preliminary\s+card)\b', text, re.I))
                 identifier = node.attrs.get('id')
+                duplicate_id = bool(identifier and ids[identifier] > 1)
                 conflict = ((identifier == 'main-tab' and early) or
                             (identifier == 'prelim-tab' and main) or
-                            (identifier and ids[identifier] > 1))
+                            duplicate_id)
                 current = ('main_card' if main else 'early_card') if main != early and not conflict else 'unassigned'
                 evidence = dict(id=identifier, text=text) if current != 'unassigned' else None
             else:

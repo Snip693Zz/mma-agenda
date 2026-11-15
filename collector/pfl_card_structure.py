@@ -57,17 +57,22 @@ def extract_pairs(html, source_url):
     if tree.malformed or len(components) != 1 or not components[0].closed:
         result['reason'] = 'missing_ambiguous_or_incomplete_component'
         return result
-    rows = [n for n in components[0].walk() if 'matchupRow' in (n.attrs.get('class') or '').split()]
+    component = components[0]
+    nested_components = [n for n in component.walk() if n is not component and n.attrs.get('id') == 'fight_card_component']
+    if nested_components:
+        result['reason'] = 'nested_card_component'
+        return result
+    rows = [n for n in component.walk() if 'matchupRow' in (n.attrs.get('class') or '').split()]
     result['row_count'] = len(rows)
     if not rows:
         result['reason'] = 'no_structured_rows'
         return result
     pairs, seen = [], set()
     for row in rows:
-        fighters = []
         if not row.closed:
             result['reason'] = 'incomplete_row'
             return result
+        fighters = []
         for node in row.walk():
             if node is not row and 'matchupRow' in (node.attrs.get('class') or '').split():
                 result['reason'] = 'nested_rows'
@@ -77,12 +82,15 @@ def extract_pairs(html, source_url):
             url = urlsplit(urljoin(source_url, node.attrs.get('href') or ''))
             if not re.fullmatch(r'/fighter/[a-zA-Z0-9-]+/?', url.path):
                 continue
-            if url.scheme != 'https' or url.netloc not in ('pflmma.com', 'www.pflmma.com') or url.query or url.fragment:
+            if (url.scheme != 'https' or url.netloc not in ('pflmma.com', 'www.pflmma.com')
+                    or url.query or url.fragment):
                 result['reason'] = 'invalid_fighter_url'
                 return result
             canonical = 'https://pflmma.com' + url.path.rstrip('/')
-            if canonical not in fighters:
-                fighters.append(canonical)
+            if canonical in fighters:
+                result['reason'] = 'duplicate_fighter_in_row'
+                return result
+            fighters.append(canonical)
         if len(fighters) != 2:
             result['reason'] = 'ambiguous_fighter_pair'
             return result
