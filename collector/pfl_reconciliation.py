@@ -24,8 +24,10 @@ except ImportError:
 
 try:
     from .pfl_primary_identity import primary_identity_matches
+    from .pfl_section_candidates import TextTree
 except ImportError:
     from pfl_primary_identity import primary_identity_matches
+    from pfl_section_candidates import TextTree
 
 try:
     from .update_reconciliation import compare_event, summarize
@@ -71,16 +73,35 @@ def extract_fights(html: str) -> list[dict]:
 
 
 def extract_event_date(html: str) -> str | None:
+    """Unique French date in primary content; ambiguous or invalid means unknown."""
     if not isinstance(html, str):
         return None
-    match = DATE_RE.search(html)
-    if not match:
+    tree = TextTree(html)
+    if tree.malformed or len(tree.stack) != 1:
         return None
-    day, month, year = match.groups()
-    month_number = MONTHS.get(month.lower())
-    if not month_number:
+    excluded = {'header', 'nav', 'footer', 'aside', 'script', 'style', 'template'}
+    def visible(node):
+        if node.tag in excluded:
+            return
+        yield node
+        for child in node.children:
+            yield from visible(child)
+    mains = [n for n in visible(tree.root) if n.tag == 'main']
+    if len(mains) > 1:
         return None
-    return f'{int(year):04d}-{month_number:02d}-{int(day):02d}'
+    scope = mains[0] if mains else tree.root
+    nodes = list(visible(scope))
+    if sum(n.tag == 'h1' for n in nodes) != 1:
+        return None
+    dates = set()
+    # Match each text node separately: never assemble a date across unrelated nodes.
+    for node in nodes:
+        for day, month, year in DATE_RE.findall(getattr(node, 'text', '')):
+            try:
+                dates.add(dt.date(int(year), MONTHS[month.lower()], int(day)).isoformat())
+            except (ValueError, KeyError):
+                return None
+    return next(iter(dates)) if len(dates) == 1 else None
 
 
 def extract_event_identity(html: str, event: dict) -> bool:
