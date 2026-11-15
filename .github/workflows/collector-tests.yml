@@ -29,6 +29,7 @@ jobs:
         working-directory: collector
         run: |
           set +e
+          mkdir -p ../reports
           python -m pytest -q --junitxml=../reports/collector-tests.xml > ../reports/collector-tests.log 2>&1
           status=$?
           printf '%s' "$status" > ../reports/collector-tests.exit
