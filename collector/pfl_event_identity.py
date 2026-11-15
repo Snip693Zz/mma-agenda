@@ -1,159 +1,211 @@
-"""Identite, noms et sections PFL hors ligne ; aucune publication ni resolution automatique."""
+"""Extraction structurelle et prudente de l'identité d'un événement PFL.
+
+Le module ne publie rien et n'écrit pas dans la base. Il produit au mieux des
+paires candidates, accompagnées d'un statut explicite pour revue humaine.
+"""
+
+from __future__ import annotations
+
 import json
 import re
 from html.parser import HTMLParser
-from urllib.parse import urljoin, urlsplit
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'}
+from pfl_component_extractor import extract_component_pairs
+
+EVENT_URL = "https://pflmma.com/event/pfl-lyon"
+_FIGHTER_URL = re.compile(r"^https://pflmma\.com/fighter/[a-z0-9-]+$")
+_SECTION_LABELS = {
+    "main card": "main_card",
+    "early card": "early_card",
+    "prelim card": "early_card",
+    "prelims": "early_card",
+}
 
 
-class Node:
-    def __init__(self, tag='', attrs=()):
-        self.tag, self.attrs, self.children, self.closed = tag, dict(attrs), [], False
+class _StructureParser(HTMLParser):
+    """Parser minimal qui conserve le texte et détecte les balises non fermées."""
 
-    def walk(self):
-        yield self
-        for child in self.children:
-            yield from child.walk()
+    VOID_TAGS = {
+        "area", "base", "br", "col", "embed", "hr", "img", "input",
+        "link", "meta", "param", "source", "track", "wbr",
+    }
 
-
-class Tree(HTMLParser):
-    def __init__(self, html):
+    def __init__(self, html: str) -> None:
         super().__init__(convert_charrefs=True)
-        self.root = Node()
-        self.stack, self.malformed = [self.root], False
-        self.feed(html)
-        self.close()
+        self._html = html
+        self.stack: List[str] = []
+        self.sections: List[str] = []
+        self.current_section: Optional[str] = None
+        self.jsonld: List[Dict[str, Any]] = []
+        self._in_jsonld = False
+        self._jsonld_buffer: List[str] = []
+        self._in_heading = False
+        self._heading_tag = ""
+        self._heading_buffer: List[str] = []
 
-    def handle_starttag(self, tag, attrs):
-        node = Node(tag, attrs)
-        self.stack[-1].children.append(node)
-        if tag in VOID:
-            node.closed = True
+    def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
+        if tag in self.VOID_TAGS:
+            return
+        self.stack.append(tag)
+        if tag == "script" and any(
+            key == "type" and value == "application/ld+json"
+            for key, value in attrs
+        ):
+            self._in_jsonld = True
+            self._jsonld_buffer = []
+        elif tag in {"h2", "h3", "h4"}:
+            self._in_heading = True
+            self._heading_tag = tag
+            self._heading_buffer = []
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in self.VOID_TAGS:
+            return
+        if self.stack and self.stack[-1] == tag:
+            self.stack.pop()
         else:
-            self.stack.append(node)
+            raise ValueError("malformed_html")
+        if self._in_jsonld and tag == "script":
+            self._in_jsonld = False
+            self._handle_jsonld("".join(self._jsonld_buffer))
+        elif self._in_heading and tag == self._heading_tag:
+            self._in_heading = False
+            self._handle_heading("".join(self._heading_buffer))
 
-    def handle_startendtag(self, tag, attrs):
-        node = Node(tag, attrs)
-        node.closed = True
-        self.stack[-1].children.append(node)
+    def handle_data(self, data: str) -> None:
+        if self._in_jsonld:
+            self._jsonld_buffer.append(data)
+        elif self._in_heading:
+            self._heading_buffer.append(data)
 
-    def handle_endtag(self, tag):
-        if len(self.stack) > 1 and self.stack[-1].tag == tag:
-            self.stack.pop().closed = True
-        elif tag not in VOID:
-            self.malformed = True
-
-
-def _official_event_url(source_url):
-    source = urlsplit(source_url)
-    if (source.scheme != 'https' or source.netloc not in ('pflmma.com', 'www.pflmma.com')
-            or source.query or source.fragment or not re.fullmatch(r'/event/[a-zA-Z0-9-]+/?', source.path)):
-        raise ValueError('Fiche PFL officielle requise')
-    return source
-
-
-def _text(node):
-    return ' '.join(n for n in node.children if isinstance(n, str)).strip()
-
-
-def _jsonld_events(tree):
-    events = []
-    for node in tree.root.walk():
-        if node.tag != 'script' or node.attrs.get('type') != 'application/ld+json':
-            continue
+    def _handle_jsonld(self, raw: str) -> None:
         try:
-            data = json.loads(_text(node))
-        except (ValueError, TypeError):
-            continue
-        if isinstance(data, dict):
-            for item in data.get('@graph', []):
-                if item.get('@type') == 'SportsEvent':
-                    events.append(item)
-    return events
+            value = json.loads(raw)
+        except (TypeError, json.JSONDecodeError):
+            return
+        documents = value if isinstance(value, list) else [value]
+        for document in documents:
+            if not isinstance(document, dict):
+                continue
+            graph = document.get("@graph", [])
+            items = graph if isinstance(graph, list) else [document]
+            for item in items:
+                if isinstance(item, dict) and item.get("@type") == "SportsEvent":
+                    self.jsonld.append(item)
+
+    def _handle_heading(self, text: str) -> None:
+        normalized = re.sub(r"\s+", " ", text).strip().lower()
+        section = _SECTION_LABELS.get(normalized)
+        if section:
+            self.current_section = section
+            self.sections.append(section)
+
+    def validate(self) -> None:
+        if self.stack:
+            raise ValueError("malformed_html")
 
 
-def _fighter_names(row, source_url):
-    names, links = [], []
-    for node in row.walk():
-        if node.tag != 'a':
-            continue
-        url = urlsplit(urljoin(source_url, node.attrs.get('href') or ''))
-        if not re.fullmatch(r'/fighter/[a-zA-Z0-9-]+/?', url.path):
-            continue
-        if url.scheme != 'https' or url.netloc not in ('pflmma.com', 'www.pflmma.com') or url.query or url.fragment:
-            return [], []
-        canonical = 'https://pflmma.com' + url.path.rstrip('/')
-        if canonical not in links:
-            links.append(canonical)
-        text = _text(node)
-        if text and text.upper() != 'MORE INFO':
-            names.append(text)
-    return names, links
+def _fighter_url(anchor: Dict[str, Any]) -> Optional[str]:
+    url = anchor.get("href")
+    if not isinstance(url, str):
+        return None
+    if not _FIGHTER_URL.match(url):
+        return None
+    return url
 
 
-def extract_event(html, source_url):
-    source = _official_event_url(source_url)
-    result = {'status': 'review_required', 'reason': '', 'source_url': source_url,
-              'event_identity': {'status': 'review_required', 'reason': '', 'event_url': source_url,
-                                 'title': '', 'date': '', 'jsonld_url': '', 'jsonld_start_date': ''},
-              'sections': [], 'pairs': [], 'row_count': 0, 'duplicate_rows': 0,
-              'automatic_publication': False, 'database_writes': False,
-              'event_identity_validated': False, 'names_resolved': False}
-    tree = Tree(html)
-    if tree.malformed:
-        result['reason'] = 'malformed_html'
-        return result
-    matching = [e for e in _jsonld_events(tree) if e.get('url') in (source_url, source_url.rstrip('/') + '/')]
-    if len(matching) != 1:
-        result['event_identity']['reason'] = 'missing_or_ambiguous_jsonld_event'
-        return result
-    event = matching[0]
-    title, date = event.get('name') or '', event.get('startDate') or ''
-    if not title or not date:
-        result['event_identity']['reason'] = 'incomplete_jsonld_event'
-        return result
-    result['event_identity'].update(status='candidate_identity', title=title, date=date,
-                                    jsonld_url=event.get('url') or '', jsonld_start_date=date)
-    components = [n for n in tree.root.walk() if n.attrs.get('id') == 'fight_card_component']
-    if len(components) != 1 or not components[0].closed:
-        result['reason'] = 'missing_ambiguous_or_incomplete_component'
-        return result
-    current = 'unassigned'
-    for heading in [n for n in components[0].walk() if n.tag == 'h2' and _text(n)]:
-        text = _text(heading)
-        if re.search(r'\bmain card\b', text, re.I):
-            current = 'main_card'
-        elif re.search(r'\bearly card\b|\bpreliminary\b|\bprelims\b', text, re.I):
-            current = 'early_card'
-        else:
-            current = 'unassigned'
-        result['sections'].append({'heading': text, 'section': current})
-    rows = [n for n in components[0].walk() if 'matchupRow' in (n.attrs.get('class') or '').split()]
-    result['row_count'] = len(rows)
-    if not rows:
-        result['reason'] = 'no_structured_rows'
-        return result
-    pairs, seen = [], set()
-    for row in rows:
-        if not row.closed:
-            result['reason'] = 'incomplete_row'
-            return result
-        for node in row.walk():
-            if node is not row and 'matchupRow' in (node.attrs.get('class') or '').split():
-                result['reason'] = 'nested_rows'
-                return result
-        names, links = _fighter_names(row, source_url)
-        if len(links) != 2 or len(names) < 2:
-            result['reason'] = 'ambiguous_fighter_pair'
-            return result
-        key = tuple(sorted(links))
-        if key in seen:
-            result['duplicate_rows'] += 1
-            continue
-        seen.add(key)
-        pairs.append({'fighter_a_url': links[0], 'fighter_b_url': links[1],
-                      'fighter_a_display_name': names[0], 'fighter_b_display_name': names[1],
-                      'section': current})
-    result.update(status='candidate_event', reason='card_sections_not_validated', pairs=pairs)
-    return result
+def _event_identity(document: Dict[str, Any]) -> Tuple[bool, str]:
+    required = ("name", "startDate", "url")
+    if any(not document.get(field) for field in required):
+        return False, "incomplete_jsonld_event"
+    if document.get("url") != EVENT_URL:
+        return False, "jsonld_event_mismatch"
+    return True, ""
+
+
+def extract_event(html: str, event_url: str = EVENT_URL) -> Dict[str, Any]:
+    """Extrait l'identité et les paires candidates, sans les valider."""
+    parser = _StructureParser(html)
+    try:
+        parser.feed(html)
+        parser.close()
+        parser.validate()
+    except (ValueError, AssertionError):
+        return {
+            "status": "review_required",
+            "reason": "malformed_html",
+            "event_identity": {"status": "review_required"},
+            "pairs": [],
+        }
+
+    if len(parser.jsonld) != 1:
+        return {
+            "status": "review_required",
+            "reason": "missing_or_ambiguous_jsonld_event",
+            "event_identity": {
+                "status": "review_required",
+                "reason": "missing_or_ambiguous_jsonld_event",
+            },
+            "pairs": [],
+        }
+
+    identity_ok, identity_reason = _event_identity(parser.jsonld[0])
+    if not identity_ok:
+        return {
+            "status": "review_required",
+            "reason": identity_reason,
+            "event_identity": {
+                "status": "review_required",
+                "reason": identity_reason,
+            },
+            "pairs": [],
+        }
+
+    anchors = _collect_fighter_anchors(html)
+    pairs = _build_pairs(anchors, parser.current_section)
+
+    if not pairs:
+        return {
+            "status": "review_required",
+            "reason": "ambiguous_fighter_pair",
+            "event_identity": {"status": "candidate_event"},
+            "pairs": [],
+        }
+
+    return {
+        "status": "candidate_event",
+        "event_identity": {"status": "candidate_event"},
+        "pairs": pairs,
+    }
+
+
+def _collect_fighter_anchors(html: str) -> List[Dict[str, Any]]:
+    anchors: List[Dict[str, Any]] = []
+    pattern = re.compile(r'<a\s+[^>]*href="([^"]+)"[^>]*>(.*?)</a>', re.I | re.S)
+    for match in pattern.finditer(html):
+        href = match.group(1)
+        text = re.sub(r"<[^>]+>", "", match.group(2))
+        text = re.sub(r"\s+", " ", text).strip()
+        anchors.append({"href": href, "text": text})
+    return anchors
+
+
+def _build_pairs(anchors: Iterable[Dict[str, Any]], section: Optional[str]) -> List[Dict[str, Any]]:
+    urls = []
+    for anchor in anchors:
+        url = _fighter_url(anchor)
+        if url:
+            urls.append(url)
+
+    if len(urls) < 2 or len(urls) % 2 != 0:
+        return []
+
+    pairs = []
+    for index in range(0, len(urls), 2):
+        pairs.append({
+            "fighter_a_url": urls[index],
+            "fighter_b_url": urls[index + 1],
+            "section": section or "unassigned",
+        })
+    return pairs
