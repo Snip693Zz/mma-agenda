@@ -17,11 +17,32 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
-from update_reconciliation import compare_event, summarize
+try:
+    from .source_validation import assess_source
+except ImportError:
+    from source_validation import assess_source
 
+try:
+    from .pfl_card_structure import extract_structured_fights
+except ImportError:
+    from pfl_card_structure import extract_structured_fights
+
+try:
+    from .pfl_primary_identity import primary_identity_matches
+    from .pfl_section_candidates import TextTree
+except ImportError:
+    from pfl_primary_identity import primary_identity_matches
+    from pfl_section_candidates import TextTree
+
+try:
+    from .update_reconciliation import compare_event, summarize
+except ImportError:
+    from update_reconciliation import compare_event, summarize
 PFL_HOSTS = {'pflmma.com', 'www.pflmma.com'}
 TAG_RE = re.compile(r'<[^>]+>')
 NOISE = ('pfl record', 'career record', 'professional record', 'winner', 'method', 'round', 'time', 'faceoff', 'face-off')
+DATE_RE = re.compile(r'\b(\d{1,2})\s+(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+(\d{4})\b', re.IGNORECASE)
+MONTHS = {'janvier': 1, 'février': 2, 'mars': 3, 'avril': 4, 'mai': 5, 'juin': 6, 'juillet': 7, 'août': 8, 'septembre': 9, 'octobre': 10, 'novembre': 11, 'décembre': 12}
 
 
 def clean_text(value: str) -> str:
@@ -29,7 +50,7 @@ def clean_text(value: str) -> str:
 
 
 def extract_fights(html: str) -> list[dict]:
-    """Extrait les paires affichées avec « vs » ; extraction prudente, à valider."""
+    """Extraction textuelle conservée pour les diagnostics ; non utilisée pour valider une carte."""
     if not isinstance(html, str):
         return []
     fights = []
@@ -56,32 +77,76 @@ def extract_fights(html: str) -> list[dict]:
     return fights
 
 
-def fetch_page(url: str, timeout: int = 20) -> str:
-    parsed = urlsplit(url)
-    if parsed.scheme != 'https' or parsed.hostname not in PFL_HOSTS or parsed.username or parsed.password:
-        raise ValueError('URL PFL non autorisée')
-    request = Request(url, headers={'User-Agent': 'mma-agenda-pfl-reconciliation/1.0'})
-    try:
-        with urlopen(request, timeout=timeout) as response:
-            if response.status != 200:
-                raise ValueError(f'Réponse PFL invalide : {response.status}')
-            return response.read().decode('utf-8', errors='replace')
-    except HTTPError as error:
-        if error.code == 404:
-            raise ValueError('Fiche PFL introuvable (404)') from error
-        raise
+def extract_event_date(html: str) -> str | None:
+    """Unique French date in primary content; ambiguous or invalid means unknown."""
+    if not isinstance(html, str):
+        return None
+    tree = TextTree(html)
+    if tree.malformed or len(tree.stack) != 1:
+        return None
+    excluded = {'header', 'nav', 'footer', 'aside', 'script', 'style', 'template'}
+    def visible(node):
+        if node.tag in excluded:
+            return
+        yield node
+        for child in node.children:
+            yield from visible(child)
+    mains = [n for n in visible(tree.root) if n.tag == 'main']
+    if len(mains) > 1:
+        return None
+    scope = mains[0] if mains else tree.root
+    nodes = list(visible(scope))
+    if sum(n.tag == 'h1' for n in nodes) != 1:
+        return None
+    dates = set()
+    for node in nodes:
+        for day, month, year in DATE_RE.findall(getattr(node, 'text', '')):
+            try:
+                dates.add(dt.date(int(year), MONTHS[month.lower()], int(day)).isoformat())
+            except (ValueError, KeyError):
+                return None
+    return next(iter(dates)) if len(dates) == 1 else None
+
+
+def extract_event_identity(html: str, event: dict) -> bool:
+    return primary_identity_matches(html, event)
+
+
+def fetch_page(url: str) -> str:
+    """Récupère uniquement une fiche PFL officielle en HTTPS."""
+    source = urlsplit(url)
+    if (source.scheme != 'https' or source.netloc not in PFL_HOSTS
+            or source.query or source.fragment or not re.fullmatch(r'/event/[a-zA-Z0-9-]+/?', source.path)):
+        raise ValueError('Fiche PFL officielle requise')
+    request = Request(url, headers={'User-Agent': 'mma-agenda/1.0 (+https://github.com/Snip693Zz/mma-agenda)'})
+    with urlopen(request, timeout=30) as response:
+        if response.status != 200:
+            raise ValueError('Réponse PFL non valide')
+        return response.read().decode('utf-8')
 
 
 def reconcile_event(event: dict, existing_fights: list[dict], html: str) -> dict:
-    observed = extract_fights(html)
+    source_url = str(event.get('url') or '')
+    observed = extract_structured_fights(html, source_url)
     source_kind = 'official' if event.get('official') else 'secondary'
+    observed_date = extract_event_date(html) or ''
+    validation = assess_source(
+        str(event.get('date') or observed_date),
+        observed_date,
+        identity_verified=extract_event_identity(html, event),
+        structured_card=bool(observed),
+        fight_count=len(observed),
+    )
     payload_event = dict(event)
     payload_event['source_kind'] = source_kind
-    proposals = [] if not observed else compare_event(payload_event, existing_fights, observed)
+    proposals = []
+    if validation['can_reconcile'] and observed:
+        proposals = compare_event(payload_event, existing_fights, observed)
     return {
         'event_id': event.get('id'),
         'event': event.get('title'),
         'source_url': event.get('url'),
+        'source_validation': validation,
         'observed_fights': observed,
         'proposals': proposals,
         'summary': summarize(proposals),

@@ -1,0 +1,123 @@
+name: Sections candidates PFL sur captures reelles
+on:
+  push:
+    branches: [fix/pfl-source-validation]
+    paths:
+      - '.github/workflows/pfl-section-candidates.yml'
+      - '.github/workflows/pfl-identity-evidence.yml'
+      - 'collector/pfl_section_candidates.py'
+      - 'collector/test_pfl_section_candidates.py'
+      - 'collector/pfl_card_structure.py'
+      - 'collector/pfl_identity_evidence.py'
+      - 'collector/test_pfl_identity_evidence.py'
+      - 'collector/pfl_date_anomaly.py'
+      - 'collector/test_pfl_date*.py'
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  section-candidates:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Tester les sections et les deux contextes d'import
+        run: |
+          python -m unittest discover -s collector -p test_pfl_section_candidates.py
+          python -m unittest discover -s collector -p test_pfl_identity_evidence.py
+          python -m unittest discover -s collector -p 'test_pfl_date*.py'
+          python -c 'from collector.pfl_section_candidates import diagnose_sections; from collector.pfl_identity_evidence import validate_identity'
+      - name: Installer les dependances de capture
+        run: |
+          python -m pip install PyYAML
+          npm install --no-save --package-lock=false @playwright/test@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Capturer avec les restrictions existantes
+        env:
+          EVIDENCE_SHA: ${{ github.sha }}
+        run: |
+          python - <<'PY'
+          import subprocess, yaml
+          from pathlib import Path
+          workflow = yaml.safe_load(Path('.github/workflows/pfl-identity-evidence.yml').read_text())
+          scripts = [s['run'] for s in workflow['jobs']['evidence']['steps'] if s.get('name') == 'Capturer les preuves sans valider les cartes']
+          if len(scripts) != 1:
+              raise SystemExit('missing_or_ambiguous_capture_step')
+          subprocess.run(['bash', '-e', '-c', scripts[0]], check=True, timeout=360)
+          PY
+      - name: Consolider identite dates et sections sans valider les cartes
+        env:
+          REPORT_SHA: ${{ github.sha }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          from collector.pfl_section_candidates import diagnose_sections
+          from collector.pfl_identity_evidence import validate_identity
+          root = Path('reports/pfl-identity-evidence')
+          report = json.loads((root / 'report.json').read_text())
+          assert report['commit'] == os.environ['REPORT_SHA'], 'capture_commit_mismatch'
+          urls = ['https://pflmma.com/event/pfl-lyon', 'https://pflmma.com/event/2026-chicago2']
+          assert [e['source_url'] for e in report['events']] == urls, 'unexpected_capture_events'
+          failed = False
+          for index, event in enumerate(report['events']):
+              path = root / f'event-{index}.html'
+              sections = diagnose_sections(path.read_text(), event['source_url']) if path.exists() else {'status': 'review_required', 'reason': 'missing_capture', 'rows': []}
+              event['section_candidates'] = sections
+              structure = event.get('structural_extraction', {})
+              if event.get('http_status') != 200 or event.get('jsonld_parse_errors') != 0:
+                  checked = {'status': 'review_required', 'reason': 'missing_or_invalid_jsonld_capture'}
+              elif structure.get('status') != 'candidate_pairs':
+                  checked = {'status': 'review_required', 'reason': 'capture_or_structure_not_ready'}
+              else:
+                  checked = validate_identity(event.get('sports_events'), event['source_url'])
+              event['identity_checks'] = checked
+              event['status'] = 'review_required'
+              expected = structure.get('row_count', 0)
+              complete = expected > 0 and len(sections['rows']) == expected
+              event['section_row_coverage_complete'] = complete
+              failed = failed or not complete
+              assert checked['status'] in ('review_required', 'candidate_identity')
+              assert checked.get('event_identity_validated', False) is False
+              assert checked.get('automatic_publication', False) is False
+              assert checked.get('database_writes', False) is False
+              if complete:
+                  assert sections['automatic_publication'] is False
+                  assert sections['database_writes'] is False
+                  assert sections['event_identity_validated'] is False
+                  assert sum(sections['counts'].values()) == expected
+                  for row in sections['rows']:
+                      assert row['section'] in ('main_card', 'early_card', 'unassigned')
+                      assert (row['evidence'] is not None) == (row['section'] != 'unassigned')
+          report.update(status='review_required', automatic_publication=False, database_writes=False)
+          (root / 'section-candidates.json').write_text(json.dumps(report, indent=2))
+          if failed:
+              raise SystemExit('incomplete_section_row_coverage')
+          PY
+      - name: Restituer le rapport dans la PR 4
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const pr = (await github.rest.pulls.get({...context.repo, pull_number:4})).data;
+            if(pr.state !== 'open' || pr.head.ref !== 'fix/pfl-source-validation' || pr.head.sha !== context.sha || pr.head.repo.full_name !== `${context.repo.owner}/${context.repo.repo}`) return;
+            const path = 'reports/pfl-identity-evidence/section-candidates.json';
+            const report = fs.existsSync(path) ? JSON.parse(fs.readFileSync(path,'utf8')) : {status:'review_required',reason:'missing_section_report'};
+            const text = JSON.stringify(report,null,2).replace(/`/g,'\\u0060').replace(/@/g,'\\u0040');
+            if(text.length > 48000) {core.setFailed('section_report_too_large'); return;}
+            await github.rest.issues.createComment({...context.repo,issue_number:4,body:'## Preuves consolidees PFL — revue requise\nCommit : '+context.sha+'\nDonnees externes non fiables. Aucune carte validee. Aucun acces Supabase.\n```json\n'+text+'\n```'});
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pfl-section-candidates
+          path: reports/pfl-identity-evidence/
+          retention-days: 7

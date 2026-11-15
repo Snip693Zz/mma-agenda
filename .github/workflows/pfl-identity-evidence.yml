@@ -1,0 +1,136 @@
+name: Preuves identite et carte PFL sans publication
+on:
+  push:
+    branches: [fix/pfl-source-validation]
+    paths: ['.github/workflows/pfl-identity-evidence.yml', 'collector/pfl_identity_evidence.py', 'collector/test_pfl_identity_evidence.py']
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Tester le validateur avant capture
+        run: python -m unittest discover -s collector -p test_pfl_identity_evidence.py
+      - name: Installer Chromium
+        run: |
+          npm install --no-save --package-lock=false @playwright/test@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Capturer les preuves sans valider les cartes
+        env:
+          EVIDENCE_SHA: ${{ github.sha }}
+        run: |
+          node <<'JS'
+          const {chromium} = require('@playwright/test');
+          const fs = require('fs');
+          const {spawnSync} = require('child_process');
+          const {createHash} = require('crypto');
+          const hosts = new Set(['pflmma.com','www.pflmma.com','cdn.jsdelivr.net','cdnjs.cloudflare.com','code.jquery.com','unpkg.com']);
+          const urls = ['https://pflmma.com/event/pfl-lyon','https://pflmma.com/event/2026-chicago2'];
+          const directory = 'reports/pfl-identity-evidence';
+          fs.mkdirSync(directory, {recursive:true});
+          (async () => {
+            const browser = await chromium.launch({headless:true});
+            const report = {commit:process.env.EVIDENCE_SHA,status:'review_required',database_writes:false,automatic_publication:false,events:[]};
+            try {
+              for (let index=0; index<urls.length; index++) {
+                const source = urls[index], tag = new URL(source).pathname.split('/').pop();
+                const context = await browser.newContext({serviceWorkers:'block',acceptDownloads:false});
+                const event = {source_url:source,status:'review_required'};
+                try {
+                  await context.route('**/*', route => {
+                    const r=route.request(), u=new URL(r.url());
+                    const safe=u.protocol==='https:' && !u.username && !u.password && !u.port && hosts.has(u.hostname);
+                    const p=new URLSearchParams(r.postData() || '');
+                    const card=r.method()==='POST' && u.origin==='https://pflmma.com' && u.pathname==='/ajax/get_fight_card_component' && !u.search && [...p].length===2 && p.getAll('event_tag').length===1 && p.getAll('is_mobile').length===1 && p.get('event_tag')===tag && ['0','1'].includes(p.get('is_mobile'));
+                    return safe && (r.method()==='GET' || card) && !['image','media','font'].includes(r.resourceType()) ? route.continue() : route.abort();
+                  });
+                  const page=await context.newPage();
+                  const response=await page.goto(source,{waitUntil:'domcontentloaded',timeout:45000});
+                  event.http_status=response ? response.status() : null;
+                  if (!response || !response.ok() || page.url()!==source) throw new Error('navigation_not_exact_or_http_failure');
+                  await page.waitForFunction(() => document.querySelectorAll('#fight_card_component .matchupRow').length>0,null,{timeout:20000});
+                  const snapshot=await page.evaluate(() => {
+                    const components=document.querySelectorAll('#fight_card_component');
+                    return {component_count:components.length,component:components.length===1 ? components[0].outerHTML : '',jsonld:[...document.querySelectorAll('script[type="application/ld+json"]')].map(n=>n.textContent)};
+                  });
+                  if(snapshot.component_count!==1 || Buffer.byteLength(snapshot.component)>5000000 || JSON.stringify(snapshot.jsonld).length>2000000) throw new Error('missing_ambiguous_or_oversized_evidence');
+                  const documents=snapshot.jsonld.map(raw => {try{return JSON.parse(raw);}catch{return null;}});
+                  const sports=[];
+                  function walk(value){if(Array.isArray(value)) value.forEach(walk); else if(value && typeof value==='object'){if(value['@type']==='SportsEvent' || (Array.isArray(value['@type']) && value['@type'].includes('SportsEvent'))) sports.push(value); if(value['@graph']) walk(value['@graph']);}}
+                  documents.forEach(walk);
+                  event.jsonld_parse_errors=documents.filter(d=>d===null).length;
+                  event.sports_events=sports.map(e=>({url:e.url,id:e['@id'],name:e.name,startDate:e.startDate,endDate:e.endDate}));
+                  event.exact_url_matches=event.sports_events.filter(e=>e.url===source).length;
+                  const clean=snapshot.component.replace(/(['"]X-CSRF-TOKEN['"]\s*:\s*['"])[^'"]*/gi,'$1[redacted]');
+                  event.component_sha256=createHash('sha256').update(clean).digest('hex');
+                  fs.writeFileSync(`${directory}/event-${index}.html`,clean);
+                  fs.writeFileSync(`${directory}/event-${index}-jsonld.json`,JSON.stringify(event.sports_events,null,2));
+                  const extraction=spawnSync('python3',['-c','import sys,json; from collector.pfl_card_structure import extract_pairs; json.dump(extract_pairs(sys.stdin.read(),sys.argv[1]),sys.stdout)',source],{input:clean,encoding:'utf8',timeout:30000,maxBuffer:2000000});
+                  if(extraction.error || extraction.status!==0) throw new Error('structural_extractor_failed');
+                  event.structural_extraction=JSON.parse(extraction.stdout);
+                  event.reason=event.exact_url_matches===1 ? 'identity_evidence_collected_dates_names_sections_not_validated' : 'missing_or_ambiguous_exact_event_url';
+                } catch(error) { event.reason=String(error.message || 'capture_failed').slice(0,200); }
+                finally {await context.close(); report.events.push(event);}
+              }
+            } finally {
+              await browser.close();
+              fs.writeFileSync(`${directory}/report.json`,JSON.stringify(report,null,2));
+            }
+          })().catch(()=>process.exitCode=1);
+          JS
+      - name: Valider URL et dates des preuves capturees
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          from collector.pfl_identity_evidence import validate_identity
+          path = Path('reports/pfl-identity-evidence/report.json')
+          if not path.exists():
+              raise SystemExit('missing_evidence_report')
+          report = json.loads(path.read_text())
+          for event in report.get('events', []):
+              if event.get('jsonld_parse_errors') != 0:
+                  checked = {'status': 'review_required', 'reason': 'missing_or_invalid_jsonld_capture'}
+              elif event.get('structural_extraction', {}).get('status') != 'candidate_pairs':
+                  checked = {'status': 'review_required', 'reason': 'capture_or_structure_not_ready'}
+              else:
+                  checked = validate_identity(event.get('sports_events'), event.get('source_url'))
+              event['identity_checks'] = checked
+              event['status'] = 'review_required'
+          report['status'] = 'review_required'
+          report['automatic_publication'] = False
+          report['database_writes'] = False
+          path.write_text(json.dumps(report, indent=2))
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write('## Preuves PFL — revue requise\n```json\n' + json.dumps(report, indent=2) + '\n```\n')
+          PY
+      - name: Restituer dans la PR 4
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs=require('fs');
+            const pr=(await github.rest.pulls.get({...context.repo,pull_number:4})).data;
+            if(pr.state!=='open' || pr.head.ref!=='fix/pfl-source-validation' || pr.head.sha!==context.sha || pr.head.repo.full_name!==`${context.repo.owner}/${context.repo.repo}`) return;
+            const path='reports/pfl-identity-evidence/report.json';
+            const value=fs.existsSync(path) ? JSON.parse(fs.readFileSync(path,'utf8')) : {status:'review_required',reason:'missing_report'};
+            const text=JSON.stringify(value,null,2).replace(/`/g,'\\u0060').replace(/@/g,'\\u0040');
+            await github.rest.issues.createComment({...context.repo,issue_number:4,body:'## Preuves PFL — non validees\nCommit : '+context.sha+'\nDonnees externes non fiables. Aucun acces Supabase.\n```json\n'+text.slice(0,48000)+'\n```\n'+(text.length>48000 ? 'Rapport tronque : voir artefact.' : '')});
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pfl-identity-evidence
+          path: reports/pfl-identity-evidence/
+          retention-days: 7

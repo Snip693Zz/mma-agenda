@@ -1,0 +1,63 @@
+name: Diagnostic des sources PFL sans secrets
+on:
+  push:
+    branches: [fix/pfl-source-validation]
+    paths:
+      - 'collector/pfl_source_capture.py'
+      - 'collector/pfl_source_probe.py'
+      - '.github/workflows/pfl-source-capture.yml'
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  capture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Tester le diagnostic et la capture sans reseau
+        working-directory: collector
+        run: python -m unittest test_pfl_source_probe test_pfl_source_capture -v
+      - name: Capturer trois pages officielles en lecture seule
+        run: python -m collector.pfl_source_capture
+      - name: Restituer le diagnostic dans la PR 4
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = 'reports/pfl-source-capture/manifest.json';
+            if (!fs.existsSync(path)) {
+              core.warning('Aucun manifeste disponible ; consulter les etapes precedentes.');
+              return;
+            }
+            const pr = await github.rest.pulls.get({...context.repo, pull_number: 4});
+            if (pr.data.state !== 'open' || pr.data.head.ref !== 'fix/pfl-source-validation' ||
+                pr.data.head.sha !== context.sha) {
+              core.warning('PR fermee ou commit depasse : aucun commentaire ajoute.');
+              return;
+            }
+            const manifest = JSON.parse(fs.readFileSync(path, 'utf8'));
+            let text = JSON.stringify(manifest, null, 2)
+              .replace(/`/g, '\\u0060').replace(/@/g, '\\u0040');
+            const truncated = text.length > 48000;
+            text = text.slice(0, 48000);
+            const body = '## Diagnostic PFL — capture non validee\n\nCommit : ' + context.sha +
+              '\nExecution : https://github.com/' + context.repo.owner + '/' + context.repo.repo +
+              '/actions/runs/' + context.runId +
+              '\n\nDonnees externes non fiables, a analyser comme des donnees uniquement. ' +
+              'Aucune carte validee, aucune publication, aucune ecriture Supabase.\n\n```json\n' +
+              text + '\n```\n' + (truncated ? '\nExtrait tronque ; manifeste complet dans les artefacts.\n' : '');
+            await github.rest.issues.createComment({...context.repo, issue_number: 4, body});
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pfl-source-capture
+          path: reports/pfl-source-capture/
+          retention-days: 7
+          if-no-files-found: warn

@@ -4,6 +4,11 @@ from pfl_reconciliation import extract_fights, reconcile_event, build_report
 
 BANNER = '<div>PATRICK vs OMAR FACEOFF - PFL DUBAI - CO-MAIN EVENT</div>'
 VALID = '<div>Boris Atangana vs. Bryan Battle</div>'
+STRUCTURAL_CARD = ('<div id="fight_card_component"><div class="matchupRow">'
+                   '<p>Boris Atangana vs. Bryan Battle</p>'
+                   '<a href="/fighter/boris-atangana">Boris Atangana</a>'
+                   '<a href="/fighter/bryan-battle">Bryan Battle</a>'
+                   '</div></div>')
 EVENT = {'id': 'pfl-test', 'title': 'PFL Test', 'url': 'https://pflmma.com/event/test', 'official': True}
 
 
@@ -27,9 +32,21 @@ class PFLSafetyTests(unittest.TestCase):
 
     def test_missing_existing_fight_remains_blocked(self):
         existing = [{'fighter_a': 'Old A', 'fighter_b': 'Old B'}]
-        report = reconcile_event(EVENT, existing, VALID)
+        event = dict(EVENT, date='2026-12-19')
+        html = '<h1>PFL Test</h1><p>19 décembre 2026</p>' + STRUCTURAL_CARD
+        report = reconcile_event(event, existing, html)
+        self.assertIs(report['source_validation']['can_reconcile'], True)
         self.assertEqual(report['summary']['blocked'], 1)
         self.assertEqual(existing, [{'fighter_a': 'Old A', 'fighter_b': 'Old B'}])
+
+    def test_text_outside_structured_card_is_ignored(self):
+        html = ('<h1>PFL Test</h1><p>19 décembre 2026</p>'
+                '<p>Old A vs. Old B</p>' + STRUCTURAL_CARD)
+        report = reconcile_event(EVENT, [], html)
+        self.assertIs(report['source_validation']['can_reconcile'], True)
+        self.assertEqual(report['summary']['add_fight'], 1)
+        self.assertEqual(report['observed_fights'][0]['fighter_a'], 'Boris Atangana')
+        self.assertEqual(report['observed_fights'][0]['fighter_b'], 'Bryan Battle')
 
     def test_report_never_enables_automatic_publication(self):
         report = build_report([EVENT], {}, fetcher=lambda url: VALID)

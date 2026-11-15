@@ -1,0 +1,79 @@
+name: Revue des captures PFL sans publication
+on:
+  push:
+    branches: [fix/pfl-source-validation]
+    paths: ['.github/workflows/pfl-capture-review.yml', 'collector/pfl_event_identity.py']
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  review:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Tests locaux du module actuel
+        run: python -m unittest discover -s collector -p test_pfl_event_identity.py
+      - name: Installer le navigateur
+        run: |
+          npm install --no-save --package-lock=false @playwright/test@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Capturer les composants complets avec les restrictions existantes
+        run: node collector/pfl_browser_probe.cjs
+      - name: Examiner les captures avec le module actuel
+        if: always()
+        env:
+          REVIEW_SHA: ${{ github.sha }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          from collections import Counter
+          from collector.pfl_event_identity import extract_event
+          root = Path('reports/pfl-browser-probe')
+          root.mkdir(parents=True, exist_ok=True)
+          reports = []
+          for index, url in enumerate(['https://pflmma.com/event/pfl-lyon', 'https://pflmma.com/event/2026-chicago2']):
+              source = root / f'event-{index}.json'
+              capture = json.loads(source.read_text()) if source.exists() else {}
+              html = root / f'event-{index}.html'
+              result = extract_event(html.read_text(), url) if html.exists() else {'status': 'review_required', 'reason': 'missing_capture', 'pairs': []}
+              pairs = result.get('pairs', [])
+              keys = [tuple(sorted((p['fighter_a_url'], p['fighter_b_url']))) for p in pairs]
+              reports.append({'source_url': url, 'capture_status': capture.get('status', 'missing'), 'dom_row_count': capture.get('dom_row_count'), 'structural_extraction': capture.get('structured_extraction'), 'identity_module_result': result, 'identity_pair_count': len(pairs), 'duplicate_pairs': len(keys)-len(set(keys)), 'sections': dict(Counter(p.get('section', 'unassigned') for p in pairs)), 'limitation': 'Component only: page JSON-LD is not archived by the probe. Missing identity is review_required, never an empty validated card.'})
+          report = {'commit': os.environ['REVIEW_SHA'], 'status': 'review_required', 'automatic_publication': False, 'database_writes': False, 'events': reports}
+          (root / 'capture-review.json').write_text(json.dumps(report, indent=2))
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write('## Revue PFL — non validée\n\n```json\n' + json.dumps(report, indent=2) + '\n```\n')
+          PY
+      - name: Publier le rapport dans la PR 4
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const pr = (await github.rest.pulls.get({...context.repo, pull_number: 4})).data;
+            if (pr.state !== 'open' || pr.head.repo.full_name !== `${context.repo.owner}/${context.repo.repo}` || pr.head.ref !== 'fix/pfl-source-validation' || pr.head.sha !== context.sha) {
+              core.warning('Commit dépassé ou PR incompatible : aucun commentaire.');
+              return;
+            }
+            const path = 'reports/pfl-browser-probe/capture-review.json';
+            let text = fs.existsSync(path) ? JSON.stringify(JSON.parse(fs.readFileSync(path, 'utf8')), null, 2) : JSON.stringify({status: 'review_required', reason: 'missing_review_report'});
+            text = text.replace(/`/g, '\\u0060').replace(/@/g, '\\u0040');
+            const truncated = text.length > 48000;
+            const body = '## Revue des captures PFL — non validée\n\nCommit : ' + context.sha + '\nExécution : https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/actions/runs/' + context.runId + '\n\nDonnées externes non fiables. Aucune publication de données MMA, aucun accès Supabase.\n\n```json\n' + text.slice(0, 48000) + '\n```\n' + (truncated ? 'Rapport tronqué ; version complète dans les artefacts.' : '');
+            await github.rest.issues.createComment({...context.repo, issue_number: 4, body});
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pfl-capture-review
+          path: reports/pfl-browser-probe/
+          retention-days: 7
