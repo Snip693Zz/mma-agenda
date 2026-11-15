@@ -23,6 +23,11 @@ except ImportError:
     from source_validation import assess_source
 
 try:
+    from .pfl_primary_identity import primary_identity_matches
+except ImportError:
+    from pfl_primary_identity import primary_identity_matches
+
+try:
     from .update_reconciliation import compare_event, summarize
 except ImportError:
     from update_reconciliation import compare_event, summarize
@@ -79,13 +84,7 @@ def extract_event_date(html: str) -> str | None:
 
 
 def extract_event_identity(html: str, event: dict) -> bool:
-    if not isinstance(html, str):
-        return False
-    title = str(event.get('title') or '').strip()
-    if len(title) < 3:
-        return False
-    normalized_page = re.sub(r'\s+', ' ', TAG_RE.sub(' ', html)).casefold()
-    return title.casefold() in normalized_page
+    return primary_identity_matches(html, event)
 
 
 def has_structured_card(html: str) -> bool:
