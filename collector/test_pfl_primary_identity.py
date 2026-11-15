@@ -5,6 +5,11 @@ from pfl_reconciliation import extract_event_date, extract_event_identity, recon
 
 EVENT = dict(id='test', title='PFL Lyon', date='2026-12-19', url='https://pflmma.com/event/test', official=True)
 TAIL = '<p>Fight Card</p><p>19 décembre 2026</p><div>Alpha Test vs. Beta Test</div>'
+STRUCTURAL_CARD = ('<div id="fight_card_component"><div class="matchupRow">'
+                   '<p>Alpha Test vs. Beta Test</p>'
+                   '<a href="/fighter/alpha-test">Alpha Test</a>'
+                   '<a href="/fighter/beta-test">Beta Test</a>'
+                   '</div></div>')
 
 
 class PrimaryIdentityTests(unittest.TestCase):
@@ -40,11 +45,14 @@ class PrimaryIdentityTests(unittest.TestCase):
     def test_matching_date_in_distinct_primary_block_is_accepted(self):
         html = ('<main><h1>PFL Lyon</h1>'
                 '<section><p>19 décembre 2026</p></section>'
-                '<section><p>Fight Card</p>'
-                '<p>Alpha Test vs. Beta Test</p></section></main>')
+                '<section>' + STRUCTURAL_CARD + '</section></main>')
         self.assertTrue(extract_event_identity(html, EVENT))
         self.assertEqual(extract_event_date(html), '2026-12-19')
         report = reconcile_event(EVENT, [], html)
         self.assertEqual(report['source_validation']['status'], 'parsed_candidate')
         self.assertTrue(report['source_validation']['can_reconcile'])
         self.assertEqual(len(report['proposals']), 1)
+
+
+if __name__ == '__main__':
+    unittest.main()

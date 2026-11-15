@@ -74,9 +74,10 @@ def test_promotional_card_without_structure_blocks_all_proposals():
     assert report['proposals'] == []
 
 
-def test_zero_fights_blocks_all_proposals():
-    report = reconcile_event(EVENT, [], HTML.replace('Boris Atangana vs. Bryan Battle', '').replace('Denis Goltsov vs. Test Opponent', ''))
-    assert report['source_validation']['reason'] == 'no_exploitable_fights'
+def test_zero_structured_fights_blocks_all_proposals():
+    html = HTML.replace('<a href="/fighter/boris-atangana">Boris Atangana</a>', '').replace('<a href="/fighter/bryan-battle">Bryan Battle</a>', '')
+    report = reconcile_event(EVENT, [], html)
+    assert report['source_validation']['reason'] == 'card_structure_unverified'
     assert report['proposals'] == []
 
 

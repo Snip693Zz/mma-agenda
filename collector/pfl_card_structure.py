@@ -8,7 +8,7 @@ VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'met
 
 class Node:
     def __init__(self, tag='', attrs=()):
-        self.tag, self.attrs, self.children, self.closed = tag, dict(attrs), [], False
+        self.tag, self.attrs, self.children, self.closed, self.text = tag, dict(attrs), [], False, ''
 
     def walk(self):
         yield self
@@ -42,6 +42,9 @@ class Tree(HTMLParser):
             self.stack.pop().closed = True
         elif tag not in VOID:
             self.malformed = True
+
+    def handle_data(self, data):
+        self.stack[-1].text += data
 
 
 def extract_pairs(html, source_url):
@@ -114,3 +117,49 @@ def extract_pairs(html, source_url):
         pairs.append({'fighter_a_url': fighters[0], 'fighter_b_url': fighters[1]})
     result.update(status='candidate_pairs', reason='identity_names_and_card_sections_not_validated', pairs=pairs)
     return result
+
+
+def extract_structured_fights(html, source_url):
+    """Retourne uniquement les combats issus d'une carte structurellement valide."""
+    try:
+        validation = extract_pairs(html, source_url)
+    except (TypeError, ValueError):
+        return []
+    if validation.get('status') != 'candidate_pairs' or not validation.get('pairs'):
+        return []
+    tree = Tree(html)
+    components = [n for n in tree.root.walk() if n.attrs.get('id') == 'fight_card_component']
+    if len(components) != 1:
+        return []
+    fights, seen = [], set()
+    for row in [n for n in components[0].walk() if 'matchupRow' in (n.attrs.get('class') or '').split()]:
+        fighters = {}
+        for node in row.walk():
+            if node.tag != 'a':
+                continue
+            url = urlsplit(urljoin(source_url, node.attrs.get('href') or ''))
+            if not re.fullmatch(r'/fighter/[a-zA-Z0-9-]+/?', url.path):
+                continue
+            if (url.scheme != 'https' or url.netloc not in ('pflmma.com', 'www.pflmma.com')
+                    or url.query or url.fragment):
+                return []
+            canonical = 'https://pflmma.com' + url.path.rstrip('/')
+            name = re.sub(r'\s+', ' ', (node.text or '')).strip()
+            if canonical not in fighters and name:
+                fighters[canonical] = name
+        if len(fighters) != 2:
+            return []
+        fighter_a_url, fighter_b_url = list(fighters)
+        key = tuple(sorted((fighter_a_url, fighter_b_url)))
+        if key in seen:
+            continue
+        seen.add(key)
+        fights.append({
+            'fighter_a': fighters[fighter_a_url],
+            'fighter_b': fighters[fighter_b_url],
+            'fighter_a_url': fighter_a_url,
+            'fighter_b_url': fighter_b_url,
+            'card_position': 0,
+            'position': len(fights),
+        })
+    return fights

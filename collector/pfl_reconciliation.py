@@ -23,9 +23,9 @@ except ImportError:
     from source_validation import assess_source
 
 try:
-    from .pfl_card_structure import extract_pairs
+    from .pfl_card_structure import extract_structured_fights
 except ImportError:
-    from pfl_card_structure import extract_pairs
+    from pfl_card_structure import extract_structured_fights
 
 try:
     from .pfl_primary_identity import primary_identity_matches
@@ -50,7 +50,7 @@ def clean_text(value: str) -> str:
 
 
 def extract_fights(html: str) -> list[dict]:
-    """Extrait les paires affichées avec « vs » ; extraction prudente, à valider."""
+    """Extraction textuelle conservée pour les diagnostics ; non utilisée pour valider une carte."""
     if not isinstance(html, str):
         return []
     fights = []
@@ -99,7 +99,6 @@ def extract_event_date(html: str) -> str | None:
     if sum(n.tag == 'h1' for n in nodes) != 1:
         return None
     dates = set()
-    # Match each text node separately: never assemble a date across unrelated nodes.
     for node in nodes:
         for day, month, year in DATE_RE.findall(getattr(node, 'text', '')):
             try:
@@ -113,42 +112,15 @@ def extract_event_identity(html: str, event: dict) -> bool:
     return primary_identity_matches(html, event)
 
 
-def has_structured_card(html: str, source_url: str) -> bool:
-    """Une carte n'est structurellement vérifiée que si l'extracteur PFL
-    identifie au moins une paire candidate dans un composant de carte valide."""
-    if not isinstance(html, str) or not isinstance(source_url, str):
-        return False
-    try:
-        result = extract_pairs(html, source_url)
-    except (TypeError, ValueError):
-        return False
-    return result.get('status') == 'candidate_pairs' and bool(result.get('pairs'))
-
-
-def fetch_page(url: str, timeout: int = 20) -> str:
-    parsed = urlsplit(url)
-    if parsed.scheme != 'https' or parsed.hostname not in PFL_HOSTS or parsed.username or parsed.password:
-        raise ValueError('URL PFL non autorisée')
-    request = Request(url, headers={'User-Agent': 'mma-agenda-pfl-reconciliation/1.0'})
-    try:
-        with urlopen(request, timeout=timeout) as response:
-            if response.status != 200:
-                raise ValueError(f'Réponse PFL invalide : {response.status}')
-            return response.read().decode('utf-8', errors='replace')
-    except HTTPError as error:
-        if error.code == 404:
-            raise ValueError('Fiche PFL introuvable (404)') from error
-        raise
-
-
 def reconcile_event(event: dict, existing_fights: list[dict], html: str) -> dict:
-    observed = extract_fights(html)
+    source_url = str(event.get('url') or '')
+    observed = extract_structured_fights(html, source_url)
     source_kind = 'official' if event.get('official') else 'secondary'
     validation = assess_source(
         str(event.get('date') or ''),
         extract_event_date(html) or '',
         identity_verified=extract_event_identity(html, event),
-        structured_card=has_structured_card(html, str(event.get('url') or '')),
+        structured_card=bool(observed),
         fight_count=len(observed),
     )
     payload_event = dict(event)
