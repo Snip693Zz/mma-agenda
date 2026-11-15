@@ -24,7 +24,7 @@ _SECTION_LABELS = {
 
 
 class _StructureParser(HTMLParser):
-    """Parser minimal qui conserve le texte et détecte les balises non fermées."""
+    """Parser minimal qui conserve le texte, les sections et les balises non fermées."""
 
     VOID_TAGS = {
         "area", "base", "br", "col", "embed", "hr", "img", "input",
@@ -38,26 +38,32 @@ class _StructureParser(HTMLParser):
         self.sections: List[str] = []
         self.current_section: Optional[str] = None
         self.jsonld: List[Dict[str, Any]] = []
+        self.anchor_sequence: List[Dict[str, Any]] = []
         self._in_jsonld = False
         self._jsonld_buffer: List[str] = []
         self._in_heading = False
         self._heading_tag = ""
         self._heading_buffer: List[str] = []
+        self._in_anchor = False
+        self._anchor_href = ""
+        self._anchor_buffer: List[str] = []
 
     def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
         if tag in self.VOID_TAGS:
             return
         self.stack.append(tag)
-        if tag == "script" and any(
-            key == "type" and value == "application/ld+json"
-            for key, value in attrs
-        ):
+        attributes = dict(attrs)
+        if tag == "script" and attributes.get("type") == "application/ld+json":
             self._in_jsonld = True
             self._jsonld_buffer = []
         elif tag in {"h2", "h3", "h4"}:
             self._in_heading = True
             self._heading_tag = tag
             self._heading_buffer = []
+        elif tag == "a":
+            self._in_anchor = True
+            self._anchor_href = attributes.get("href") or ""
+            self._anchor_buffer = []
 
     def handle_endtag(self, tag: str) -> None:
         if tag in self.VOID_TAGS:
@@ -72,12 +78,21 @@ class _StructureParser(HTMLParser):
         elif self._in_heading and tag == self._heading_tag:
             self._in_heading = False
             self._handle_heading("".join(self._heading_buffer))
+        elif self._in_anchor and tag == "a":
+            self._in_anchor = False
+            self.anchor_sequence.append({
+                "href": self._anchor_href,
+                "text": "".join(self._anchor_buffer),
+                "section": self.current_section,
+            })
 
     def handle_data(self, data: str) -> None:
         if self._in_jsonld:
             self._jsonld_buffer.append(data)
         elif self._in_heading:
             self._heading_buffer.append(data)
+        elif self._in_anchor:
+            self._anchor_buffer.append(data)
 
     def _handle_jsonld(self, raw: str) -> None:
         try:
@@ -163,8 +178,7 @@ def extract_event(html: str, event_url: str = EVENT_URL) -> Dict[str, Any]:
             "pairs": [],
         }
 
-    anchors = _collect_fighter_anchors(html)
-    pairs = _build_pairs(anchors, parser.current_section)
+    pairs = _build_pairs(parser.anchor_sequence)
 
     if not pairs:
         return {
@@ -181,32 +195,24 @@ def extract_event(html: str, event_url: str = EVENT_URL) -> Dict[str, Any]:
     }
 
 
-def _collect_fighter_anchors(html: str) -> List[Dict[str, Any]]:
-    anchors: List[Dict[str, Any]] = []
-    pattern = re.compile(r'<a\s+[^>]*href="([^"]+)"[^>]*>(.*?)</a>', re.I | re.S)
-    for match in pattern.finditer(html):
-        href = match.group(1)
-        text = re.sub(r"<[^>]+>", "", match.group(2))
-        text = re.sub(r"\s+", " ", text).strip()
-        anchors.append({"href": href, "text": text})
-    return anchors
-
-
-def _build_pairs(anchors: Iterable[Dict[str, Any]], section: Optional[str]) -> List[Dict[str, Any]]:
-    urls = []
+def _build_pairs(anchors: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    fighter_anchors = []
     for anchor in anchors:
         url = _fighter_url(anchor)
         if url:
-            urls.append(url)
+            fighter_anchors.append({"url": url, "section": anchor.get("section")})
 
-    if len(urls) < 2 or len(urls) % 2 != 0:
+    if len(fighter_anchors) < 2 or len(fighter_anchors) % 2 != 0:
         return []
 
     pairs = []
-    for index in range(0, len(urls), 2):
+    for index in range(0, len(fighter_anchors), 2):
+        first = fighter_anchors[index]
+        second = fighter_anchors[index + 1]
+        section = first.get("section") or second.get("section") or "unassigned"
         pairs.append({
-            "fighter_a_url": urls[index],
-            "fighter_b_url": urls[index + 1],
-            "section": section or "unassigned",
+            "fighter_a_url": first["url"],
+            "fighter_b_url": second["url"],
+            "section": section,
         })
     return pairs
