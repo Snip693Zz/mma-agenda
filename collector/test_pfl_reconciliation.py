@@ -73,3 +73,46 @@ def test_missing_fight_is_blocked():
     existing = [{'fighter_a': 'Old A', 'fighter_b': 'Old B'}]
     report = reconcile_event(EVENT, existing, HTML)
     assert report['summary']['blocked'] == 1
+
+
+def test_date_in_event_heading_context_is_accepted():
+    html = """
+    <html><body>
+    <main>
+      <section>
+        <h1>PFL Lyon</h1>
+        <p>19 décembre 2026</p>
+      </section>
+      <section>
+        <p>Fight Card</p>
+        <div>Boris Atangana vs. Bryan Battle</div>
+      </section>
+    </main>
+    </body></html>
+    """
+    report = reconcile_event(EVENT, [], html)
+    assert report['source_validation']['status'] == 'parsed_candidate'
+    assert report['source_validation']['can_reconcile'] is True
+    assert report['summary']['add_fight'] == 1
+
+
+def test_date_without_event_context_blocks_proposals():
+    html = """
+    <html><body>
+    <main>
+      <section>
+        <h1>PFL Lyon</h1>
+      </section>
+      <section>
+        <p>Fight Card</p>
+        <div>Boris Atangana vs. Bryan Battle</div>
+      </section>
+      <aside>
+        <p>19 décembre 2026</p>
+      </aside>
+    </main>
+    </body></html>
+    """
+    report = reconcile_event(EVENT, [], html)
+    assert report['source_validation']['reason'] == 'missing_or_invalid_date'
+    assert report['proposals'] == []
