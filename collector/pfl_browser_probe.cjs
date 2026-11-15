@@ -1,5 +1,7 @@
 const fs = require('node:fs/promises');
 const assert = require('node:assert/strict');
+const {createHash} = require('node:crypto');
+const {spawnSync} = require('node:child_process');
 const urls = ['https://pflmma.com/event/pfl-lyon', 'https://pflmma.com/event/2026-chicago2'];
 const hosts = new Set(['pflmma.com', 'www.pflmma.com', 'cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'code.jquery.com', 'unpkg.com']);
 function allowed(value, method, body, tag) {
@@ -36,8 +38,14 @@ function safeUrl(value) {
   u.hash = '';
   return u.toString();
 }
+function python(args, input) {
+  const result = spawnSync('python3', args, {input, encoding: 'utf8', timeout: 30000, maxBuffer: 2000000});
+  if (result.error || result.status !== 0) throw new Error('Python diagnostic: ' + redact(String(result.error || result.stderr)).slice(0, 1000));
+  return result.stdout;
+}
 async function main() {
   selfTest();
+  python(['-m', 'unittest', 'discover', '-s', 'collector', '-p', 'test_pfl_card_structure.py']);
   const {chromium} = require('@playwright/test');
   const directory = 'reports/pfl-browser-probe';
   await fs.mkdir(directory, {recursive: true});
@@ -49,7 +57,8 @@ async function main() {
       const context = await browser.newContext({serviceWorkers: 'block', acceptDownloads: false});
       const page = await context.newPage();
       const report = {source_url: urls[index], collected_at: new Date().toISOString(),
-        status: 'unvalidated', database_writes: false, automatic_publication: false,
+        status: 'unvalidated', structured_extraction: null,
+        database_writes: false, automatic_publication: false,
         network: [], blocked: [], errors: []};
       await context.route('**/*', async route => {
         const request = route.request();
@@ -76,26 +85,38 @@ async function main() {
         report.http_status = response ? response.status() : null;
         if (!response || !response.ok()) throw new Error('Navigation HTTP non reussie');
         try {
-          await page.waitForFunction(() => {
-            const element = document.querySelector('#fight_card_component');
-            return element && element.textContent.trim().length > 50;
-          }, null, {timeout: 20000});
+          await page.waitForFunction(() => document.querySelectorAll('#fight_card_component .matchupRow a[href*="/fighter/"]').length >= 2,
+            null, {timeout: 20000});
         } catch {report.component_wait = 'timeout_or_empty';}
-        report.dom = await page.evaluate(() => {
-          const component = document.querySelector('#fight_card_component');
-          return {component_found: !!component,
-            component_html: component ? component.outerHTML.slice(0, 14000) : null,
-            component_text: component ? component.textContent.trim().slice(0, 7000) : null,
-            related_scripts: [...document.scripts].filter(s => !s.src && /fight_card_component|fightCard|axios|fetch\(/i.test(s.textContent))
-              .slice(0, 3).map(s => s.textContent.slice(0, 5000))};
+        const snapshot = await page.evaluate(() => {
+          const components = document.querySelectorAll('#fight_card_component');
+          const component = components[0];
+          return {component_count: components.length,
+            html: component ? component.outerHTML : '',
+            row_count: component ? component.querySelectorAll('.matchupRow').length : 0};
         });
-        report.status = report.dom.component_text ? 'rendered_unvalidated' : 'empty_or_unavailable';
+        if (snapshot.component_count !== 1) throw new Error('Composant absent ou ambigu');
+        const html = redact(snapshot.html);
+        if (Buffer.byteLength(html) > 5000000) throw new Error('Composant trop volumineux');
+        const filename = `event-${index}.html`;
+        await fs.writeFile(`${directory}/${filename}`, html);
+        report.component_source_file = filename;
+        report.component_bytes = Buffer.byteLength(html);
+        report.component_sha256 = createHash('sha256').update(html).digest('hex');
+        report.dom_row_count = snapshot.row_count;
+        report.structured_extraction = JSON.parse(python(['-c',
+          'import sys,json; from collector.pfl_card_structure import extract_pairs; json.dump(extract_pairs(sys.stdin.read(), sys.argv[1]), sys.stdout)',
+          urls[index]], html));
+        const extraction = report.structured_extraction;
+        const accepted = extraction.status === 'candidate_pairs' && extraction.pairs.length > 0 && extraction.row_count === snapshot.row_count;
+        report.status = accepted ? 'extracted_unvalidated' : 'extraction_review_required';
+        if (!accepted) failures++;
       } catch (error) {
         failures++;
-        report.status = 'navigation_failed';
-        report.errors.push(redact(String(error)).slice(0, 500));
+        report.status = 'diagnostic_failed';
+        report.errors.push(redact(String(error)).slice(0, 1000));
       } finally {
-        report.warning = 'Diagnostic seulement. Seul POST autorise : chargement de la carte PFL pour cet evenement avec deux parametres controles. Une carte vide reste non validee.';
+        report.warning = 'Paires candidates uniquement : identite, noms et sections non valides. Aucun acces Supabase. Composant complet archive apres masquage CSRF.';
         await context.close();
         await fs.writeFile(`${directory}/event-${index}.json`, JSON.stringify(report,
           (key, value) => typeof value === 'string' ? redact(value) : value, 2));
