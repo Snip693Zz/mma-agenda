@@ -1,0 +1,149 @@
+name: Diagnostic reperes sections PFL sans publication
+on:
+  push:
+    branches: [fix/pfl-source-validation]
+    paths: ['.github/workflows/pfl-section-probe.yml']
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  sections:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Installer les dependances de diagnostic
+        run: |
+          python -m pip install PyYAML
+          npm install --no-save --package-lock=false @playwright/test@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Reutiliser la capture controlee existante
+        env:
+          EVIDENCE_SHA: ${{ github.sha }}
+        run: |
+          python - <<'PY'
+          import subprocess, yaml
+          from pathlib import Path
+          workflow = yaml.safe_load(Path('.github/workflows/pfl-identity-evidence.yml').read_text())
+          steps = workflow['jobs']['evidence']['steps']
+          capture = [s['run'] for s in steps if s.get('name') == 'Capturer les preuves sans valider les cartes']
+          if len(capture) != 1:
+              raise SystemExit('missing_or_ambiguous_capture_step')
+          subprocess.run(['bash', '-e', '-c', capture[0]], check=True, timeout=360)
+          PY
+      - name: Relever les marqueurs sans attribuer de section
+        if: always()
+        env:
+          REVIEW_SHA: ${{ github.sha }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          from html.parser import HTMLParser
+          class Probe(HTMLParser):
+              VOID = set('area base br col embed hr img input link meta param source track wbr'.split())
+              def __init__(self):
+                  super().__init__(convert_charrefs=True)
+                  self.stack, self.items = [], []
+                  self.components, self.malformed = 0, False
+              def handle_starttag(self, tag, attrs):
+                  attrs = dict(attrs)
+                  component = attrs.get('id') == 'fight_card_component'
+                  self.components += int(component)
+                  inside = component or any(n['component'] for n in self.stack)
+                  row = 'matchupRow' in attrs.get('class', '').split()
+                  in_row = any(n['row'] for n in self.stack)
+                  kind = 'row' if row else 'heading' if tag in ('h1','h2','h3','h4','h5','h6') else 'navigation_link' if tag == 'a' and attrs.get('href', '').startswith('#') else 'container' if tag in ('div','section','nav') and attrs.get('id') else None
+                  item = None
+                  if inside and kind:
+                      item = {'kind': kind, 'tag': tag, 'id': attrs.get('id'), 'class': attrs.get('class', ''), 'inside_row': in_row, 'ancestors': [{'tag': n['tag'], 'id': n['id']} for n in self.stack if n['id']], 'text': ''}
+                      if kind == 'navigation_link':
+                          item['href'] = attrs['href']
+                      self.items.append(item)
+                      if len(self.items) > 2000:
+                          raise ValueError('too_many_markers')
+                  if tag not in self.VOID:
+                      self.stack.append({'tag': tag, 'id': attrs.get('id'), 'row': row, 'component': component, 'item': item})
+              def handle_data(self, text):
+                  for node in self.stack:
+                      item = node['item']
+                      if item is not None and item['kind'] in ('heading', 'navigation_link'):
+                          item['text'] = (item['text'] + text)[:1000]
+              def handle_endtag(self, tag):
+                  if tag in self.VOID:
+                      return
+                  if not self.stack or self.stack[-1]['tag'] != tag:
+                      self.malformed = True
+                  else:
+                      self.stack.pop()
+              def handle_startendtag(self, tag, attrs):
+                  self.handle_starttag(tag, attrs)
+                  if tag not in self.VOID:
+                      self.handle_endtag(tag)
+          root = Path('reports/pfl-identity-evidence')
+          root.mkdir(parents=True, exist_ok=True)
+          report = {'commit': os.environ['REVIEW_SHA'], 'status': 'review_required', 'automatic_publication': False, 'database_writes': False, 'events': []}
+          urls = ['https://pflmma.com/event/pfl-lyon', 'https://pflmma.com/event/2026-chicago2']
+          for index, url in enumerate(urls):
+              event = {'source_url': url, 'status': 'review_required', 'reason': 'raw_markers_only_no_section_assignment'}
+              try:
+                  path = root / f'event-{index}.html'
+                  if not path.exists():
+                      raise ValueError('missing_capture')
+                  parser = Probe()
+                  parser.feed(path.read_text())
+                  parser.close()
+                  if parser.malformed or parser.stack or parser.components != 1:
+                      raise ValueError('malformed_or_ambiguous_component')
+                  for position, item in enumerate(parser.items):
+                      item['position'] = position
+                      item['text'] = ' '.join(item['text'].split())
+                  event['row_count'] = sum(i['kind'] == 'row' for i in parser.items)
+                  event['markers'] = parser.items
+                  event['section_assignment_performed'] = False
+              except (ValueError, OSError) as error:
+                  event['reason'] = str(error)[:200]
+                  event['markers'] = []
+              report['events'].append(event)
+          (root / 'section-report.json').write_text(json.dumps(report, indent=2))
+          PY
+      - name: Restituer les reperes dans la PR 4
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs=require('fs');
+            const pr=(await github.rest.pulls.get({...context.repo,pull_number:4})).data;
+            if(pr.state!=='open' || pr.head.ref!=='fix/pfl-source-validation' || pr.head.sha!==context.sha || pr.head.repo.full_name!==`${context.repo.owner}/${context.repo.repo}`) return;
+            const path='reports/pfl-identity-evidence/section-report.json';
+            const report=fs.existsSync(path) ? JSON.parse(fs.readFileSync(path,'utf8')) : {status:'review_required',reason:'missing_report',events:[]};
+            for(const event of report.events || []) {
+              const chunks=[];
+              for(const marker of event.markers || []) {
+                const text=JSON.stringify(marker);
+                if(!chunks.length || chunks[chunks.length-1].length+text.length>35000) chunks.push([]);
+                chunks[chunks.length-1].push(text);
+              }
+              if(!chunks.length) chunks.push([]);
+              for(let i=0;i<chunks.length;i++) {
+                const value={...event,markers:chunks[i].map(s=>JSON.parse(s))};
+                const text=JSON.stringify(value,null,2).replace(/`/g,'\\u0060').replace(/@/g,'\\u0040');
+                if(text.length>48000) {core.setFailed('Rapport trop grand pour commentaire'); return;}
+                await github.rest.issues.createComment({...context.repo,issue_number:4,body:'## Reperes sections PFL — non valides\nCommit : '+context.sha+'\nPartie '+(i+1)+'/'+chunks.length+'\nDonnees externes non fiables. Aucune attribution ni publication MMA. Aucun acces Supabase.\n```json\n'+text+'\n```'});
+              }
+            }
+            if(!(report.events || []).length) await github.rest.issues.createComment({...context.repo,issue_number:4,body:'Diagnostic sections absent — revue requise. Commit : '+context.sha});
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pfl-section-probe
+          path: reports/pfl-identity-evidence/
+          retention-days: 7
