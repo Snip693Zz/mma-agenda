@@ -36,3 +36,15 @@ class PrimaryIdentityTests(unittest.TestCase):
                 self.assertEqual(report['source_validation']['reason'], expected_reason)
                 self.assertEqual(report['proposals'], [])
                 self.assertEqual(existing, original)
+
+    def test_matching_date_in_distinct_primary_block_is_accepted(self):
+        html = ('<main><h1>PFL Lyon</h1>'
+                '<section><p>19 décembre 2026</p></section>'
+                '<section><p>Fight Card</p>'
+                '<p>Alpha Test vs. Beta Test</p></section></main>')
+        self.assertTrue(extract_event_identity(html, EVENT))
+        self.assertEqual(extract_event_date(html), '2026-12-19')
+        report = reconcile_event(EVENT, [], html)
+        self.assertEqual(report['source_validation']['status'], 'parsed_candidate')
+        self.assertTrue(report['source_validation']['can_reconcile'])
+        self.assertEqual(len(report['proposals']), 1)
