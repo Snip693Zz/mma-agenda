@@ -82,6 +82,7 @@ def extract_pairs(html, source_url):
             result['reason'] = 'incomplete_row'
             return result
         fighters = []
+        fighter_link_count = 0
         for node in row.walk():
             if node is not row and 'matchupRow' in (node.attrs.get('class') or '').split():
                 result['reason'] = 'nested_rows'
@@ -95,9 +96,13 @@ def extract_pairs(html, source_url):
                     or url.query or url.fragment):
                 result['reason'] = 'invalid_fighter_url'
                 return result
+            fighter_link_count += 1
             canonical = 'https://pflmma.com' + url.path.rstrip('/')
             if canonical not in fighters:
                 fighters.append(canonical)
+        if len(fighters) == 1 and fighter_link_count > 1:
+            result['reason'] = 'duplicate_fighter_in_row'
+            return result
         if len(fighters) != 2:
             result['reason'] = 'ambiguous_fighter_pair'
             return result
