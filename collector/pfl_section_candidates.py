@@ -1,7 +1,10 @@
 """Offline section candidates only; never validates an event or publishes data."""
 import re
 from collections import Counter
-from pfl_card_structure import Tree, extract_pairs
+try:
+    from .pfl_card_structure import Tree, extract_pairs
+except ImportError:
+    from pfl_card_structure import Tree, extract_pairs
 
 
 class TextTree(Tree):
@@ -33,7 +36,7 @@ def diagnose_sections(html, source_url):
         for node in parent.children:
             classes = (node.attrs.get('class') or '').split()
             if 'matchupRow' in classes:
-                result['rows'].append(dict(row_id=node.attrs.get('id'), section=current, evidence=evidence))
+                result['rows'].append(dict(row_index=len(result['rows']), row_id=node.attrs.get('id'), section=current, evidence=evidence))
                 continue
             if re.fullmatch(r'h[1-6]', node.tag):
                 text = ' '.join(heading_text(node).split())
