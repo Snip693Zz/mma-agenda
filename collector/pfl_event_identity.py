@@ -11,8 +11,6 @@ import re
 from html.parser import HTMLParser
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-from pfl_component_extractor import extract_component_pairs
-
 EVENT_URL = "https://pflmma.com/event/pfl-lyon"
 _FIGHTER_URL = re.compile(r"^https://pflmma\.com/fighter/[a-z0-9-]+$")
 _SECTION_LABELS = {
