@@ -576,13 +576,61 @@
       "url": "https://www.ufc.com/event/ufc-fight-night-january-16-2027",
       "date": "2027-01-16",
       "note": "Annonce officielle UFC ; répartition et horaires des cartes à confirmer.",
-      "cards": [],
+      "cards": [
+        {
+          "name": "Combats officiels — répartition à confirmer",
+          "level": "official",
+          "start": null,
+          "fights": [
+            [
+              "Chidi Njokuani",
+              "Ignacio Bahamondes"
+            ],
+            [
+              "Daniel Rodriguez",
+              "Roberto Soldić"
+            ],
+            [
+              "Yair Rodriguez",
+              "Steve Garcia"
+            ]
+          ],
+          "source": "https://www.ufc.com/event/ufc-fight-night-january-16-2027"
+        }
+      ],
       "place": "Lieu à confirmer",
       "title": "UFC Fight Night",
       "boxUrl": null,
       "official": false,
       "verified": "2026-11-14",
       "officialCardUrl": "https://www.ufc.com/event/ufc-fight-night-january-16-2027"
+    },
+    {
+      "id": "ufc-auto-7f32716e02bc",
+      "org": "UFC",
+      "url": "https://www.ufc.com/event/ufc-fight-night-january-23-2027",
+      "date": "2027-01-23",
+      "note": "Annonce officielle UFC ; répartition et horaires des cartes à confirmer.",
+      "cards": [
+        {
+          "name": "Combats officiels — répartition à confirmer",
+          "level": "official",
+          "start": null,
+          "fights": [
+            [
+              "Gabriel Bonfim",
+              "Sean Brady"
+            ]
+          ],
+          "source": "https://www.ufc.com/event/ufc-fight-night-january-23-2027"
+        }
+      ],
+      "place": "Lieu à confirmer",
+      "title": "UFC Fight Night",
+      "boxUrl": null,
+      "official": false,
+      "verified": "2026-11-15",
+      "officialCardUrl": "https://www.ufc.com/event/ufc-fight-night-january-23-2027"
     },
     {
       "id": "ufc-auto-91c8979e4e5a",
@@ -653,6 +701,33 @@
       "official": false,
       "verified": "2026-11-12",
       "officialCardUrl": "https://www.ufc.com/event/ufc-fight-night-february-06-2027"
+    },
+    {
+      "id": "ufc-auto-9d42646b870d",
+      "org": "UFC",
+      "url": "https://www.ufc.com/event/ufc-fight-night-february-13-2027",
+      "date": "2027-02-13",
+      "note": "Annonce officielle UFC ; répartition et horaires des cartes à confirmer.",
+      "cards": [
+        {
+          "name": "Combats officiels — répartition à confirmer",
+          "level": "official",
+          "start": null,
+          "fights": [
+            [
+              "Joe Pyfer",
+              "Bo Nickal"
+            ]
+          ],
+          "source": "https://www.ufc.com/event/ufc-fight-night-february-13-2027"
+        }
+      ],
+      "place": "Lieu à confirmer",
+      "title": "UFC Fight Night",
+      "boxUrl": null,
+      "official": false,
+      "verified": "2026-11-15",
+      "officialCardUrl": "https://www.ufc.com/event/ufc-fight-night-february-13-2027"
     }
   ],
   "fighterRecords": {
