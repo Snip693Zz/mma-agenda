@@ -112,6 +112,19 @@ def extract_event_identity(html: str, event: dict) -> bool:
     return primary_identity_matches(html, event)
 
 
+def fetch_page(url: str) -> str:
+    """Récupère uniquement une fiche PFL officielle en HTTPS."""
+    source = urlsplit(url)
+    if (source.scheme != 'https' or source.netloc not in PFL_HOSTS
+            or source.query or source.fragment or not re.fullmatch(r'/event/[a-zA-Z0-9-]+/?', source.path)):
+        raise ValueError('Fiche PFL officielle requise')
+    request = Request(url, headers={'User-Agent': 'mma-agenda/1.0 (+https://github.com/Snip693Zz/mma-agenda)'})
+    with urlopen(request, timeout=30) as response:
+        if response.status != 200:
+            raise ValueError('Réponse PFL non valide')
+        return response.read().decode('utf-8')
+
+
 def reconcile_event(event: dict, existing_fights: list[dict], html: str) -> dict:
     source_url = str(event.get('url') or '')
     observed = extract_structured_fights(html, source_url)
