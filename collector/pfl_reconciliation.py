@@ -129,9 +129,10 @@ def reconcile_event(event: dict, existing_fights: list[dict], html: str) -> dict
     source_url = str(event.get('url') or '')
     observed = extract_structured_fights(html, source_url)
     source_kind = 'official' if event.get('official') else 'secondary'
+    observed_date = extract_event_date(html) or ''
     validation = assess_source(
-        str(event.get('date') or ''),
-        extract_event_date(html) or '',
+        str(event.get('date') or observed_date),
+        observed_date,
         identity_verified=extract_event_identity(html, event),
         structured_card=bool(observed),
         fight_count=len(observed),
