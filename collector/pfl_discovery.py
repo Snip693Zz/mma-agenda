@@ -17,6 +17,7 @@ from urllib.parse import urljoin, urlsplit, urlunsplit
 
 PFL_HOSTS = {'pflmma.com', 'www.pflmma.com'}
 EVENT_PATH_RE = re.compile(r'/event/[A-Za-z0-9-]+/?$')
+MONTHS = {'JAN': 1, 'FEB': 2, 'MAR': 3, 'APR': 4, 'MAY': 5, 'JUN': 6, 'JUL': 7, 'AUG': 8, 'SEP': 9, 'OCT': 10, 'NOV': 11, 'DEC': 12}
 
 
 def canonical_url(value: str) -> str:
@@ -97,6 +98,19 @@ def _extract_html_metadata(event_html: str, expected: str) -> dict:
             start = raw
         except ValueError:
             date = ''
+    if not date:
+        text = re.sub(r'<[^>]+>', ' ', html)
+        text = re.sub(r'\s+', ' ', text)
+        day_match = re.search(r'\b(?:MON|TUE|WED|THU|FRI|SAT|SUN)\s+([A-Z]{3})\s+(\d{1,2})\b', text, re.IGNORECASE)
+        if day_match:
+            month = MONTHS.get(day_match.group(1).upper())
+            day = int(day_match.group(2))
+            year_match = re.search(r'\b(20\d{2})\b', text[day_match.end():])
+            if month and year_match:
+                try:
+                    date = dt.date(int(year_match.group(1)), month, day).isoformat()
+                except ValueError:
+                    date = ''
     if title and date:
         return {
             'status': 'metadata_found',
