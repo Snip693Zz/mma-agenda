@@ -35,6 +35,8 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Observer les cartes sans interaction
         run: node collector/pfl_browser_probe.cjs
+      - name: Afficher le rapport dans le log
+        run: cat reports/pfl-browser-probe/*.json
       - name: Restituer les rapports dans la PR 4
         if: always()
         uses: actions/github-script@v7
