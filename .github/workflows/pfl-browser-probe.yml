@@ -1,13 +1,22 @@
 name: Diagnostic navigateur PFL sans publication
+
 on:
+  workflow_dispatch:
+    inputs:
+      event_url:
+        description: 'URL de la fiche PFL à sonder'
+        required: true
+        default: 'https://pflmma.com/event/pfl-returns-to-dubai'
   push:
     branches: [fix/pfl-source-validation]
     paths:
       - 'collector/pfl_browser_probe.cjs'
       - '.github/workflows/pfl-browser-probe.yml'
+
 permissions:
   contents: read
   pull-requests: write
+
 jobs:
   pfl-browser-probe:
     runs-on: ubuntu-24.04
