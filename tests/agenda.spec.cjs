@@ -10,6 +10,17 @@ const embeddedCounts = { events: '8', fights: '61', fighters: '59', list: 8 };
 const paginationExtra = 450;
 const base = 'http://127.0.0.1:8765';
 const api = 'https://wxrxjwfktdviiasixupk.supabase.co/rest/v1/';
+const todayParis = () => new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Paris'}).format(new Date());
+const periodCounts = events => {
+  const today = todayParis();
+  return {
+    upcoming: events.filter(e => e.date >= today).length,
+    past: events.filter(e => e.date < today).length,
+  };
+};
+const seedPeriods = periodCounts(seed.events);
+const embeddedIds = ['ufc334','pfl-dubai','ares45','hex49','ufc-saudi','ares46','ufc335','pfl-lyon'];
+const embeddedPeriods = periodCounts(seed.events.filter(e => embeddedIds.includes(e.id)));
 async function expectLoadStatus(page, success) {
   const status = page.locator('#loadStatus');
   await expect(status).toHaveText(success ? 'Données synchronisées' : 'Affichage des données de secours');
@@ -27,6 +38,7 @@ for (const mode of ['absent', 'invalide', 'valide']) {
     if (mode === 'absent') await page.route('**/mma-data.json', route => route.fulfill({ status: 404, body: 'Absent' }));
     if (mode === 'invalide') await page.route('**/mma-data.json', route => route.fulfill({ contentType: 'application/json', body: '{"events":[{}],"fighterRecords":{}}' }));
     const expected = mode === 'valide' ? seedCounts : embeddedCounts;
+    const periods = mode === 'valide' ? seedPeriods : embeddedPeriods;
     await page.goto(base);
     await expect(page.locator('#calendar button[data-open]').first()).toBeVisible();
     await expect(page.locator('#nEvents')).toHaveText(expected.events);
@@ -36,7 +48,10 @@ for (const mode of ['absent', 'invalide', 'valide']) {
     await expect(page.locator('#loadStatus')).toHaveAttribute('data-fallback-source', mode === 'valide' ? 'json' : 'embedded');
     await page.locator('#listBtn').click();
     await expect(page.locator('#listView')).toBeVisible();
-    await expect(page.locator('#eventList [data-open]')).toHaveCount(expected.list);
+    await expect(page.locator('#upcomingTab')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#eventList [data-open]')).toHaveCount(periods.upcoming);
+    await page.locator('#historyTab').click();
+    await expect(page.locator('#eventList [data-open]')).toHaveCount(periods.past);
     await page.locator('#eventList [data-open=ufc334]').click();
     await expect(page.locator('#eventDialog')).toBeVisible();
     await expect(page.locator('#eventBody')).toContainText('UFC 334');
@@ -87,15 +102,21 @@ for (const mode of ['valide', 'refuse', 'incoherent', 'vide', 'pagination']) {
     const success = ['valide', 'pagination'].includes(mode);
     const fallback = !success;
     const expected = fallback ? embeddedCounts : { ...seedCounts, fighters: String(Number(seedCounts.fighters) + (mode === 'pagination' ? paginationExtra : 0)) };
+    const periods = success ? seedPeriods : embeddedPeriods;
     expect(result.ok).toBe(success);
     await expectLoadStatus(page, success);
     await expect(page.locator('#nEvents')).toHaveText(expected.events);
     await expect(page.locator('#nFights')).toHaveText(expected.fights);
     await expect(page.locator('#nFighters')).toHaveText(expected.fighters);
     await page.locator('#listBtn').click();
-    await expect(page.locator('#eventList [data-open]')).toHaveCount(expected.list);
-    if (success) await expect(page.locator('#eventList')).toContainText('TEST SUPABASE');
-    else await expect(page.locator('#eventList')).not.toContainText('TEST SUPABASE');
+    await expect(page.locator('#eventList [data-open]')).toHaveCount(periods.upcoming);
+    if (success) {
+      await page.locator('#historyTab').click();
+      await expect(page.locator('#eventList [data-open]')).toHaveCount(periods.past);
+      await expect(page.locator('#eventList')).toContainText('TEST SUPABASE');
+    } else {
+      await expect(page.locator('#eventList')).not.toContainText('TEST SUPABASE');
+    }
     expect(requests.length).toBeGreaterThanOrEqual(mode === 'pagination' ? 5 : 4);
     expect(requests.every(r => r.method === 'GET' || (r.method === 'POST' && r.table === 'pfl_reconciliation_reports_v1'))).toBe(true);
     expect(errors).toEqual([]);
