@@ -75,10 +75,45 @@ def _iter_jsonld(value):
             yield from _iter_jsonld(child)
 
 
+def _extract_html_metadata(event_html: str, expected: str) -> dict:
+    """Repli HTML strict : titre et date valide requis, sinon revue."""
+    html = event_html or ''
+    title = ''
+    og = re.search(r'<meta[^>]+property=["\']og:title["\'][^>]+content=["\']([^"\']+)["\']', html, re.IGNORECASE)
+    if og:
+        title = og.group(1).strip()
+    else:
+        h1 = re.search(r'<h1[^>]*>(.*?)</h1>', html, re.IGNORECASE | re.DOTALL)
+        if h1:
+            title = re.sub(r'<[^>]+>', '', h1.group(1)).strip()
+    start = ''
+    date = ''
+    time_match = re.search(r'<time[^>]+datetime=["\']([^"\']+)["\']', html, re.IGNORECASE)
+    if time_match:
+        raw = time_match.group(1).strip()
+        try:
+            parsed = dt.datetime.fromisoformat(raw.replace('Z', '+00:00'))
+            date = parsed.date().isoformat()
+            start = raw
+        except ValueError:
+            date = ''
+    if title and date:
+        return {
+            'status': 'metadata_found',
+            'title': title,
+            'date': date,
+            'start_at': start,
+            'place': '',
+            'url': expected,
+        }
+    return {'status': 'needs_review', 'reason': 'metadata_not_found'}
+
+
 def extract_event_metadata(event_html: str, event_url: str) -> dict:
     """Extrait un événement JSON-LD unique correspondant à la fiche demandée."""
     validate_official_url(event_url)
     expected = canonical_url(event_url)
+    expected_path = urlsplit(expected).path.rstrip('/')
     matches: list[dict] = []
     for match in re.finditer(
         r'<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>',
@@ -95,26 +130,27 @@ def extract_event_metadata(event_html: str, event_url: str) -> dict:
             if 'Event' not in types:
                 continue
             item_url = canonical_url(str(item.get('url') or ''))
-            if item_url and item_url == expected:
+            item_path = urlsplit(item_url).path.rstrip('/')
+            if item_path and item_path == expected_path:
                 matches.append(item)
-    if len(matches) != 1:
-        return {'status': 'needs_review', 'reason': 'jsonld_event_not_unique'}
-    item = matches[0]
-    title = str(item.get('name') or '').strip()
-    start = str(item.get('startDate') or '').strip()
-    date = start[:10]
-    try:
-        parsed_date = dt.date.fromisoformat(date)
-    except ValueError:
-        return {'status': 'needs_review', 'reason': 'jsonld_start_date_invalid'}
-    return {
-        'status': 'metadata_found',
-        'title': title,
-        'date': parsed_date.isoformat(),
-        'start_at': start,
-        'place': str(item.get('location', {}).get('name') or '').strip() if isinstance(item.get('location'), dict) else '',
-        'url': expected,
-    }
+    if len(matches) == 1:
+        item = matches[0]
+        title = str(item.get('name') or '').strip()
+        start = str(item.get('startDate') or '').strip()
+        date = start[:10]
+        try:
+            parsed_date = dt.date.fromisoformat(date)
+        except ValueError:
+            return {'status': 'needs_review', 'reason': 'jsonld_start_date_invalid'}
+        return {
+            'status': 'metadata_found',
+            'title': title,
+            'date': parsed_date.isoformat(),
+            'start_at': start,
+            'place': str(item.get('location', {}).get('name') or '').strip() if isinstance(item.get('location'), dict) else '',
+            'url': expected,
+        }
+    return _extract_html_metadata(event_html, expected)
 
 
 def classify_candidate(metadata: dict, existing_urls: set[str], today: str) -> dict:
