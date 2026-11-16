@@ -10,6 +10,9 @@ const embeddedCounts = { events: '8', fights: '61', fighters: '59', list: 8 };
 const paginationExtra = 450;
 const base = 'http://127.0.0.1:8765';
 const api = 'https://wxrxjwfktdviiasixupk.supabase.co/rest/v1/';
+const todayParis = () => new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Paris'}).format(new Date());
+const upcomingEvents = seed.events.filter(e => e.date >= todayParis());
+const pastEvents = seed.events.filter(e => e.date < todayParis());
 async function expectLoadStatus(page, success) {
   const status = page.locator('#loadStatus');
   await expect(status).toHaveText(success ? 'Données synchronisées' : 'Affichage des données de secours');
@@ -36,7 +39,10 @@ for (const mode of ['absent', 'invalide', 'valide']) {
     await expect(page.locator('#loadStatus')).toHaveAttribute('data-fallback-source', mode === 'valide' ? 'json' : 'embedded');
     await page.locator('#listBtn').click();
     await expect(page.locator('#listView')).toBeVisible();
-    await expect(page.locator('#eventList [data-open]')).toHaveCount(expected.list);
+    await expect(page.locator('#upcomingTab')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#eventList [data-open]')).toHaveCount(upcomingEvents.length);
+    await page.locator('#historyTab').click();
+    await expect(page.locator('#eventList [data-open]')).toHaveCount(pastEvents.length);
     await page.locator('#eventList [data-open=ufc334]').click();
     await expect(page.locator('#eventDialog')).toBeVisible();
     await expect(page.locator('#eventBody')).toContainText('UFC 334');
@@ -93,9 +99,14 @@ for (const mode of ['valide', 'refuse', 'incoherent', 'vide', 'pagination']) {
     await expect(page.locator('#nFights')).toHaveText(expected.fights);
     await expect(page.locator('#nFighters')).toHaveText(expected.fighters);
     await page.locator('#listBtn').click();
-    await expect(page.locator('#eventList [data-open]')).toHaveCount(expected.list);
-    if (success) await expect(page.locator('#eventList')).toContainText('TEST SUPABASE');
-    else await expect(page.locator('#eventList')).not.toContainText('TEST SUPABASE');
+    await expect(page.locator('#eventList [data-open]')).toHaveCount(upcomingEvents.length);
+    if (success) {
+      await page.locator('#historyTab').click();
+      await expect(page.locator('#eventList [data-open]')).toHaveCount(pastEvents.length);
+      await expect(page.locator('#eventList')).toContainText('TEST SUPABASE');
+    } else {
+      await expect(page.locator('#eventList')).not.toContainText('TEST SUPABASE');
+    }
     expect(requests.length).toBeGreaterThanOrEqual(mode === 'pagination' ? 5 : 4);
     expect(requests.every(r => r.method === 'GET' || (r.method === 'POST' && r.table === 'pfl_reconciliation_reports_v1'))).toBe(true);
     expect(errors).toEqual([]);
