@@ -33,21 +33,6 @@ function redact(value) {
   return String(value).replace(/(['"])X-CSRF-TOKEN(['"])\s*:\s*(['"])[^'"]*/gi, '$1X-CSRF-TOKEN$2$3[redacted]');
 }
 
-function safeUrl(value) {
-  try {
-    const url = new URL(value);
-    url.username = '';
-    url.password = '';
-    for (const key of [...url.searchParams.keys()]) {
-      if (!['id', 'event_id', 'eventId', 'page'].includes(key)) url.searchParams.set(key, '[redacted]');
-    }
-    url.hash = '';
-    return url.toString();
-  } catch {
-    return '[invalid-url]';
-  }
-}
-
 function extractDate(text) {
   const match = text.match(/\b(MON|TUE|WED|THU|FRI|SAT|SUN)\s+([A-Z]{3})\s+(\d{1,2})\b/i);
   if (!match) return '';
@@ -105,13 +90,18 @@ async function main() {
         const response = await page.goto(url, {waitUntil: 'domcontentloaded', timeout: 45000});
         if (!response || !response.ok()) throw new Error('Navigation PFL non reussie');
         try {
+          await page.waitForFunction(() => /\b(MON|TUE|WED|THU|FRI|SAT|SUN)\s+[A-Z]{3}\s+\d{1,2}\b/i.test(document.body.innerText), null, {timeout: 15000});
+        } catch {}
+        try {
           await page.waitForFunction(() => document.querySelectorAll('#fight_card_component .matchupRow a[href*="/fighter/"]').length >= 2, null, {timeout: 20000});
         } catch {}
         const snapshot = await page.evaluate(() => {
           const component = document.querySelector('#fight_card_component');
           const meta = document.querySelector('meta[property="og:title"]');
-          const heading = document.querySelector('h1') || document.querySelector('h2');
-          const title = (meta && meta.content) || (heading && heading.textContent) || '';
+          const headings = [...document.querySelectorAll('h1, h2')]
+            .map(element => (element.textContent || '').trim())
+            .filter(text => text.length > 0);
+          const title = (meta && meta.content) || headings[0] || '';
           return {
             title: (title || '').trim(),
             text: document.body.innerText,
@@ -136,6 +126,14 @@ async function main() {
         candidate.error = redact(String(error)).slice(0, 500);
       } finally {
         candidates.push(candidate);
+        console.log(JSON.stringify({
+          source_url: candidate.source_url,
+          title: candidate.title,
+          date: candidate.date,
+          row_count: candidate.row_count,
+          extraction_status: candidate.extraction_status,
+          error: candidate.error || null,
+        }));
         await context.close();
       }
     }
