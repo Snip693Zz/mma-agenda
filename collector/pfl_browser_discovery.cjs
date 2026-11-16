@@ -85,7 +85,7 @@ async function main() {
         if (!allowed(request.url(), request.method(), request.postData(), tag) || ['image', 'media', 'font'].includes(request.resourceType())) return route.abort();
         return route.continue();
       });
-      const candidate = {source_url: url, title: '', date: '', start_at: '', pairs: [], row_count: 0, extraction_status: 'not_available'};
+      const candidate = {source_url: url, title: '', date: '', start_at: '', pairs: [], row_count: 0, extraction_status: 'not_available', date_found: false, text_excerpt: ''};
       try {
         const response = await page.goto(url, {waitUntil: 'domcontentloaded', timeout: 45000});
         if (!response || !response.ok()) throw new Error('Navigation PFL non reussie');
@@ -102,16 +102,25 @@ async function main() {
             .map(element => (element.textContent || '').trim())
             .filter(text => text.length > 0);
           const title = (meta && meta.content) || headings[0] || '';
+          const text = document.body.innerText;
+          const dateMatch = text.match(/\b(MON|TUE|WED|THU|FRI|SAT|SUN)\s+[A-Z]{3}\s+\d{1,2}\b/i);
+          const excerpt = dateMatch
+            ? text.slice(Math.max(0, dateMatch.index - 80), dateMatch.index + 140)
+            : text.slice(0, 200);
           return {
             title: (title || '').trim(),
-            text: document.body.innerText,
+            text,
             html: component ? component.outerHTML : '',
             rowCount: component ? component.querySelectorAll('.matchupRow').length : 0,
+            dateFound: Boolean(dateMatch),
+            excerpt,
           };
         });
         candidate.title = snapshot.title;
         candidate.date = extractDate(snapshot.text);
         candidate.row_count = snapshot.rowCount;
+        candidate.date_found = snapshot.dateFound;
+        candidate.text_excerpt = snapshot.excerpt;
         const extraction = spawnSync('python3', [
           '-c',
           'import sys,json; from collector.pfl_card_structure import extract_pairs; json.dump(extract_pairs(sys.stdin.read(), sys.argv[1]), sys.stdout)',
@@ -130,6 +139,8 @@ async function main() {
           source_url: candidate.source_url,
           title: candidate.title,
           date: candidate.date,
+          date_found: candidate.date_found,
+          text_excerpt: candidate.text_excerpt,
           row_count: candidate.row_count,
           extraction_status: candidate.extraction_status,
           error: candidate.error || null,
