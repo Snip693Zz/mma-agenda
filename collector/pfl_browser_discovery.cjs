@@ -46,6 +46,40 @@ function extractDate(text) {
   return `${yearMatch[1]}-${monthText}-${day}`;
 }
 
+function extractJsonLdDate(payloads, eventUrl) {
+  const expectedPath = new URL(eventUrl).pathname.replace(/\/$/, '');
+  for (const payload of payloads) {
+    try {
+      const parsed = JSON.parse(payload);
+      const stack = [parsed];
+      while (stack.length) {
+        const item = stack.pop();
+        if (!item || typeof item !== 'object') continue;
+        if (Array.isArray(item)) {
+          stack.push(...item);
+          continue;
+        }
+        const types = item['@type'];
+        const typeList = Array.isArray(types) ? types : [types];
+        if (typeList.includes('Event')) {
+          const itemUrl = String(item.url || '');
+          let itemPath = '';
+          try {
+            itemPath = new URL(itemUrl).pathname.replace(/\/$/, '');
+          } catch {}
+          if (itemPath && itemPath === expectedPath && item.startDate) {
+            return String(item.startDate);
+          }
+        }
+        for (const value of Object.values(item)) {
+          if (value && typeof value === 'object') stack.push(value);
+        }
+      }
+    } catch {}
+  }
+  return '';
+}
+
 async function main() {
   const args = parseArgs(process.argv);
   const {chromium} = require('@playwright/test');
@@ -85,7 +119,7 @@ async function main() {
         if (!allowed(request.url(), request.method(), request.postData(), tag) || ['image', 'media', 'font'].includes(request.resourceType())) return route.abort();
         return route.continue();
       });
-      const candidate = {source_url: url, title: '', date: '', start_at: '', pairs: [], row_count: 0, extraction_status: 'not_available', date_found: false, text_excerpt: ''};
+      const candidate = {source_url: url, title: '', date: '', start_at: '', pairs: [], row_count: 0, extraction_status: 'not_available', date_found: false, text_excerpt: '', jsonld_found: false, jsonld_start_date: ''};
       try {
         const response = await page.goto(url, {waitUntil: 'domcontentloaded', timeout: 45000});
         if (!response || !response.ok()) throw new Error('Navigation PFL non reussie');
@@ -107,6 +141,8 @@ async function main() {
           const excerpt = dateMatch
             ? text.slice(Math.max(0, dateMatch.index - 80), dateMatch.index + 140)
             : text.slice(0, 200);
+          const jsonld = [...document.querySelectorAll('script[type="application/ld+json"]')]
+            .map(script => script.textContent || '');
           return {
             title: (title || '').trim(),
             text,
@@ -114,13 +150,23 @@ async function main() {
             rowCount: component ? component.querySelectorAll('.matchupRow').length : 0,
             dateFound: Boolean(dateMatch),
             excerpt,
+            jsonld,
           };
         });
         candidate.title = snapshot.title;
-        candidate.date = extractDate(snapshot.text);
-        candidate.row_count = snapshot.rowCount;
         candidate.date_found = snapshot.dateFound;
         candidate.text_excerpt = snapshot.excerpt;
+        candidate.row_count = snapshot.rowCount;
+        const jsonldDate = extractJsonLdDate(snapshot.jsonld, url);
+        if (jsonldDate) {
+          candidate.jsonld_found = true;
+          candidate.jsonld_start_date = jsonldDate;
+          candidate.date = jsonldDate.slice(0, 10);
+          candidate.start_at = jsonldDate;
+        }
+        if (!candidate.date) {
+          candidate.date = extractDate(snapshot.text);
+        }
         const extraction = spawnSync('python3', [
           '-c',
           'import sys,json; from collector.pfl_card_structure import extract_pairs; json.dump(extract_pairs(sys.stdin.read(), sys.argv[1]), sys.stdout)',
@@ -141,6 +187,8 @@ async function main() {
           date: candidate.date,
           date_found: candidate.date_found,
           text_excerpt: candidate.text_excerpt,
+          jsonld_found: candidate.jsonld_found,
+          jsonld_start_date: candidate.jsonld_start_date,
           row_count: candidate.row_count,
           extraction_status: candidate.extraction_status,
           error: candidate.error || null,
