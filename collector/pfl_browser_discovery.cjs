@@ -39,11 +39,11 @@ function extractDate(text) {
   const months = {JAN: 1, FEB: 2, MAR: 3, APR: 4, MAY: 5, JUN: 6, JUL: 7, AUG: 8, SEP: 9, OCT: 10, NOV: 11, DEC: 12};
   const month = months[match[2].toUpperCase()];
   if (!month) return '';
-  const yearMatch = text.slice(match.index + match[0].length).match(/\b(20\d{2})\b/);
-  if (!yearMatch) return '';
+  const copyrightMatch = text.match(/(?:©|&copy;|copyright)\s*(20\d{2})/i);
+  if (!copyrightMatch) return '';
   const day = String(Number(match[3])).padStart(2, '0');
   const monthText = String(month).padStart(2, '0');
-  return `${yearMatch[1]}-${monthText}-${day}`;
+  return `${copyrightMatch[1]}-${monthText}-${day}`;
 }
 
 function extractJsonLdDate(payloads, eventUrl) {
@@ -119,7 +119,7 @@ async function main() {
         if (!allowed(request.url(), request.method(), request.postData(), tag) || ['image', 'media', 'font'].includes(request.resourceType())) return route.abort();
         return route.continue();
       });
-      const candidate = {source_url: url, title: '', date: '', start_at: '', pairs: [], row_count: 0, extraction_status: 'not_available', date_found: false, text_excerpt: '', jsonld_found: false, jsonld_start_date: ''};
+      const candidate = {source_url: url, title: '', date: '', start_at: '', pairs: [], row_count: 0, extraction_status: 'not_available', date_found: false, date_source: '', text_excerpt: '', jsonld_found: false, jsonld_start_date: ''};
       try {
         const response = await page.goto(url, {waitUntil: 'domcontentloaded', timeout: 45000});
         if (!response || !response.ok()) throw new Error('Navigation PFL non reussie');
@@ -163,9 +163,14 @@ async function main() {
           candidate.jsonld_start_date = jsonldDate;
           candidate.date = jsonldDate.slice(0, 10);
           candidate.start_at = jsonldDate;
+          candidate.date_source = 'jsonld';
         }
         if (!candidate.date) {
           candidate.date = extractDate(snapshot.text);
+          if (candidate.date) {
+            candidate.start_at = candidate.date;
+            candidate.date_source = 'visible_date+copyright_year';
+          }
         }
         const extraction = spawnSync('python3', [
           '-c',
@@ -186,6 +191,7 @@ async function main() {
           title: candidate.title,
           date: candidate.date,
           date_found: candidate.date_found,
+          date_source: candidate.date_source,
           text_excerpt: candidate.text_excerpt,
           jsonld_found: candidate.jsonld_found,
           jsonld_start_date: candidate.jsonld_start_date,
