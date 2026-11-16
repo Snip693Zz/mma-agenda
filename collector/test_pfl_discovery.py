@@ -46,6 +46,14 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(metadata['status'], 'needs_review')
         self.assertEqual(metadata['reason'], 'metadata_not_found')
 
+    def test_html_fallback_extracts_title_and_visible_date(self):
+        html = ('<html><head><meta property="og:title" content="PFL Dubai"></head>'
+                '<body><h2>PFL Dubai</h2><p>SAT NOV 14</p><p>Nov 13, 2026</p></body></html>')
+        metadata = extract_event_metadata(html, 'https://pflmma.com/event/pfl-returns-to-dubai')
+        self.assertEqual(metadata['status'], 'metadata_found')
+        self.assertEqual(metadata['title'], 'PFL Dubai')
+        self.assertEqual(metadata['date'], '2026-11-14')
+
     def test_report_classifies_new_upcoming_event_without_writes(self):
         report = build_discovery_report(
             listing('pfl-lyon'),
