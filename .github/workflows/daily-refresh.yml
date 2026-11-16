@@ -88,6 +88,19 @@ jobs:
           else
             python collector/pfl_publisher.py --output reports/pfl-publication-result.json
           fi
+      - name: Synchroniser les secours PFL après publication
+        id: pfl_fallback
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          PFL_FALLBACK: ${{ vars.PFL_FALLBACK }}
+        run: |
+          if [ "${PFL_FALLBACK,,}" = "true" ]; then
+            python collector/pfl_fallback_sync.py --output reports/pfl-fallback-sync.json --sync
+          else
+            python collector/pfl_fallback_sync.py --output reports/pfl-fallback-sync.json
+          fi
       - name: Vérifier le raccordement et la désactivation du publieur
         if: ${{ success() && steps.collect.outcome == 'success' && steps.journal.outcome == 'success' }}
         env:
@@ -120,6 +133,7 @@ jobs:
             reports/pfl-publication-guardrails.json
             reports/pfl-reconciliation.json
             reports/pfl-publication-result.json
+            reports/pfl-fallback-sync.json
           if-no-files-found: warn
           retention-days: 14
       - name: Conserver le statut d’échec de la collecte
