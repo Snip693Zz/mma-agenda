@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import http.client
 import json
 import os
 import time
@@ -82,7 +83,7 @@ def run_daily_discovery(
             pause(1)
         try:
             event_pages[url] = fetcher(url)
-        except (HTTPError, URLError, ValueError) as error:
+        except (HTTPError, URLError, ValueError, http.client.HTTPException, TimeoutError, OSError) as error:
             errors.append({'source_url': url, 'reason': str(error)[:500]})
     report = build_discovery_report(listing_html, LISTING_URL, event_pages, existing_events, today)
     report['errors'] = errors
