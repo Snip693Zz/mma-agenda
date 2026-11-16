@@ -44,7 +44,7 @@ class DiscoveryTests(unittest.TestCase):
     def test_missing_or_ambiguous_jsonld_requires_review(self):
         metadata = extract_event_metadata('<html></html>', EVENT_URL)
         self.assertEqual(metadata['status'], 'needs_review')
-        self.assertEqual(metadata['reason'], 'jsonld_event_not_unique')
+        self.assertEqual(metadata['reason'], 'metadata_not_found')
 
     def test_report_classifies_new_upcoming_event_without_writes(self):
         report = build_discovery_report(
