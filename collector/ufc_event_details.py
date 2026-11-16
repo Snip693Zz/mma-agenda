@@ -63,6 +63,18 @@ def instant(node):
         raise ValueError('Année hors limites')
     return candidate.astimezone(dt.timezone.utc).isoformat().replace('+00:00','Z')
 
+def hero_instant(nodes):
+    candidates = []
+    for parent in nodes:
+        if not has(parent,'c-hero__bottom-text'):
+            continue
+        for node in parent.nodes():
+            if node.attrs.get('data-timestamp') or re.search(r'\b\d{1,2}:\d{2}\s*(AM|PM)\b',node.text(),re.I):
+                candidates.append(node)
+    if not candidates:
+        raise ValueError('Zone horaire du héros introuvable')
+    return instant(candidates[0])
+
 def token(name):
     value = unicodedata.normalize('NFKD',name).encode('ascii','ignore').decode().lower()
     return ' '.join(re.sub('[^a-z0-9]+',' ',value).split())
@@ -83,7 +95,7 @@ def extract_details(html, address):
         if not re.match(r'^UFC\b',prefix) or token(headline) in ('tbd vs tbd','tba vs tba'):
             raise ValueError('Titre non exploitable')
         place = unique(n.text() for n in nodes if has(n,'field--name-venue') and n.text())
-        hero = unique(instant(n) for parent in nodes if has(parent,'c-hero__bottom-text') for n in parent.nodes() if n.attrs.get('data-timestamp') or n.text())
+        hero = hero_instant(nodes)
         date = dt.datetime.fromisoformat(hero.replace('Z','+00:00')).astimezone(ZoneInfo('America/New_York')).date().isoformat()
         result['event_patch'] = {'title':prefix+' — '+headline,'place':place,'date':date}
         seen = set()
