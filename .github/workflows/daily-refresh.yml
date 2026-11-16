@@ -50,6 +50,18 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: python collector/pfl_daily_discovery.py --output reports/pfl-daily-discovery.json --limit 20
+      - name: Appliquer les garde-fous de publication PFL
+        id: pfl_guardrails
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          if [ -f reports/pfl-daily-discovery.json ]; then
+            python collector/pfl_publication_guardrails.py --discovery reports/pfl-daily-discovery.json --baseline reports/pfl-daily-discovery.json --output reports/pfl-publication-guardrails.json
+          else
+            echo "Rapport de découverte PFL absent : garde-fous ignorés."
+          fi
       - name: Rapprocher les cartes PFL sans publication
         id: pfl_reconciliation
         continue-on-error: true
@@ -92,6 +104,7 @@ jobs:
             reports/publication-result.json
             reports/fallback-sync.json
             reports/pfl-daily-discovery.json
+            reports/pfl-publication-guardrails.json
             reports/pfl-reconciliation.json
           if-no-files-found: warn
           retention-days: 14
