@@ -23,8 +23,9 @@ def _canonical(value: str) -> str:
     return urlunsplit(('https', host, parsed.path.rstrip('/'), '', ''))
 
 
-def build_proposals(discovery_report: dict, existing_events: list[dict]) -> dict:
+def build_proposals(discovery_report: dict, existing_events: list[dict], today: str | None = None) -> dict:
     """Produit des propositions de création contrôlées, sans écriture."""
+    today = today or dt.date.today().isoformat()
     existing_urls = {
         _canonical(event.get('url') or '')
         for event in existing_events
@@ -42,12 +43,15 @@ def build_proposals(discovery_report: dict, existing_events: list[dict]) -> dict
         url = _canonical(candidate.get('source_url') or '')
         title = str(metadata.get('title') or '').strip()
         date = str(metadata.get('date') or '').strip()
+        try:
+            upcoming = bool(date) and dt.date.fromisoformat(date) >= dt.date.fromisoformat(today)
+        except ValueError:
+            upcoming = False
         eligible = (
             bool(url)
             and url not in existing_urls
             and bool(title)
-            and bool(date)
-            and candidate.get('upcoming') is True
+            and upcoming
             and metadata.get('status') == 'metadata_found'
         )
         proposal = {
@@ -100,10 +104,11 @@ def main() -> int:
     parser.add_argument('--discovery', required=True)
     parser.add_argument('--baseline', required=True)
     parser.add_argument('--output', default='reports/pfl-publication-guardrails.json')
+    parser.add_argument('--as-of', default=dt.date.today().isoformat())
     args = parser.parse_args()
     discovery = json.loads(Path(args.discovery).read_text(encoding='utf-8'))
     baseline = json.loads(Path(args.baseline).read_text(encoding='utf-8'))
-    report = build_proposals(discovery, baseline.get('events', []))
+    report = build_proposals(discovery, baseline.get('events', []), args.as_of)
     destination = Path(args.output)
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')

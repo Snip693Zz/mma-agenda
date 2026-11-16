@@ -18,7 +18,7 @@ def discovery(url=EVENT_URL, upcoming=True, status='metadata_found', title='PFL 
 
 class PublicationGuardrailsTests(unittest.TestCase):
     def test_valid_upcoming_event_is_proposed_without_auto_publication(self):
-        report = build_proposals(discovery(), [])
+        report = build_proposals(discovery(), [], today=TODAY)
         proposal = report['proposals'][0]
         self.assertEqual(proposal['proposal'], 'create_event')
         self.assertFalse(proposal['auto_publishable'])
@@ -29,23 +29,28 @@ class PublicationGuardrailsTests(unittest.TestCase):
 
     def test_existing_event_is_not_proposed_for_creation(self):
         existing = [{'id': 'pfl-1', 'url': 'https://www.pflmma.com/event/pfl-lyon/'}]
-        report = build_proposals(discovery(), existing)
+        report = build_proposals(discovery(), existing, today=TODAY)
         proposal = report['proposals'][0]
         self.assertEqual(proposal['proposal'], 'review_required')
         self.assertEqual(report['summary']['create_event'], 0)
 
     def test_past_event_is_not_proposed_for_creation(self):
-        report = build_proposals(discovery(date='2026-11-15'), [])
+        report = build_proposals(discovery(date='2026-11-15'), [], today=TODAY)
         proposal = report['proposals'][0]
         self.assertEqual(proposal['proposal'], 'review_required')
 
     def test_incomplete_metadata_requires_review(self):
-        report = build_proposals(discovery(title=''), [])
+        report = build_proposals(discovery(title=''), [], today=TODAY)
+        proposal = report['proposals'][0]
+        self.assertEqual(proposal['proposal'], 'review_required')
+
+    def test_invalid_date_requires_review(self):
+        report = build_proposals(discovery(date='not-a-date'), [], today=TODAY)
         proposal = report['proposals'][0]
         self.assertEqual(proposal['proposal'], 'review_required')
 
     def test_summary_counts_are_consistent(self):
-        report = build_proposals(discovery(), [])
+        report = build_proposals(discovery(), [], today=TODAY)
         self.assertEqual(report['summary']['candidates'], 1)
         self.assertEqual(report['summary']['create_event'], 1)
         self.assertEqual(report['summary']['review_required'], 0)
