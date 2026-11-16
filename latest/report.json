@@ -4,7 +4,7 @@
   "database_writes": false,
   "automatic_publication": false,
   "source_url": "https://www.ufc.com/event/ufc-fight-night-november-21-2026",
-  "source_sha256": "450cae7dfec6c9c4f642590373d3142cb8ba2bce6c44e00c0b260f4a535924dd",
+  "source_sha256": "cf5665b242831158ed12cf35827134c9e3aa055bb089fbf7312a6be8c093ef53",
   "headings": [
     {
       "tag": "h2",
@@ -33,6 +33,18 @@
     {
       "tag": "h2",
       "text": "Get the advance word"
+    },
+    {
+      "tag": "h3",
+      "text": "Full Fight | Navajo Stirling vs Jan Błachowicz"
+    },
+    {
+      "tag": "h3",
+      "text": "Full Fight | Jiří Procházka vs Khalil Rountree Jr."
+    },
+    {
+      "tag": "h3",
+      "text": "FORMER CHAMPION JIŘÍ PROCHÁZKA TAKES ON UNDEFEATED NAVAJO STIRLING AS UFC RETURNS TO DOHA ON NOVEMBER 21"
     },
     {
       "tag": "h2",
@@ -539,7 +551,7 @@
       "id": null,
       "class": "c-cards-load-more c-cards-load-more--black",
       "timestamp": null,
-      "text": "Get the advance word"
+      "text": "Get the advance word Play Video Full Fight | Navajo Stirling vs Jan Błachowicz Play Video Full Fight | Jiří Procházka vs Khalil Rountree Jr. FORMER CHAMPION JIŘÍ PROCHÁZKA TAKES ON UNDEFEATED NAVAJO STIRLING AS UFC RETURNS TO DOHA ON NOVEMBER 21"
     },
     {
       "tag": "h2",
@@ -553,7 +565,119 @@
       "id": null,
       "class": "c-cards-load-more__list",
       "timestamp": null,
+      "text": "Play Video Full Fight | Navajo Stirling vs Jan Błachowicz Play Video Full Fight | Jiří Procházka vs Khalil Rountree Jr. FORMER CHAMPION JIŘÍ PROCHÁZKA TAKES ON UNDEFEATED NAVAJO STIRLING AS UFC RETURNS TO DOHA ON NOVEMBER 21"
+    },
+    {
+      "tag": "a",
+      "id": null,
+      "class": "c-card c-card--advance",
+      "timestamp": null,
+      "text": "Play Video Full Fight | Navajo Stirling vs Jan Błachowicz"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-card__media",
+      "timestamp": null,
+      "text": "Play Video"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-card__icon-big",
+      "timestamp": null,
+      "text": "Play"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-card__icon",
+      "timestamp": null,
+      "text": "Video"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-card__allinfo",
+      "timestamp": null,
+      "text": "Full Fight | Navajo Stirling vs Jan Błachowicz"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-card__headline",
+      "timestamp": null,
+      "text": "Full Fight | Navajo Stirling vs Jan Błachowicz"
+    },
+    {
+      "tag": "a",
+      "id": null,
+      "class": "c-card c-card--advance",
+      "timestamp": null,
+      "text": "Play Video Full Fight | Jiří Procházka vs Khalil Rountree Jr."
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-card__media",
+      "timestamp": null,
+      "text": "Play Video"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-card__icon-big",
+      "timestamp": null,
+      "text": "Play"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-card__icon",
+      "timestamp": null,
+      "text": "Video"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-card__allinfo",
+      "timestamp": null,
+      "text": "Full Fight | Jiří Procházka vs Khalil Rountree Jr."
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-card__headline",
+      "timestamp": null,
+      "text": "Full Fight | Jiří Procházka vs Khalil Rountree Jr."
+    },
+    {
+      "tag": "a",
+      "id": null,
+      "class": "c-card c-card--advance c-card--small",
+      "timestamp": null,
+      "text": "FORMER CHAMPION JIŘÍ PROCHÁZKA TAKES ON UNDEFEATED NAVAJO STIRLING AS UFC RETURNS TO DOHA ON NOVEMBER 21"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-card__media",
+      "timestamp": null,
       "text": ""
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-card__allinfo",
+      "timestamp": null,
+      "text": "FORMER CHAMPION JIŘÍ PROCHÁZKA TAKES ON UNDEFEATED NAVAJO STIRLING AS UFC RETURNS TO DOHA ON NOVEMBER 21"
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "c-card__headline",
+      "timestamp": null,
+      "text": "FORMER CHAMPION JIŘÍ PROCHÁZKA TAKES ON UNDEFEATED NAVAJO STIRLING AS UFC RETURNS TO DOHA ON NOVEMBER 21"
     },
     {
       "tag": "div",
@@ -2000,6 +2124,6 @@
   ],
   "fight_rows": 9,
   "warning": "Signaux bruts : aucune affectation de carte ou horaire validée.",
-  "collected_at": "2026-11-14T04:40:16.503653+00:00",
+  "collected_at": "2026-11-16T06:13:57.973917+00:00",
   "status": "captured"
 }

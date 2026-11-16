@@ -1,11 +1,11 @@
 {
-  "source_commit": "c104cf3b10b03d9e0df0768ced615815399f5132",
-  "run_id": "43557768065",
+  "source_commit": "99d34f24a6daa0d9b252d6aae8081fbbb96c11a6",
+  "run_id": "43815302481",
   "run_attempt": "1",
-  "run_url": "https://github.com/Snip693Zz/mma-agenda/actions/runs/43557768065",
+  "run_url": "https://github.com/Snip693Zz/mma-agenda/actions/runs/43815302481",
   "source_url": "https://www.ufc.com/event/ufc-fight-night-november-21-2026",
-  "collected_at": "2026-11-14T04:40:16.503653+00:00",
-  "source_sha256": "450cae7dfec6c9c4f642590373d3142cb8ba2bce6c44e00c0b260f4a535924dd",
-  "report_sha256": "8811fb00e72d2be7637d91048a4a553ee295823741e51e280f2f164acf1f60cc",
-  "details_sha256": "55bf5c66aa21dd169fcbc217ec6ab23d3f23323dc0f8329650e35a138b10f2ca"
+  "collected_at": "2026-11-16T06:13:57.973917+00:00",
+  "source_sha256": "cf5665b242831158ed12cf35827134c9e3aa055bb089fbf7312a6be8c093ef53",
+  "report_sha256": "e6a49233afc7368f32864bdbcbab31b0de740eb6adab5d669075630701469e84",
+  "details_sha256": "fba10dc8cd9c28b6f1b94f3e809f48aaf47e71a738bf73690d1bac8c6f7743e9"
 }

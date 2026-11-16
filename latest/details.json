@@ -4,7 +4,7 @@
   "database_writes": false,
   "automatic_publication": false,
   "source_url": "https://www.ufc.com/event/ufc-fight-night-november-21-2026",
-  "source_sha256": "450cae7dfec6c9c4f642590373d3142cb8ba2bce6c44e00c0b260f4a535924dd",
+  "source_sha256": "cf5665b242831158ed12cf35827134c9e3aa055bb089fbf7312a6be8c093ef53",
   "status": "parsed",
   "event_patch": {
     "title": "UFC Fight Night — Prochazka vs Stirling",

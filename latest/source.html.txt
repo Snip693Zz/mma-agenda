@@ -161,7 +161,7 @@
 <link rel="alternate" hreflang="ja" href="https://www.ufc.com/event/ufc-fight-night-november-21-2026" />
 <link rel="alternate" hreflang="pt-br" href="https://www.ufc.com/event/ufc-fight-night-november-21-2026" />
 <link rel="alternate" hreflang="ru" href="https://www.ufc.com/event/ufc-fight-night-november-21-2026" />
-<script src="/sites/default/files/google_tag/primary/google_tag.script.js?tog2v4" defer></script>
+<script src="/sites/default/files/google_tag/primary/google_tag.script.js?tokpj4" defer></script>
 <script>window.a2a_config=window.a2a_config||{};a2a_config.callbacks=[];a2a_config.overlays=[];a2a_config.templates={};a2a_config.icon_color = "transparent,black";</script>
 
     <title>UFC Fight Night: Prochazka vs Stirling | UFC Qatar</title>
@@ -1088,7 +1088,7 @@ Qatar
     <h3 class="hidden">Main Card</h3>
       
 
-  <div class="view view-eva view-event-fights view-id-event_fights view-display-id-entity_view_1 js-view-dom-id-04a681894a94c9c3080425e504a9aa024f7bbd4186754f11092aa472113853b1">
+  <div class="view view-eva view-event-fights view-id-event_fights view-display-id-entity_view_1 js-view-dom-id-405c0a822f2daa78aff22f22ee2170bceeca2c10a2a5a009cfc0ded7d280f11d">
   
     
 
@@ -2262,7 +2262,7 @@ Qatar
     <h3 class="hidden">Prelims</h3>
       
 
-  <div class="view view-eva view-event-fights view-id-event_fights view-display-id-entity_view_2 js-view-dom-id-694bca4df569c2e47a2ee1654372a70be6bf96bc035e909df4526a276c1d48d5">
+  <div class="view view-eva view-event-fights view-id-event_fights view-display-id-entity_view_2 js-view-dom-id-58e2ed7b5a026d5546c740cd06594b48ba46da95005f92d3c4e084cdb85ad677">
   
     
 
@@ -3236,7 +3236,216 @@ Qatar
             <div class="c-cards-load-more__list">
               
 
+  <div class="view view-eva view-related-content-event view-id-related_content_event view-display-id-entity_view_1 js-view-dom-id-fe421f9a6fc6af90472b79c50ecfa26ebb16f4b60667e04378363c3a354043d6">
+
   
+  
+
+  <div class="view view-related-content-event view-id-related_content_event view-display-id-attachment_1 js-view-dom-id-bf05657d9bbadbe6c788f0b9a7e129d1f5abc6aea0373e84e0e0e7485caae8a7">
+  
+    
+      
+      <div class="view-content">
+      <div>
+  
+  <ul class="l-grid--2col">
+
+          <li class="l-grid__item">
+
+
+
+<a href="/video/162053" class="c-card c-card--advance" data-modal-callback="/ajax/modal/node/162053"    data-video-meta-type="vod" data-video-meta-id="987947" data-locale="en">
+
+    
+  <div class="c-card__media">
+          <i class="video-lock-icon"></i>
+                  
+              <div class="layout layout--onecol">
+    <div  class="layout__region layout__region--content">
+            <picture>
+                  <source srcset="/s3/files/styles/card_content_footer_desktop_x1/s3/2026-11/080126-Navajo-Stirling-Punch-GettyImages-2288626611.jpg?itok=QoNV4UVy 1x, /s3/files/styles/card_content_footer_desktop_x2/s3/2026-11/080126-Navajo-Stirling-Punch-GettyImages-2288626611.jpg?itok=vNOwHVON 2x" media="(min-width: 1024px)" type="image/jpeg" width="585" height="330"/>
+              <source srcset="/s3/files/styles/card_trending_mobile_x1/s3/2026-11/080126-Navajo-Stirling-Punch-GettyImages-2288626611.jpg?itok=AkUeJzzM 1x, /s3/files/styles/card_trending_mobile_x2/s3/2026-11/080126-Navajo-Stirling-Punch-GettyImages-2288626611.jpg?itok=P_2s2UD1 2x" type="image/jpeg" width="323" height="182"/>
+                  <img loading="eager" width="323" height="182" src="/s3/files/styles/card_trending_mobile_x1/s3/2026-11/080126-Navajo-Stirling-Punch-GettyImages-2288626611.jpg?itok=AkUeJzzM" alt="Navajo Stirling of New Zealand punches Jan Blachowicz of Poland in a light heavyweight fight during the UFC Fight Night event at Belgrade Arena" />
+
+  </picture>
+
+
+
+    </div>
+  </div>
+
+
+      
+                              <div class="c-card__icon-big">
+            <svg class="e-icon__svg"><title>Play</title><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/themes/custom/ufc/assets/svg/sprite-ui.svg#play-text"></use></svg>
+          </div>
+                                <div class="c-card__icon">
+                      <svg class="e-icon__svg"><title>Video</title><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/themes/custom/ufc/assets/svg/sprite-ui.svg#video"></use></svg>
+                    <span class="e-p--small"></span>
+        </div>
+          
+        
+        
+
+  </div> 
+        <div class="c-card__allinfo">
+
+      
+              <div class="c-card__headline">
+                    <h3 class="e-t3">
+            Full Fight | Navajo Stirling vs Jan Błachowicz
+          </h3>
+        </div>
+      
+    </div>
+  
+  
+  
+</a>
+
+</li>
+          <li class="l-grid__item">
+
+
+
+<a href="/video/162052" class="c-card c-card--advance" data-modal-callback="/ajax/modal/node/162052"    data-video-meta-type="vod" data-video-meta-id="866790" data-locale="en">
+
+    
+  <div class="c-card__media">
+          <i class="video-lock-icon"></i>
+                  
+              <div class="layout layout--onecol">
+    <div  class="layout__region layout__region--content">
+            <picture>
+                  <source srcset="/s3/files/styles/card_content_footer_desktop_x1/s3/2026-11/100425-Jiri-Prochazka-Punch-GettyImages-2239284570.jpg?itok=gNpEaCwI 1x, /s3/files/styles/card_content_footer_desktop_x2/s3/2026-11/100425-Jiri-Prochazka-Punch-GettyImages-2239284570.jpg?itok=mWIX_NX9 2x" media="(min-width: 1024px)" type="image/jpeg" width="585" height="330"/>
+              <source srcset="/s3/files/styles/card_trending_mobile_x1/s3/2026-11/100425-Jiri-Prochazka-Punch-GettyImages-2239284570.jpg?itok=hJj01nf2 1x, /s3/files/styles/card_trending_mobile_x2/s3/2026-11/100425-Jiri-Prochazka-Punch-GettyImages-2239284570.jpg?itok=m_oLHfC6 2x" type="image/jpeg" width="323" height="182"/>
+                  <img loading="eager" width="323" height="182" src="/s3/files/styles/card_trending_mobile_x1/s3/2026-11/100425-Jiri-Prochazka-Punch-GettyImages-2239284570.jpg?itok=hJj01nf2" alt="Jiri Prochazka of the Czech Republic strikes Khalil Rountree Jr. in a light heavyweight fight during the UFC 320 event at T-Mobile Arena" />
+
+  </picture>
+
+
+
+    </div>
+  </div>
+
+
+      
+                              <div class="c-card__icon-big">
+            <svg class="e-icon__svg"><title>Play</title><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/themes/custom/ufc/assets/svg/sprite-ui.svg#play-text"></use></svg>
+          </div>
+                                <div class="c-card__icon">
+                      <svg class="e-icon__svg"><title>Video</title><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/themes/custom/ufc/assets/svg/sprite-ui.svg#video"></use></svg>
+                    <span class="e-p--small"></span>
+        </div>
+          
+        
+        
+
+  </div> 
+        <div class="c-card__allinfo">
+
+      
+              <div class="c-card__headline">
+                    <h3 class="e-t3">
+            Full Fight | Jiří Procházka vs Khalil Rountree Jr.
+          </h3>
+        </div>
+      
+    </div>
+  
+  
+  
+</a>
+
+</li>
+    
+  </ul>
+
+</div>
+
+    </div>
+  
+          </div>
+
+
+
+
+
+
+
+  
+
+  <div data-drupal-views-infinite-scroll-content-wrapper class="views-infinite-scroll-content-wrapper clearfix"><div>
+  
+  <ul class="l-grid--4col">
+
+          <li class="l-grid__item">
+
+
+<a href="/news/former-champion-jiri-prochazka-takes-undefeated-navajo-stirling-ufc-returns-doha-november-21" class="c-card c-card--advance c-card--small"    >
+
+    
+  <div class="c-card__media">
+                  
+            <div class="field field--name-thumbnail field--type-entity-reference field--label-hidden field__item">  <div class="layout layout--onecol">
+    <div  class="layout__region layout__region--content">
+            <picture>
+                  <source srcset="https://ufc.com/images/styles/card_advance_small_280x356/s3/2026-09/_Endpage.jpg?itok=8Qr_vXi2 1x" media="(min-width: 1024px)" type="image/jpeg" width="280" height="356"/>
+              <source srcset="https://ufc.com/images/styles/card_advance_small_175x220/s3/2026-09/_Endpage.jpg?itok=e93NnmE0 1x" type="image/jpeg" width="175" height="220"/>
+                  <img loading="eager" width="280" height="356" src="https://ufc.com/images/styles/card_advance_small_280x356/s3/2026-09/_Endpage.jpg?itok=8Qr_vXi2" alt="UFC light heavyweights Jiri Prochazka and Navajo Stirling stand side by side over a red background" />
+
+  </picture>
+
+
+
+    </div>
+  </div>
+
+</div>
+      
+                
+        
+        
+
+  </div> 
+        <div class="c-card__allinfo">
+
+      
+              <div class="c-card__headline">
+                    <h3 class="e-t3" id="n-161015">
+            
+<span>FORMER CHAMPION JIŘÍ PROCHÁZKA TAKES ON UNDEFEATED NAVAJO STIRLING AS UFC RETURNS TO DOHA ON NOVEMBER 21</span>
+
+          </h3>
+        </div>
+      
+    </div>
+  
+  
+  
+</a>
+
+</li>
+    
+  </ul>
+
+</div>
+</div>
+
+
+
+
+
+  
+  
+
+
+  
+  
+
+  
+  </div>
+
 
 
 
@@ -4421,15 +4630,15 @@ Qatar
   </div>
 
     
-    <script type="application/json" data-drupal-selector="drupal-settings-json">{"path":{"baseUrl":"\/","pathPrefix":"","currentPath":"node\/160194","currentPathIsAdmin":false,"isFront":false,"currentLanguage":"en"},"pluralDelimiter":"\u0003","suppressDeprecationErrors":true,"ajaxPageState":{"libraries":"eJx1UFGSgyAMvZDIRfZvD8BEiEqLxCFB655-KWi3-9EZJrz3AklewDkhiIeGE_RjoijdAPZuhMpZ9Rs2N_6YEnxI5zbUm3dIXYCDshjn2dKG6dAU0VLoVgpBu5RXCP0Tq-DjnTs-WHApBRm7PFoN0c6UWA2QKh-yCEWu2EL5JqTAiqfYpDI0RlG4ldhejX6aRVlITg2JwFkoHVqxKdAAQVnmd3prbMZEL6BG_0D3mmKm_dl4B7Fz6_VBVlOivNZk9adcotXR3qZdMGa1gG9shal5Zi-oRqJrzMpnBNe4Acc6oTMDxHhKza-u15ff8Fug2TfV_grMGrKUVfofuLZlApUVnkKpOF06k_UQdLvelT_Yn8nN4866xh5u8PgnLORywCaZZ9ZMKPoCv25q8NI","theme":"ufc","theme_token":null},"ajaxTrustedUrl":[],"back_to_top":{"back_to_top_button_trigger":100,"back_to_top_prevent_on_mobile":true,"back_to_top_prevent_in_admin":true,"back_to_top_button_type":"text","back_to_top_button_text":"Back to top"},"accountSettings":{"apiUrl":"https:\/\/ufc.api.onvesper.com","realm":"dce.ufc","app":"dice-id","apiKey":"39d5cb34-799c-4967-8038-fc240bf2984b","loginText":"Unlock MORE of your inner combat sports fan with UFC Fight Pass! Fighting is what we live for. And no one brings you MORE live fights, new shows, and events across multiple combat sports from around the world. With a never-ending supply of fighting in every discipline, there`s always something new to watch. Leave it to the world`s authority in MMA to bring you the Ultimate 24\/7 platform for MORE combat sports, UFC Fight Pass!","ctaText":"Continue watching","ctaLink":"\/account\/login","createAccount":"\/account\/signup","heartbeatApiUrl":"https:\/\/ufc.api.onvesper.com\/prod","hideAccountIcon":true,"hideAddressFields":false,"errorTextGeneral":"There was a problem while loading content. Please try again.","errorTextEntitlement":"Unlock MORE of your inner combat sports fan with UFC Fight Pass! Fighting is what we live for. And no one brings you MORE live fights, new shows, and events across multiple combat sports from around the world. With a never-ending supply of fighting in every discipline, there`s always something new to watch. Leave it to the world`s authority in MMA to bring you the Ultimate 24\/7 platform for MORE combat sports, UFC Fight Pass!","entitlementCtaText":"Upgrade licence","entitlementCtaLink":"\/account\/signup","settings":{"videoPreviewInfo":"videoPreviewInfo"}},"ufcLiveStatsApi":{"baseUrl":"https:\/\/d29dxerjsp82wz.cloudfront.net\/api\/v3"},"contentLocalization":"en","cacheableGlobalsTimestamp":1794590648,"breakpoints":{"ufc.images.mobile":"","ufc.images.tablet":"(min-width: 700px)","ufc.images.desktop":"(min-width: 1024px)","ufc.images.extra-large":"(min-width: 1440px)"},"eventLiveStats":{"event_fmid":"1348","final":false,"mode":"live","refreshOdds":true,"simulate":""},"widthBreakpoint":1,"views":{"ajax_path":"\/views\/ajax","ajaxViews":{"views_dom_id:97130b2ab1be02e7caf070eacb02d8449b3d476f183c67434246bdab4d8a4d3d":{"view_name":"related_content_event","view_display_id":"entity_view_1","view_args":"160194","view_path":"\/node\/160194","view_base_path":"\/node\/160194","view_dom_id":"97130b2ab1be02e7caf070eacb02d8449b3d476f183c67434246bdab4d8a4d3d","pager_element":0}}},"viewsAjaxGet":{"related_content_event":"related_content_event"},"field_group":{"html_element":{"mode":"full","context":"view","settings":{"classes":"main-card","id":"main-card","element":"div","show_label":true,"label_element":"h3","label_element_classes":"hidden","attributes":"","effect":"none","speed":"fast","required_fields":false,"formatter":"closed","description":"","direction":"horizontal","width_breakpoint":1,"open":false,"weight":0,"show_empty_fields":false}}},"disableAnimationsUrlParam":"disableAnimations","disableAnimations":false,"user":{"uid":0,"permissionsHash":"2debcf4fc9b389060fb51611b5f94c566ef01446f01a2612e35e6a8f5af6a6f0"}}</script>
-<script src="/sites/default/files/js/js_-nmaxsvjAjAUoIn-qG3Bjl9RmdUYGJqT_Cphfds-8JI.js?scope=footer&amp;delta=0&amp;language=en&amp;theme=ufc&amp;include=eJxNkG1uwyAMhi9Ul4vs3w6AXrCTkKY4Aifpdvql0FaTkHle2_IXmE2RfxxecB2KZrsExJs3Pd_q_rGf64V3cXti0cs2RIccJy2VAkrTYTPTXBtHLAuZEqIlzd11FpdsJPtpe9aQxskoojCFouCIatKLjYsGLDT3xEmKfoCG9BD-tJ30eHY6YHHqxWksuq0tuKR8q8RFV9ajz3GXvNEdqasVozSoyYQG1fcATU8C7tqDqyvCPiDnl6tv4tr3lXb5NvTFfFtsRa0Om51HSr9od9iTHNU1e8WMR3f4J_pRzL3hDwkUnRU"></script>
+    <script type="application/json" data-drupal-selector="drupal-settings-json">{"path":{"baseUrl":"\/","pathPrefix":"","currentPath":"node\/160194","currentPathIsAdmin":false,"isFront":false,"currentLanguage":"en"},"pluralDelimiter":"\u0003","suppressDeprecationErrors":true,"ajaxPageState":{"libraries":"eJx1klGSgyAMhi8kcpF92wMwEaLSInFI0NrTLwXt9qUzDvz5okn-jOCcEMRDwyn6MVGUbgB7N0LlWfWHNjf-mhJ8SOc21Jt3SF2Ag7IY59nShunQFNFS6FYKQbuUVwj9S6vg4507PlhwKQUZuzxaDdHOlFgNkGo8ZBGKXLWF8pmQAiueYkNlaIyicCtne2v00yzKQnJqSATOQunQik2BBgjKMn-GtxbNmOgt1Ogf6N5TzLS_Gu8gdm69vmA1JcprTVZ_yiVaHe1t2gVjVgv4Fq0wNc_sBdVIdI1Z4xnBtdiAY53QmQFiPFHzq-v14zf8FWj2TbW_ArOGLGWV_gnXtkygssITlIrTxZmsh6Db9Un-ZX8mN48763r2C7kcsCEDN3iYCUVf4uQ-jj4WQ4Ztev0ClaqLqkb_AHzY--I","theme":"ufc","theme_token":null},"ajaxTrustedUrl":[],"back_to_top":{"back_to_top_button_trigger":100,"back_to_top_prevent_on_mobile":true,"back_to_top_prevent_in_admin":true,"back_to_top_button_type":"text","back_to_top_button_text":"Back to top"},"accountSettings":{"apiUrl":"https:\/\/ufc.api.onvesper.com","realm":"dce.ufc","app":"dice-id","apiKey":"39d5cb34-799c-4967-8038-fc240bf2984b","loginText":"Unlock MORE of your inner combat sports fan with UFC Fight Pass! Fighting is what we live for. And no one brings you MORE live fights, new shows, and events across multiple combat sports from around the world. With a never-ending supply of fighting in every discipline, there`s always something new to watch. Leave it to the world`s authority in MMA to bring you the Ultimate 24\/7 platform for MORE combat sports, UFC Fight Pass!","ctaText":"Continue watching","ctaLink":"\/account\/login","createAccount":"\/account\/signup","heartbeatApiUrl":"https:\/\/ufc.api.onvesper.com\/prod","hideAccountIcon":true,"hideAddressFields":false,"errorTextGeneral":"There was a problem while loading content. Please try again.","errorTextEntitlement":"Unlock MORE of your inner combat sports fan with UFC Fight Pass! Fighting is what we live for. And no one brings you MORE live fights, new shows, and events across multiple combat sports from around the world. With a never-ending supply of fighting in every discipline, there`s always something new to watch. Leave it to the world`s authority in MMA to bring you the Ultimate 24\/7 platform for MORE combat sports, UFC Fight Pass!","entitlementCtaText":"Upgrade licence","entitlementCtaLink":"\/account\/signup","settings":{"videoPreviewInfo":"videoPreviewInfo"}},"ufcLiveStatsApi":{"baseUrl":"https:\/\/d29dxerjsp82wz.cloudfront.net\/api\/v3"},"contentLocalization":"en","cacheableGlobalsTimestamp":1794805111,"breakpoints":{"ufc.images.mobile":"","ufc.images.tablet":"(min-width: 700px)","ufc.images.desktop":"(min-width: 1024px)","ufc.images.extra-large":"(min-width: 1440px)"},"eventLiveStats":{"event_fmid":"1348","final":false,"mode":"live","refreshOdds":true,"simulate":""},"widthBreakpoint":1,"views":{"ajax_path":"\/views\/ajax","ajaxViews":{"views_dom_id:fe421f9a6fc6af90472b79c50ecfa26ebb16f4b60667e04378363c3a354043d6":{"view_name":"related_content_event","view_display_id":"entity_view_1","view_args":"160194","view_path":"\/node\/160194","view_base_path":"\/node\/160194","view_dom_id":"fe421f9a6fc6af90472b79c50ecfa26ebb16f4b60667e04378363c3a354043d6","pager_element":0},"views_dom_id:bf05657d9bbadbe6c788f0b9a7e129d1f5abc6aea0373e84e0e0e7485caae8a7":{"view_name":"related_content_event","view_display_id":"attachment_1","view_args":"160194","view_path":"\/node\/160194","view_base_path":null,"view_dom_id":"bf05657d9bbadbe6c788f0b9a7e129d1f5abc6aea0373e84e0e0e7485caae8a7","pager_element":0}}},"viewsAjaxGet":{"related_content_event":"related_content_event"},"field_group":{"html_element":{"mode":"full","context":"view","settings":{"classes":"main-card","id":"main-card","element":"div","show_label":true,"label_element":"h3","label_element_classes":"hidden","attributes":"","effect":"none","speed":"fast","required_fields":false,"formatter":"closed","description":"","direction":"horizontal","width_breakpoint":1,"open":false,"weight":0,"show_empty_fields":false}}},"disableAnimationsUrlParam":"disableAnimations","disableAnimations":false,"user":{"uid":0,"permissionsHash":"2debcf4fc9b389060fb51611b5f94c566ef01446f01a2612e35e6a8f5af6a6f0"}}</script>
+<script src="/sites/default/files/js/js_-nmaxsvjAjAUoIn-qG3Bjl9RmdUYGJqT_Cphfds-8JI.js?scope=footer&amp;delta=0&amp;language=en&amp;theme=ufc&amp;include=eJxNUEFuxCAM_FBcPtJbH4AMmOAsiyNwkm1f3xSSVSUEM4M1YxtDUMHybfACH7FK0cmhf1iV86zmH7ZLm8JOZudAMm3RGyw-SW3gsHbuNlUprWOPOYMKoFeWMqTTnIoC7ec9qiLPScFjDeCqYPDYlIbZnMVhhmUUJqryBhD5ReEdm-T4SzpQfRrmMFfZ1v6ZuTwahCprkGP08aSywRN5sBVn6qCxEkSRu4HOE2EY3GJoplKwDku5pDGJ6c8n7_SlOAazfbAVWzO46bkk_sG-h53paBYXfNmZ1Nzg0rlELmesbb5KzqarcKsw1F9AHKgl"></script>
 <script src="https://static.addtoany.com/menu/page.js" async></script>
-<script src="/sites/default/files/js/js__3KEMqC4LOnZhLuGGXypw5V2FdVLfO-CI9eB5kCUrT0.js?scope=footer&amp;delta=2&amp;language=en&amp;theme=ufc&amp;include=eJxNkG1uwyAMhi9Ul4vs3w6AXrCTkKY4Aifpdvql0FaTkHle2_IXmE2RfxxecB2KZrsExJs3Pd_q_rGf64V3cXti0cs2RIccJy2VAkrTYTPTXBtHLAuZEqIlzd11FpdsJPtpe9aQxskoojCFouCIatKLjYsGLDT3xEmKfoCG9BD-tJ30eHY6YHHqxWksuq0tuKR8q8RFV9ajz3GXvNEdqasVozSoyYQG1fcATU8C7tqDqyvCPiDnl6tv4tr3lXb5NvTFfFtsRa0Om51HSr9od9iTHNU1e8WMR3f4J_pRzL3hDwkUnRU"></script>
+<script src="/sites/default/files/js/js__3KEMqC4LOnZhLuGGXypw5V2FdVLfO-CI9eB5kCUrT0.js?scope=footer&amp;delta=2&amp;language=en&amp;theme=ufc&amp;include=eJxNUEFuxCAM_FBcPtJbH4AMmOAsiyNwkm1f3xSSVSUEM4M1YxtDUMHybfACH7FK0cmhf1iV86zmH7ZLm8JOZudAMm3RGyw-SW3gsHbuNlUprWOPOYMKoFeWMqTTnIoC7ec9qiLPScFjDeCqYPDYlIbZnMVhhmUUJqryBhD5ReEdm-T4SzpQfRrmMFfZ1v6ZuTwahCprkGP08aSywRN5sBVn6qCxEkSRu4HOE2EY3GJoplKwDku5pDGJ6c8n7_SlOAazfbAVWzO46bkk_sG-h53paBYXfNmZ1Nzg0rlELmesbb5KzqarcKsw1F9AHKgl"></script>
 <script src="//imasdk.googleapis.com/js/sdkloader/ima3.js" defer async></script>
 <script src="//www.youtube.com/iframe_api" defer async></script>
-<script src="/sites/default/files/js/js_3mOFEIPPa0tRqWzihqO4wLJsxBt3b-2oC1koDvbMf_0.js?scope=footer&amp;delta=5&amp;language=en&amp;theme=ufc&amp;include=eJxNkG1uwyAMhi9Ul4vs3w6AXrCTkKY4Aifpdvql0FaTkHle2_IXmE2RfxxecB2KZrsExJs3Pd_q_rGf64V3cXti0cs2RIccJy2VAkrTYTPTXBtHLAuZEqIlzd11FpdsJPtpe9aQxskoojCFouCIatKLjYsGLDT3xEmKfoCG9BD-tJ30eHY6YHHqxWksuq0tuKR8q8RFV9ajz3GXvNEdqasVozSoyYQG1fcATU8C7tqDqyvCPiDnl6tv4tr3lXb5NvTFfFtsRa0Om51HSr9od9iTHNU1e8WMR3f4J_pRzL3hDwkUnRU"></script>
+<script src="/sites/default/files/js/js_3mOFEIPPa0tRqWzihqO4wLJsxBt3b-2oC1koDvbMf_0.js?scope=footer&amp;delta=5&amp;language=en&amp;theme=ufc&amp;include=eJxNUEFuxCAM_FBcPtJbH4AMmOAsiyNwkm1f3xSSVSUEM4M1YxtDUMHybfACH7FK0cmhf1iV86zmH7ZLm8JOZudAMm3RGyw-SW3gsHbuNlUprWOPOYMKoFeWMqTTnIoC7ec9qiLPScFjDeCqYPDYlIbZnMVhhmUUJqryBhD5ReEdm-T4SzpQfRrmMFfZ1v6ZuTwahCprkGP08aSywRN5sBVn6qCxEkSRu4HOE2EY3GJoplKwDku5pDGJ6c8n7_SlOAazfbAVWzO46bkk_sG-h53paBYXfNmZ1Nzg0rlELmesbb5KzqarcKsw1F9AHKgl"></script>
 <script src="//unpkg.com/aos@next/dist/aos.js"></script>
-<script src="/sites/default/files/js/js_GLmABAX-wdg3LZKYZaMU7cHQzuhoMGFOL4c13Um9A74.js?scope=footer&amp;delta=7&amp;language=en&amp;theme=ufc&amp;include=eJxNkG1uwyAMhi9Ul4vs3w6AXrCTkKY4Aifpdvql0FaTkHle2_IXmE2RfxxecB2KZrsExJs3Pd_q_rGf64V3cXti0cs2RIccJy2VAkrTYTPTXBtHLAuZEqIlzd11FpdsJPtpe9aQxskoojCFouCIatKLjYsGLDT3xEmKfoCG9BD-tJ30eHY6YHHqxWksuq0tuKR8q8RFV9ajz3GXvNEdqasVozSoyYQG1fcATU8C7tqDqyvCPiDnl6tv4tr3lXb5NvTFfFtsRa0Om51HSr9od9iTHNU1e8WMR3f4J_pRzL3hDwkUnRU"></script>
+<script src="/sites/default/files/js/js_7zYjZM60oHSPjD1Jt37n7VLWwYpoOOuGglosnLQ9BMc.js?scope=footer&amp;delta=7&amp;language=en&amp;theme=ufc&amp;include=eJxNUEFuxCAM_FBcPtJbH4AMmOAsiyNwkm1f3xSSVSUEM4M1YxtDUMHybfACH7FK0cmhf1iV86zmH7ZLm8JOZudAMm3RGyw-SW3gsHbuNlUprWOPOYMKoFeWMqTTnIoC7ec9qiLPScFjDeCqYPDYlIbZnMVhhmUUJqryBhD5ReEdm-T4SzpQfRrmMFfZ1v6ZuTwahCprkGP08aSywRN5sBVn6qCxEkSRu4HOE2EY3GJoplKwDku5pDGJ6c8n7_SlOAazfbAVWzO46bkk_sG-h53paBYXfNmZ1Nzg0rlELmesbb5KzqarcKsw1F9AHKgl"></script>
 
   </body>
 </html>
