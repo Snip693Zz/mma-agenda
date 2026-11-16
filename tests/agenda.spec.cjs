@@ -19,16 +19,8 @@ const periodCounts = events => {
   };
 };
 const seedPeriods = periodCounts(seed.events);
-async function embeddedPeriods(page) {
-  return page.evaluate(() => {
-    const today = new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Paris'}).format(new Date());
-    const events = INITIAL.events;
-    return {
-      upcoming: events.filter(e => e.date >= today).length,
-      past: events.filter(e => e.date < today).length,
-    };
-  });
-}
+const embeddedIds = ['ufc334','pfl-dubai','ares45','hex49','ufc-saudi','ares46','ufc335','pfl-lyon'];
+const embeddedPeriods = periodCounts(seed.events.filter(e => embeddedIds.includes(e.id)));
 async function expectLoadStatus(page, success) {
   const status = page.locator('#loadStatus');
   await expect(status).toHaveText(success ? 'Données synchronisées' : 'Affichage des données de secours');
@@ -46,7 +38,7 @@ for (const mode of ['absent', 'invalide', 'valide']) {
     if (mode === 'absent') await page.route('**/mma-data.json', route => route.fulfill({ status: 404, body: 'Absent' }));
     if (mode === 'invalide') await page.route('**/mma-data.json', route => route.fulfill({ contentType: 'application/json', body: '{"events":[{}],"fighterRecords":{}}' }));
     const expected = mode === 'valide' ? seedCounts : embeddedCounts;
-    const periods = mode === 'valide' ? seedPeriods : await embeddedPeriods(page);
+    const periods = mode === 'valide' ? seedPeriods : embeddedPeriods;
     await page.goto(base);
     await expect(page.locator('#calendar button[data-open]').first()).toBeVisible();
     await expect(page.locator('#nEvents')).toHaveText(expected.events);
@@ -110,7 +102,7 @@ for (const mode of ['valide', 'refuse', 'incoherent', 'vide', 'pagination']) {
     const success = ['valide', 'pagination'].includes(mode);
     const fallback = !success;
     const expected = fallback ? embeddedCounts : { ...seedCounts, fighters: String(Number(seedCounts.fighters) + (mode === 'pagination' ? paginationExtra : 0)) };
-    const periods = success ? seedPeriods : await embeddedPeriods(page);
+    const periods = success ? seedPeriods : embeddedPeriods;
     expect(result.ok).toBe(success);
     await expectLoadStatus(page, success);
     await expect(page.locator('#nEvents')).toHaveText(expected.events);
