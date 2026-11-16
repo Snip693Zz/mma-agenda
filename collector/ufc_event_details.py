@@ -26,26 +26,42 @@ def unique(values):
 
 def instant(node):
     raw = node.attrs.get('data-timestamp','')
-    if not re.fullmatch(r'\d{10}|\d{13}',raw):
-        raise ValueError('Horodatage absent ou invalide')
-    value = dt.datetime.fromtimestamp(int(raw)/(1000 if len(raw)==13 else 1),dt.timezone.utc)
-    if not 2000 <= value.year <= 2100:
-        raise ValueError('Année hors limites')
-    local = value.astimezone(ZoneInfo('America/New_York'))
     text = node.text()
     clock = re.search(r'\b(\d{1,2}):(\d{2})\s*(AM|PM)\b',text,re.I)
     if not clock or not 1 <= int(clock[1]) <= 12 or int(clock[2]) > 59:
         raise ValueError('Heure affichée invalide')
     hour = int(clock[1])%12+(12 if clock[3].upper()=='PM' else 0)
-    if (local.hour,local.minute)!=(hour,int(clock[2])):
-        raise ValueError('Heure affichée incompatible')
+    minute = int(clock[2])
     zone = re.search(r'\b(EST|EDT)\b',text)
-    if zone and zone[1] != local.tzname():
-        raise ValueError('Fuseau affiché incompatible')
+    local_zone = ZoneInfo('America/New_York')
+
+    if re.fullmatch(r'\d{10}|\d{13}',raw):
+        value = dt.datetime.fromtimestamp(int(raw)/(1000 if len(raw)==13 else 1),dt.timezone.utc)
+        if not 2000 <= value.year <= 2100:
+            raise ValueError('Année hors limites')
+        local = value.astimezone(local_zone)
+        if (local.hour,local.minute) != (hour,minute):
+            raise ValueError('Heure affichée incompatible')
+        if zone and zone[1] != local.tzname():
+            raise ValueError('Fuseau affiché incompatible')
+        day = re.search(r'\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\.?\s+(\d{1,2})',text)
+        if day and (local.month,local.day) != ('Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split().index(day[1])+1,int(day[2])):
+            raise ValueError('Date affichée incompatible')
+        return value.isoformat().replace('+00:00','Z')
+
     day = re.search(r'\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\.?\s+(\d{1,2})',text)
-    if day and (local.month,local.day)!=('Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split().index(day[1])+1,int(day[2])):
-        raise ValueError('Date affichée incompatible')
-    return value.isoformat().replace('+00:00','Z')
+    if not day:
+        raise ValueError('Timestamp de la zone événement absent et date affichée introuvable')
+    month = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split().index(day[1]) + 1
+    day_number = int(day[2])
+    now = dt.datetime.now(local_zone)
+    year = now.year
+    candidate = dt.datetime(year, month, day_number, hour, minute, tzinfo=local_zone)
+    if candidate < now - dt.timedelta(days=1):
+        candidate = dt.datetime(year + 1, month, day_number, hour, minute, tzinfo=local_zone)
+    if not 2000 <= candidate.year <= 2100:
+        raise ValueError('Année hors limites')
+    return candidate.astimezone(dt.timezone.utc).isoformat().replace('+00:00','Z')
 
 def token(name):
     value = unicodedata.normalize('NFKD',name).encode('ascii','ignore').decode().lower()
@@ -67,7 +83,7 @@ def extract_details(html, address):
         if not re.match(r'^UFC\b',prefix) or token(headline) in ('tbd vs tbd','tba vs tba'):
             raise ValueError('Titre non exploitable')
         place = unique(n.text() for n in nodes if has(n,'field--name-venue') and n.text())
-        hero = unique(instant(n) for parent in nodes if has(parent,'c-hero__bottom-text') for n in parent.nodes() if n.attrs.get('data-timestamp'))
+        hero = unique(instant(n) for parent in nodes if has(parent,'c-hero__bottom-text') for n in parent.nodes() if n.attrs.get('data-timestamp') or n.text())
         date = dt.datetime.fromisoformat(hero.replace('Z','+00:00')).astimezone(ZoneInfo('America/New_York')).date().isoformat()
         result['event_patch'] = {'title':prefix+' — '+headline,'place':place,'date':date}
         seen = set()
