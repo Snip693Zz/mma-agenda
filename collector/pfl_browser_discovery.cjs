@@ -33,17 +33,26 @@ function redact(value) {
   return String(value).replace(/(['"])X-CSRF-TOKEN(['"])\s*:\s*(['"])[^'"]*/gi, '$1X-CSRF-TOKEN$2$3[redacted]');
 }
 
-function extractDate(text) {
+function extractDate(text, eventUrl) {
   const match = text.match(/\b(MON|TUE|WED|THU|FRI|SAT|SUN)\s+([A-Z]{3})\s+(\d{1,2})\b/i);
-  if (!match) return '';
+  if (!match) return {date: '', source: ''};
   const months = {JAN: 1, FEB: 2, MAR: 3, APR: 4, MAY: 5, JUN: 6, JUL: 7, AUG: 8, SEP: 9, OCT: 10, NOV: 11, DEC: 12};
   const month = months[match[2].toUpperCase()];
-  if (!month) return '';
-  const copyrightMatch = text.match(/(?:©|&copy;|copyright)\s*(20\d{2})/i);
-  if (!copyrightMatch) return '';
+  if (!month) return {date: '', source: ''};
   const day = String(Number(match[3])).padStart(2, '0');
   const monthText = String(month).padStart(2, '0');
-  return `${copyrightMatch[1]}-${monthText}-${day}`;
+  const urlYearMatch = String(eventUrl).match(/(?:^|[-\/])(20\d{2})(?:[-\/]|$)/);
+  if (urlYearMatch) {
+    return {date: `${urlYearMatch[1]}-${monthText}-${day}`, source: 'url_year'};
+  }
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const candidate = new Date(currentYear, month - 1, Number(day));
+  if (candidate >= today) {
+    return {date: `${currentYear}-${monthText}-${day}`, source: 'visible_date+current_year_for_future'};
+  }
+  return {date: '', source: 'past_date_year_ambiguous'};
 }
 
 function extractJsonLdDate(payloads, eventUrl) {
@@ -166,10 +175,13 @@ async function main() {
           candidate.date_source = 'jsonld';
         }
         if (!candidate.date) {
-          candidate.date = extractDate(snapshot.text);
-          if (candidate.date) {
-            candidate.start_at = candidate.date;
-            candidate.date_source = 'visible_date+copyright_year';
+          const extracted = extractDate(snapshot.text, url);
+          if (extracted.date) {
+            candidate.date = extracted.date;
+            candidate.start_at = extracted.date;
+            candidate.date_source = extracted.source;
+          } else {
+            candidate.date_source = extracted.source;
           }
         }
         const extraction = spawnSync('python3', [
