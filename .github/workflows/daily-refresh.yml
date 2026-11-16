@@ -75,6 +75,19 @@ jobs:
           else
             python collector/pfl_reconciliation.py --output reports/pfl-reconciliation.json
           fi
+      - name: Publier les propositions PFL éligibles
+        id: pfl_publisher
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          PFL_PUBLISH: ${{ vars.PFL_PUBLISH }}
+        run: |
+          if [ "${PFL_PUBLISH,,}" = "true" ]; then
+            python collector/pfl_publisher.py --output reports/pfl-publication-result.json --publish
+          else
+            python collector/pfl_publisher.py --output reports/pfl-publication-result.json
+          fi
       - name: Vérifier le raccordement et la désactivation du publieur
         if: ${{ success() && steps.collect.outcome == 'success' && steps.journal.outcome == 'success' }}
         env:
@@ -106,6 +119,7 @@ jobs:
             reports/pfl-daily-discovery.json
             reports/pfl-publication-guardrails.json
             reports/pfl-reconciliation.json
+            reports/pfl-publication-result.json
           if-no-files-found: warn
           retention-days: 14
       - name: Conserver le statut d’échec de la collecte
