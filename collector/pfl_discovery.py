@@ -76,17 +76,25 @@ def _iter_jsonld(value):
             yield from _iter_jsonld(child)
 
 
+def _extract_title(html: str) -> str:
+    og = re.search(r'<meta[^>]*property=["\']og:title["\'][^>]*content=["\']([^"\']+)["\']', html, re.IGNORECASE)
+    if not og:
+        og = re.search(r'<meta[^>]*content=["\']([^"\']+)["\'][^>]*property=["\']og:title["\']', html, re.IGNORECASE)
+    if og:
+        return og.group(1).strip()
+    h1 = re.search(r'<h1[^>]*>(.*?)</h1>', html, re.IGNORECASE | re.DOTALL)
+    if h1:
+        return re.sub(r'<[^>]+>', '', h1.group(1)).strip()
+    h2 = re.search(r'<h2[^>]*>(.*?)</h2>', html, re.IGNORECASE | re.DOTALL)
+    if h2:
+        return re.sub(r'<[^>]+>', '', h2.group(1)).strip()
+    return ''
+
+
 def _extract_html_metadata(event_html: str, expected: str) -> dict:
     """Repli HTML strict : titre et date valide requis, sinon revue."""
     html = event_html or ''
-    title = ''
-    og = re.search(r'<meta[^>]+property=["\']og:title["\'][^>]+content=["\']([^"\']+)["\']', html, re.IGNORECASE)
-    if og:
-        title = og.group(1).strip()
-    else:
-        h1 = re.search(r'<h1[^>]*>(.*?)</h1>', html, re.IGNORECASE | re.DOTALL)
-        if h1:
-            title = re.sub(r'<[^>]+>', '', h1.group(1)).strip()
+    title = _extract_title(html)
     start = ''
     date = ''
     time_match = re.search(r'<time[^>]+datetime=["\']([^"\']+)["\']', html, re.IGNORECASE)
