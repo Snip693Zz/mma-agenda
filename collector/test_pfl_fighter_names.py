@@ -32,6 +32,18 @@ class FighterNameTests(unittest.TestCase):
         ]), SOURCE_URL)
         self.assertEqual(fights[0]['card_source'], SOURCE_URL)
 
+    def test_fragment_allowed_when_enabled(self):
+        fights = extract_structured_fights(card([
+            row('/fighter/ryan-bader/', 'Ryan Bader', '/fighter/antonio-carlos-junior/', 'Antonio Carlos Junior')
+        ]), SOURCE_URL + '#fight-card', allow_fragment=True)
+        self.assertEqual(fights[0]['card_source'], SOURCE_URL + '#fight-card')
+
+    def test_fragment_rejected_by_default(self):
+        fights = extract_structured_fights(card([
+            row('/fighter/ryan-bader/', 'Ryan Bader', '/fighter/antonio-carlos-junior/', 'Antonio Carlos Junior')
+        ]), SOURCE_URL + '#fight-card')
+        self.assertEqual(fights, [])
+
     def test_nested_name_order(self):
         fights = extract_structured_fights(card([
             row('/fighter/ryan-bader/', '<span>Ryan</span> <b>Bader</b>',

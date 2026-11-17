@@ -192,7 +192,7 @@ def reconcile_event(event: dict, existing_fights: list[dict], html: str, discove
         source_url = str(discovery.get('source_url') or source_url)
         html = str(discovery.get('card_html') or html)
         page_html = str(discovery.get('page_html') or '')
-    observed = extract_structured_fights(html, source_url)
+    observed = extract_structured_fights(html, source_url, allow_fragment=True)
     source_kind = 'official' if event.get('official') else 'secondary'
     if discovery:
         observed_date = str(discovery.get('date') or '')

@@ -78,10 +78,11 @@ def _readable_name(node):
     return re.sub(r'\s+', ' ', ' '.join(kept)).strip()
 
 
-def extract_pairs(html, source_url):
+def extract_pairs(html, source_url, allow_fragment=False):
     source = urlsplit(source_url)
     if (source.scheme != 'https' or source.netloc not in ('pflmma.com', 'www.pflmma.com')
-            or source.query or source.fragment or not re.fullmatch(r'/event/[a-zA-Z0-9-]+/?', source.path)):
+            or source.query or (not allow_fragment and source.fragment)
+            or not re.fullmatch(r'/event/[a-zA-Z0-9-]+/?', source.path)):
         raise ValueError('Fiche PFL officielle requise')
     result = {'status': 'review_required', 'reason': '', 'pairs': [], 'row_count': 0,
               'duplicate_rows': 0, 'automatic_publication': False, 'database_writes': False,
@@ -150,10 +151,10 @@ def extract_pairs(html, source_url):
     return result
 
 
-def extract_structured_fights(html, source_url):
+def extract_structured_fights(html, source_url, allow_fragment=False):
     """Retourne uniquement les combats issus d'une carte structurellement valide."""
     try:
-        validation = extract_pairs(html, source_url)
+        validation = extract_pairs(html, source_url, allow_fragment=allow_fragment)
     except (TypeError, ValueError):
         return []
     if validation.get('status') != 'candidate_pairs' or not validation.get('pairs'):
