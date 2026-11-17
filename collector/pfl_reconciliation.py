@@ -18,6 +18,11 @@ from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
 try:
+    from .pfl_reconciliation_loader import load_baseline
+except ImportError:
+    from pfl_reconciliation_loader import load_baseline
+
+try:
     from .source_validation import assess_source
 except ImportError:
     from source_validation import assess_source
@@ -286,14 +291,7 @@ def main() -> int:
     args = parser.parse_args()
 
     client = supabase_client()
-    events = client.table('events').select('*').eq('org', 'PFL').execute().data or []
-    if args.limit > 0:
-        events = events[:args.limit]
-    fights_by_event = {}
-    if events:
-        fights = client.table('fights').select('event_id,card_position,position,fighter_a,fighter_b').in_('event_id', [event['id'] for event in events]).execute().data or []
-        for fight in fights:
-            fights_by_event.setdefault(fight['event_id'], []).append(fight)
+    events, fights_by_event = load_baseline(client, limit=args.limit)
 
     discovery_candidates = load_discovery_candidates(args.discovery) if args.discovery else {}
     report = build_report(events, fights_by_event, discovery_candidates=discovery_candidates)

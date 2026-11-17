@@ -23,7 +23,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Tester la preparation et le chargement sans secrets
+      - name: Tester la preparation, le chargement et le point entree sans secrets
         working-directory: collector
         run: |
-          python -m unittest -v test_pfl_reconciliation_inputs test_pfl_reconciliation_loader
+          python -m unittest -v test_pfl_reconciliation_inputs test_pfl_reconciliation_loader test_pfl_reconciliation_entrypoint
