@@ -52,17 +52,7 @@ function extractDate(text, eventUrl) {
   if (candidate >= today) {
     return {date: `${currentYear}-${monthText}-${day}`, source: 'visible_date+current_year_for_future'};
   }
-  const monthNames = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
-  const fullDatePattern = new RegExp('\\b' + monthNames[month - 1] + '\\s+' + Number(match[3]) + ',\\s*(\\d{4})\\b', 'gi');
-  const years = new Set();
-  for (const yearMatch of text.matchAll(fullDatePattern)) {
-    years.add(yearMatch[1]);
-  }
-  if (years.size === 1) {
-    const year = [...years][0];
-    return {date: `${year}-${monthText}-${day}`, source: 'visible_full_date_year'};
-  }
-  return {date: '', source: 'past_date_year_ambiguous'};
+  return {date: `${currentYear}-${monthText}-${day}`, source: 'current_year_for_past_date'};
 }
 
 function extractJsonLdDate(payloads, eventUrl) {
