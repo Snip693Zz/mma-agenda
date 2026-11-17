@@ -1,0 +1,32 @@
+name: Diagnostic PFL — identité et structure sans publication
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Installer Chromium
+        run: |
+          npm install --no-save --package-lock=false @playwright/test@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Capturer les pages PFL sans base de données
+        run: node collector/pfl_browser_discovery.cjs --output reports/pfl-browser-discovery.json --limit 20
+      - name: Diagnostiquer les captures Lyon et Dubaï
+        run: python collector/pfl_pipeline_diagnostic.py --report reports/pfl-browser-discovery.json
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: pfl-pipeline-diagnostic
+          path: reports/pfl-pipeline-diagnostic.json
+          if-no-files-found: warn
+          retention-days: 14
