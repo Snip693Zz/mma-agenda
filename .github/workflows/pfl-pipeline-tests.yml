@@ -1,0 +1,29 @@
+name: Tests du raccordement PFL
+on:
+  workflow_dispatch:
+  push:
+    branches: [fix/pfl-publication-pipeline]
+    paths:
+      - 'collector/**'
+      - '.github/workflows/pfl-pipeline-tests.yml'
+  pull_request:
+    paths:
+      - 'collector/**'
+      - '.github/workflows/pfl-pipeline-tests.yml'
+permissions:
+  contents: read
+jobs:
+  unittest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Tester la preparation et le chargement sans secrets
+        working-directory: collector
+        run: |
+          python -m unittest -v test_pfl_reconciliation_inputs test_pfl_reconciliation_loader
