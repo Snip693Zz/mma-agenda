@@ -26,6 +26,12 @@ class FighterNameTests(unittest.TestCase):
         self.assertEqual(fights[0]['fighter_a'], 'Ryan Bader')
         self.assertEqual(fights[0]['fighter_b'], 'Antonio Carlos Junior')
 
+    def test_card_source_preserved(self):
+        fights = extract_structured_fights(card([
+            row('/fighter/ryan-bader/', 'Ryan Bader', '/fighter/antonio-carlos-junior/', 'Antonio Carlos Junior')
+        ]), SOURCE_URL)
+        self.assertEqual(fights[0]['card_source'], SOURCE_URL)
+
     def test_nested_name_order(self):
         fights = extract_structured_fights(card([
             row('/fighter/ryan-bader/', '<span>Ryan</span> <b>Bader</b>',

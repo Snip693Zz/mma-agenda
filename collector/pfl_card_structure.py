@@ -196,5 +196,6 @@ def extract_structured_fights(html, source_url):
             'fighter_b_url': fighter_b_url,
             'card_position': 0,
             'position': len(fights),
+            'card_source': source_url,
         })
     return fights
