@@ -43,6 +43,8 @@ TAG_RE = re.compile(r'<[^>]+>')
 NOISE = ('pfl record', 'career record', 'professional record', 'winner', 'method', 'round', 'time', 'faceoff', 'face-off')
 DATE_RE = re.compile(r'\b(\d{1,2})\s+(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+(\d{4})\b', re.IGNORECASE)
 MONTHS = {'janvier': 1, 'février': 2, 'mars': 3, 'avril': 4, 'mai': 5, 'juin': 6, 'juillet': 7, 'août': 8, 'septembre': 9, 'octobre': 10, 'novembre': 11, 'décembre': 12}
+EN_DATE_RE = re.compile(r'\b(MON|TUE|WED|THU|FRI|SAT|SUN)\s+([A-Z]{3})\s+(\d{1,2})\b', re.IGNORECASE)
+EN_MONTHS = {'JAN': 1, 'FEB': 2, 'MAR': 3, 'APR': 4, 'MAY': 5, 'JUN': 6, 'JUL': 7, 'AUG': 8, 'SEP': 9, 'OCT': 10, 'NOV': 11, 'DEC': 12}
 
 
 def clean_text(value: str) -> str:
@@ -77,8 +79,8 @@ def extract_fights(html: str) -> list[dict]:
     return fights
 
 
-def extract_event_date(html: str) -> str | None:
-    """Unique French date in primary content; ambiguous or invalid means unknown."""
+def extract_event_date(html: str, source_url: str = '') -> str | None:
+    """Date officielle visible dans le contenu principal ; ambiguïté signifie inconnu."""
     if not isinstance(html, str):
         return None
     tree = TextTree(html)
@@ -105,7 +107,31 @@ def extract_event_date(html: str) -> str | None:
                 dates.add(dt.date(int(year), MONTHS[month.lower()], int(day)).isoformat())
             except (ValueError, KeyError):
                 return None
-    return next(iter(dates)) if len(dates) == 1 else None
+    english_dates = set()
+    for node in nodes:
+        for _, month_text, day_text in EN_DATE_RE.findall(getattr(node, 'text', '')):
+            month = EN_MONTHS.get(month_text.upper())
+            if not month:
+                continue
+            english_dates.add((month, int(day_text)))
+    if len(dates) == 1:
+        return next(iter(dates))
+    if len(dates) > 1:
+        return None
+    if len(english_dates) != 1:
+        return None
+    month, day = next(iter(english_dates))
+    url_year_match = re.search(r'(?:^|[-/])(20\d{2})(?:[-/]|$)', source_url or '')
+    if url_year_match:
+        try:
+            return dt.date(int(url_year_match.group(1)), month, day).isoformat()
+        except ValueError:
+            return None
+    now = dt.date.today()
+    candidate = dt.date(now.year, month, day)
+    if candidate >= now:
+        return candidate.isoformat()
+    return None
 
 
 def extract_event_identity(html: str, event: dict) -> bool:
@@ -121,7 +147,7 @@ def fetch_page(url: str) -> str:
     request = Request(url, headers={'User-Agent': 'mma-agenda/1.0 (+https://github.com/Snip693Zz/mma-agenda)'})
     with urlopen(request, timeout=30) as response:
         if response.status != 200:
-            raise ValueError('Réponse PFL non valide')
+            raise ValueError('Fiche PFL non valide')
         return response.read().decode('utf-8')
 
 
@@ -129,7 +155,7 @@ def reconcile_event(event: dict, existing_fights: list[dict], html: str) -> dict
     source_url = str(event.get('url') or '')
     observed = extract_structured_fights(html, source_url)
     source_kind = 'official' if event.get('official') else 'secondary'
-    observed_date = extract_event_date(html) or ''
+    observed_date = extract_event_date(html, source_url) or ''
     validation = assess_source(
         str(event.get('date') or observed_date),
         observed_date,
