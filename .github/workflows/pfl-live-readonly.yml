@@ -1,4 +1,5 @@
 name: PFL reel - lecture seule
+# Trigger version: 2026-11-17-1
 on:
   workflow_dispatch:
   push:
