@@ -29,7 +29,7 @@ jobs:
         run: |
           echo "Commit: $GITHUB_SHA"
           echo "Ref: $GITHUB_REF"
-          echo 'Decouverte: vingt fiches maximum; rapprochement: cinq evenements maximum; aucune publication.'
+          echo 'Vingt fiches maximum; cinq evenements rapproches maximum; sans publication ni artefact.'
       - name: Installer les dependances
         run: |
           python -m pip install supabase
@@ -49,7 +49,8 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: python collector/pfl_reconciliation.py --limit 5 --discovery reports/pfl-live-discovery.json --output reports/pfl-live-readonly.json
-      - name: Verifier et resumer le rapport reel
+      - name: Diagnostic compact Lyon et Dubai
+        if: always()
         env:
           DISCOVERY_OUTCOME: ${{ steps.discovery.outcome }}
         run: |
@@ -57,12 +58,16 @@ jobs:
           import json
           import os
           from pathlib import Path
-          discovery = json.loads(Path('reports/pfl-live-discovery.json').read_text())
-          report = json.loads(Path('reports/pfl-live-readonly.json').read_text())
-          if discovery.get('mode') != 'pfl_browser_discovery_report' or report.get('mode') != 'pfl_reconciliation_report':
-              raise SystemExit('Format de rapport inattendu')
-          if discovery.get('database_writes') is not False or discovery.get('automatic_publication') is not False or report.get('automatic_publication') is not False or 'saved' in report:
-              raise SystemExit('Contrat de lecture seule non respecte')
+          from collector.pfl_section_candidates import TextTree, heading_text
+          from collector.pfl_card_structure import extract_pairs
+          def load(name):
+              path = Path('reports') / name
+              return json.loads(path.read_text()) if path.exists() else {}
+          def short(value, limit=160):
+              return ' '.join(str(value or '').split())[:limit]
+          browser = load('pfl-live-browser.json')
+          discovery = load('pfl-live-discovery.json')
+          report = load('pfl-live-readonly.json')
           observations = report.get('reports', [])
           eligible = sum(item.get('source_validation', {}).get('can_reconcile') is True for item in observations)
           summary = {
@@ -72,31 +77,62 @@ jobs:
               'events_observed': report.get('events_observed', 0),
               'fights_observed': report.get('fights_observed', 0),
               'sources_reconcilable': eligible,
-              'errors': len(report.get('errors', [])),
+              'reconciliation_errors': len(report.get('errors', [])),
               'proposals': report.get('summary', {}),
-              'report_saved_to_database': False,
+              'saved_field_present': 'saved' in report,
           }
-          text = json.dumps(summary, ensure_ascii=False, indent=2)
+          details = []
+          for item in browser.get('candidates', []):
+              url = item.get('source_url', '')
+              if url.rstrip('/').split('/')[-1] not in ('pfl-lyon', 'pfl-lyon-2026', 'pfl-returns-to-dubai'):
+                  continue
+              tree = TextTree(item.get('page_html') or '')
+              headings = [n for n in tree.root.walk() if n.tag in ('h1', 'h2')]
+              card = item.get('card_html') or ''
+              structural = extract_pairs(card, url)
+              card_tree = TextTree(card)
+              rows = [n for n in card_tree.root.walk() if 'matchupRow' in (n.attrs.get('class') or '').split()]
+              samples = []
+              for index, row in enumerate(rows):
+                  links = [n for n in row.walk() if n.tag == 'a' and '/fighter/' in n.attrs.get('href', '')]
+                  unique = sorted(set(n.attrs.get('href', '') for n in links))
+                  if index < 2 or len(unique) != 2:
+                      samples.append({'row_index': index, 'closed': row.closed, 'distinct_fighter_links': len(unique), 'links': [{'href': short(n.attrs.get('href')), 'direct_text': short(n.text, 70), 'nested_text': short(heading_text(n), 70)} for n in links[:4]]})
+                  if len(samples) >= 4:
+                      break
+              details.append({
+                  'source_url': short(url),
+                  'title': short(item.get('title')),
+                  'date': short(item.get('date')),
+                  'date_source': short(item.get('date_source')),
+                  'jsonld_start_date': short(item.get('jsonld_start_date')),
+                  'date_excerpt': short(item.get('text_excerpt'), 220),
+                  'page_malformed': tree.malformed,
+                  'page_unclosed_tags': [n.tag for n in tree.stack[1:]][:8],
+                  'main_count': sum(n.tag == 'main' for n in tree.root.walk()),
+                  'h1_count': sum(n.tag == 'h1' for n in headings),
+                  'headings': [{'tag': n.tag, 'text': short(heading_text(n))} for n in headings[:8]],
+                  'card_status': structural.get('status'),
+                  'card_reason': structural.get('reason'),
+                  'card_rows': len(rows),
+                  'card_malformed': card_tree.malformed,
+                  'row_samples': samples,
+              })
+          compact = {'summary': summary, 'targeted_diagnostics': details[:3],
+                     'reconciliation': [{'event_id': short(i.get('event_id')), 'event_title': short(i.get('event')), 'validation': i.get('source_validation'), 'fight_count': len(i.get('observed_fights', []))} for i in observations[:5]],
+                     'errors': [{'event_id': short(e.get('event_id')), 'reason': short(e.get('reason'))} for e in report.get('errors', [])[:5]]}
+          text = json.dumps(compact, ensure_ascii=True, indent=2)
+          print('DEBUT DIAGNOSTIC COMPACT PFL')
           print(text)
+          print('FIN DIAGNOSTIC COMPACT PFL')
           with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as stream:
-              stream.write('## Diagnostic navigateur PFL sans publication\n\n```json\n' + text + '\n```\n')
-          for candidate in discovery.get('candidates', []):
-              print(json.dumps({'source_url': candidate.get('source_url'), 'metadata': candidate.get('metadata'), 'extraction_status': candidate.get('extraction_status'), 'row_count': candidate.get('row_count'), 'card_html_present': bool(candidate.get('card_html'))}, ensure_ascii=False))
-          for item in observations:
-              print(json.dumps({'event_id': item.get('event_id'), 'source_url': item.get('source_url'), 'source_validation': item.get('source_validation'), 'fight_count': len(item.get('observed_fights', []))}, ensure_ascii=False))
+              stream.write('## Diagnostic compact PFL — sans publication ni artefact\n\n```json\n' + text.replace('`', '\u0060') + '\n```\n')
+          if discovery.get('mode') != 'pfl_browser_discovery_report' or report.get('mode') != 'pfl_reconciliation_report':
+              raise SystemExit('Rapport manquant ou format inattendu : voir les etapes precedentes')
+          if discovery.get('database_writes') is not False or discovery.get('automatic_publication') is not False or report.get('automatic_publication') is not False or 'saved' in report:
+              raise SystemExit('Contrat de lecture seule non respecte')
           if os.environ['DISCOVERY_OUTCOME'] != 'success' or discovery.get('errors') or report.get('errors') or not observations:
-              raise SystemExit('Diagnostic incomplet : consulter les rapports JSON')
+              raise SystemExit('Diagnostic incomplet : voir le bloc compact ci-dessus')
           if not eligible:
-              raise SystemExit('Aucune source exploitable pour le rapprochement : consulter les rapports JSON')
+              raise SystemExit('Aucune source exploitable : voir le bloc compact ci-dessus')
           PY
-      - name: Conserver les rapports meme en cas de blocage
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: pfl-live-readonly
-          path: |
-            reports/pfl-live-browser.json
-            reports/pfl-live-discovery.json
-            reports/pfl-live-readonly.json
-          if-no-files-found: warn
-          retention-days: 7
