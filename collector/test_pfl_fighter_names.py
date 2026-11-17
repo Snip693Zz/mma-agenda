@@ -133,7 +133,7 @@ class RepeatedLinkTests(unittest.TestCase):
         ]), SOURCE_URL)
         self.assertEqual(fights, [])
 
-    def test_duplicate_fighter_in_row_refused_with_names(self):
+    def test_duplicate_link_with_same_name_is_tolerated(self):
         html = card([
             "<div class='matchupRow'>"
             + anchor('/fighter/ryan-bader/', 'Ryan Bader')
@@ -142,7 +142,10 @@ class RepeatedLinkTests(unittest.TestCase):
             + '</div>'
         ])
         result = extract_pairs(html, SOURCE_URL)
-        self.assertEqual(result['reason'], 'duplicate_fighter_in_row')
+        self.assertEqual(result['reason'], 'identity_names_and_card_sections_not_validated')
+        fights = extract_structured_fights(html, SOURCE_URL)
+        self.assertEqual(fights[0]['fighter_a'], 'Ryan Bader')
+        self.assertEqual(fights[0]['fighter_b'], 'Antonio Carlos Junior')
 
 
 if __name__ == '__main__':

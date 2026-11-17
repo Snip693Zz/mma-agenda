@@ -4,7 +4,10 @@ from html.parser import HTMLParser
 from urllib.parse import urljoin, urlsplit
 
 VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'}
-IGNORED_NAME_LABELS = {'MORE INFO', 'VIEW PROFILE', 'VIEW FIGHTER PROFILE', 'FIGHTER PROFILE', 'PROFILE', 'MORE', 'INFO'}
+LABEL_PATTERN = re.compile(
+    r'\b(?:MORE\s+INFO|VIEW\s+FIGHTER\s+PROFILE|VIEW\s+PROFILE|FIGHTER\s+PROFILE|MORE|INFO|VIEW|PROFILE)\b',
+    re.IGNORECASE,
+)
 
 
 class Node:
@@ -68,10 +71,10 @@ def _readable_name(node):
     visit(node)
     kept = []
     for part in parts:
-        normalized = re.sub(r'\s+', ' ', part).strip()
-        if not normalized or normalized.upper() in IGNORED_NAME_LABELS:
-            continue
-        kept.append(normalized)
+        cleaned = LABEL_PATTERN.sub(' ', part)
+        normalized = re.sub(r'\s+', ' ', cleaned).strip()
+        if normalized:
+            kept.append(normalized)
     return re.sub(r'\s+', ' ', ' '.join(kept)).strip()
 
 
