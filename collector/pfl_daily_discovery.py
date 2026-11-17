@@ -143,6 +143,7 @@ def run_browser_discovery(client, browser_report_path: str, today: str, limit: i
             'observed_pairs': item.get('pairs') or [],
             'row_count': item.get('row_count') or 0,
             'extraction_status': item.get('extraction_status') or 'not_available',
+            'card_html': item.get('card_html') or '',
             **classification,
         })
         if item.get('error'):
