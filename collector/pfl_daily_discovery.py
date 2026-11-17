@@ -135,6 +135,9 @@ def run_browser_discovery(client, browser_report_path: str, today: str, limit: i
             'start_at': item.get('start_at') or '',
             'place': '',
             'url': url.rstrip('/'),
+            'date_source': item.get('date_source') or '',
+            'boxemag_date': item.get('boxemag_date') or '',
+            'boxemag_url': item.get('boxemag_url') or '',
         }
         classification = classify_candidate(metadata, existing_urls, today)
         candidates.append({

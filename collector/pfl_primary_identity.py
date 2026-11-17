@@ -1,5 +1,7 @@
 """Conservative primary-heading check, not full event validation."""
 import re
+import unicodedata
+from html import unescape
 try:
     from .pfl_section_candidates import TextTree, heading_text
 except ImportError:
@@ -11,6 +13,17 @@ def _og_title(html):
     if not match:
         match = re.search(r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:title["\']', html or '', re.IGNORECASE)
     return match.group(1).strip() if match else ''
+
+
+def _normalize(value):
+    value = unescape(value or '')
+    value = re.sub(r'\s*\|\s*Professional Fighters League\s*$', '', value, flags=re.IGNORECASE)
+    value = ''.join(c for c in unicodedata.normalize('NFD', value) if not unicodedata.combining(c))
+    return ' '.join(value.split()).casefold()
+
+
+def _matches(observed, expected):
+    return bool(observed) and (observed == expected or (len(observed) >= 3 and expected.startswith(observed + ' ')))
 
 
 def primary_identity_matches(html, event):
@@ -33,13 +46,16 @@ def primary_identity_matches(html, event):
     if len(mains) > 1:
         return False
     scope = mains[0] if mains else tree.root
-    headings = [n for n in visible(scope) if n.tag == 'h1']
-    normalize = lambda text: ' '.join(text.split()).casefold()
-    title_norm = normalize(title)
+    nodes = list(visible(scope))
+    headings = [n for n in nodes if n.tag == 'h1']
+    title_norm = _normalize(title)
     if len(headings) == 1:
-        heading_norm = normalize(heading_text(headings[0]))
-        return heading_norm == title_norm or (len(heading_norm) >= 3 and title_norm.startswith(heading_norm))
-    if len(headings) == 0:
-        og_norm = normalize(_og_title(html))
-        return bool(og_norm) and (og_norm == title_norm or (len(og_norm) >= 3 and title_norm.startswith(og_norm)))
-    return False
+        return _matches(_normalize(heading_text(headings[0])), title_norm)
+    if headings:
+        return False
+    og_norm = _normalize(_og_title(html))
+    secondary = [_normalize(heading_text(n)) for n in nodes if n.tag == 'h2']
+    if secondary:
+        matching = [value for value in secondary if _matches(value, title_norm)]
+        return len(matching) == 1 and len(matching[0].split()) >= 2 and matching[0] == og_norm
+    return _matches(og_norm, title_norm)
