@@ -151,11 +151,50 @@ def fetch_page(url: str) -> str:
         return response.read().decode('utf-8')
 
 
-def reconcile_event(event: dict, existing_fights: list[dict], html: str) -> dict:
+def normalized_slug(url: str) -> str:
+    try:
+        slug = urlsplit(url or '').path.rstrip('/').split('/')[-1].lower()
+    except ValueError:
+        return ''
+    return re.sub(r'-20\d{2}$', '', slug)
+
+
+def load_discovery_candidates(path: str) -> dict[str, dict]:
+    report = json.loads(Path(path).read_text(encoding='utf-8'))
+    if report.get('mode') != 'pfl_browser_discovery_report':
+        raise ValueError('Rapport de découverte PFL invalide')
+    candidates = {}
+    for item in report.get('candidates', []):
+        metadata = item.get('metadata') or {}
+        date = str(metadata.get('date') or '').strip()
+        card_html = item.get('card_html') or ''
+        if not date or not card_html:
+            continue
+        try:
+            dt.date.fromisoformat(date)
+        except ValueError:
+            continue
+        slug = normalized_slug(item.get('source_url') or '')
+        if slug and slug not in candidates:
+            candidates[slug] = {
+                'source_url': item.get('source_url') or '',
+                'date': date,
+                'card_html': card_html,
+            }
+    return candidates
+
+
+def reconcile_event(event: dict, existing_fights: list[dict], html: str, discovery: dict | None = None) -> dict:
     source_url = str(event.get('url') or '')
+    if discovery:
+        source_url = str(discovery.get('source_url') or source_url)
+        html = str(discovery.get('card_html') or html)
     observed = extract_structured_fights(html, source_url)
     source_kind = 'official' if event.get('official') else 'secondary'
-    observed_date = extract_event_date(html, source_url) or ''
+    if discovery:
+        observed_date = str(discovery.get('date') or '')
+    else:
+        observed_date = extract_event_date(html, source_url) or ''
     validation = assess_source(
         str(event.get('date') or observed_date),
         observed_date,
@@ -171,7 +210,7 @@ def reconcile_event(event: dict, existing_fights: list[dict], html: str) -> dict
     return {
         'event_id': event.get('id'),
         'event': event.get('title'),
-        'source_url': event.get('url'),
+        'source_url': source_url,
         'source_validation': validation,
         'observed_fights': observed,
         'proposals': proposals,
@@ -189,12 +228,17 @@ def supabase_client():
     return create_client(url, key)
 
 
-def build_report(events: list[dict], fights_by_event: dict[str, list[dict]], fetcher=fetch_page) -> dict:
+def build_report(events: list[dict], fights_by_event: dict[str, list[dict]], fetcher=fetch_page, discovery_candidates: dict[str, dict] | None = None) -> dict:
     reports, errors = [], []
+    discovery_candidates = discovery_candidates or {}
     for event in events:
         try:
-            html = fetcher(event.get('url') or '')
-            reports.append(reconcile_event(event, fights_by_event.get(event.get('id'), []), html))
+            discovery = discovery_candidates.get(normalized_slug(event.get('url') or ''))
+            if discovery:
+                reports.append(reconcile_event(event, fights_by_event.get(event.get('id'), []), '', discovery))
+            else:
+                html = fetcher(event.get('url') or '')
+                reports.append(reconcile_event(event, fights_by_event.get(event.get('id'), []), html))
         except (HTTPError, URLError, ValueError) as error:
             errors.append({'event_id': event.get('id'), 'url': event.get('url'), 'reason': str(error)})
     proposals = [proposal for report in reports for proposal in report['proposals']]
@@ -234,6 +278,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description='Rapprochement PFL en mode rapport')
     parser.add_argument('--limit', type=int, default=0)
     parser.add_argument('--output', default='reports/pfl-reconciliation.json')
+    parser.add_argument('--discovery', default='')
     parser.add_argument('--apply', action='store_true')
     args = parser.parse_args()
 
@@ -247,7 +292,8 @@ def main() -> int:
         for fight in fights:
             fights_by_event.setdefault(fight['event_id'], []).append(fight)
 
-    report = build_report(events, fights_by_event)
+    discovery_candidates = load_discovery_candidates(args.discovery) if args.discovery else {}
+    report = build_report(events, fights_by_event, discovery_candidates=discovery_candidates)
     if args.apply:
         report['saved'] = save_report(client, report)
 
