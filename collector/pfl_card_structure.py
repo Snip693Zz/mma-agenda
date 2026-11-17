@@ -4,11 +4,13 @@ from html.parser import HTMLParser
 from urllib.parse import urljoin, urlsplit
 
 VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'}
+IGNORED_NAME_LABELS = {'MORE INFO', 'VIEW PROFILE', 'VIEW FIGHTER PROFILE', 'FIGHTER PROFILE', 'PROFILE', 'MORE', 'INFO'}
 
 
 class Node:
     def __init__(self, tag='', attrs=()):
         self.tag, self.attrs, self.children, self.closed, self.text = tag, dict(attrs), [], False, ''
+        self.content = []
 
     def walk(self):
         yield self
@@ -26,7 +28,9 @@ class Tree(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         node = Node(tag, attrs)
-        self.stack[-1].children.append(node)
+        parent = self.stack[-1]
+        parent.children.append(node)
+        parent.content.append(('node', node))
         if tag in VOID:
             node.closed = True
         else:
@@ -35,7 +39,9 @@ class Tree(HTMLParser):
     def handle_startendtag(self, tag, attrs):
         node = Node(tag, attrs)
         node.closed = True
-        self.stack[-1].children.append(node)
+        parent = self.stack[-1]
+        parent.children.append(node)
+        parent.content.append(('node', node))
 
     def handle_endtag(self, tag):
         if len(self.stack) > 1 and self.stack[-1].tag == tag:
@@ -44,7 +50,29 @@ class Tree(HTMLParser):
             self.malformed = True
 
     def handle_data(self, data):
-        self.stack[-1].text += data
+        parent = self.stack[-1]
+        parent.text += data
+        parent.content.append(('text', data))
+
+
+def _readable_name(node):
+    parts = []
+
+    def visit(current):
+        for kind, value in current.content:
+            if kind == 'text':
+                parts.append(value)
+            else:
+                visit(value)
+
+    visit(node)
+    kept = []
+    for part in parts:
+        normalized = re.sub(r'\s+', ' ', part).strip()
+        if not normalized or normalized.upper() in IGNORED_NAME_LABELS:
+            continue
+        kept.append(normalized)
+    return re.sub(r'\s+', ' ', ' '.join(kept)).strip()
 
 
 def extract_pairs(html, source_url):
@@ -144,8 +172,12 @@ def extract_structured_fights(html, source_url):
                     or url.query or url.fragment):
                 return []
             canonical = 'https://pflmma.com' + url.path.rstrip('/')
-            name = re.sub(r'\s+', ' ', (node.text or '')).strip()
-            if canonical not in fighters and name:
+            name = _readable_name(node)
+            if not name:
+                continue
+            if canonical in fighters and fighters[canonical] != name:
+                return []
+            if canonical not in fighters:
                 fighters[canonical] = name
         if len(fighters) != 2:
             return []
