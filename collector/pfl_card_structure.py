@@ -72,30 +72,7 @@ def _fighter_links(row, source_url):
     return links
 
 
-def extract_pairs(html, source_url):
-    source = urlsplit(source_url)
-    if (source.scheme != 'https' or source.netloc not in ('pflmma.com', 'www.pflmma.com')
-            or source.query or source.fragment or not re.fullmatch(r'/event/[a-zA-Z0-9-]+/?', source.path)):
-        raise ValueError('Fiche PFL officielle requise')
-    result = {'status': 'review_required', 'reason': '', 'pairs': [], 'row_count': 0,
-              'duplicate_rows': 0, 'automatic_publication': False, 'database_writes': False,
-              'source_url': source_url, 'event_identity_validated': False,
-              'offending_row_index': None, 'offending_row_links': []}
-    tree = Tree(html)
-    components = [n for n in tree.root.walk() if n.attrs.get('id') == 'fight_card_component']
-    if tree.malformed or not components or not components[0].closed:
-        result['reason'] = 'missing_ambiguous_or_incomplete_component'
-        return result
-    component = components[0]
-    nested_components = [n for n in component.walk() if n is not component and n.attrs.get('id') == 'fight_card_component']
-    if nested_components:
-        result['reason'] = 'nested_card_component'
-        return result
-    if len(components) > 1:
-        result['reason'] = 'missing_ambiguous_or_incomplete_component'
-        return result
-    rows = [n for n in component.walk() if 'matchupRow' in (n.attrs.get('class') or '').split()]
-    result['row_count'] = len(rows)
+def _validate_rows(rows, source_url, result):
     if not rows:
         result['reason'] = 'no_structured_rows'
         return result
@@ -135,20 +112,62 @@ def extract_pairs(html, source_url):
     return result
 
 
-def extract_structured_fights(html, source_url):
+def extract_pairs(html, source_url, allow_fragment=False):
+    source = urlsplit(source_url)
+    if (source.scheme != 'https' or source.netloc not in ('pflmma.com', 'www.pflmma.com')
+            or source.query or source.fragment or not re.fullmatch(r'/event/[a-zA-Z0-9-]+/?', source.path)):
+        raise ValueError('Fiche PFL officielle requise')
+    result = {'status': 'review_required', 'reason': '', 'pairs': [], 'row_count': 0,
+              'duplicate_rows': 0, 'automatic_publication': False, 'database_writes': False,
+              'source_url': source_url, 'event_identity_validated': False,
+              'offending_row_index': None, 'offending_row_links': []}
+    tree = Tree(html)
+    if tree.malformed:
+        result['reason'] = 'missing_ambiguous_or_incomplete_component'
+        return result
+    components = [n for n in tree.root.walk() if n.attrs.get('id') == 'fight_card_component']
+    if components:
+        if not components[0].closed:
+            result['reason'] = 'missing_ambiguous_or_incomplete_component'
+            return result
+        component = components[0]
+        nested_components = [n for n in component.walk() if n is not component and n.attrs.get('id') == 'fight_card_component']
+        if nested_components:
+            result['reason'] = 'nested_card_component'
+            return result
+        if len(components) > 1:
+            result['reason'] = 'missing_ambiguous_or_incomplete_component'
+            return result
+        rows = [n for n in component.walk() if 'matchupRow' in (n.attrs.get('class') or '').split()]
+    elif allow_fragment:
+        rows = [n for n in tree.root.walk() if 'matchupRow' in (n.attrs.get('class') or '').split()]
+    else:
+        result['reason'] = 'missing_ambiguous_or_incomplete_component'
+        return result
+    result['row_count'] = len(rows)
+    return _validate_rows(rows, source_url, result)
+
+
+def extract_structured_fights(html, source_url, allow_fragment=False):
     """Retourne uniquement les combats issus d'une carte structurellement valide."""
     try:
-        validation = extract_pairs(html, source_url)
+        validation = extract_pairs(html, source_url, allow_fragment=allow_fragment)
     except (TypeError, ValueError):
         return []
     if validation.get('status') != 'candidate_pairs' or not validation.get('pairs'):
         return []
     tree = Tree(html)
     components = [n for n in tree.root.walk() if n.attrs.get('id') == 'fight_card_component']
-    if len(components) != 1:
+    if components:
+        if len(components) != 1:
+            return []
+        rows = [n for n in components[0].walk() if 'matchupRow' in (n.attrs.get('class') or '').split()]
+    elif allow_fragment:
+        rows = [n for n in tree.root.walk() if 'matchupRow' in (n.attrs.get('class') or '').split()]
+    else:
         return []
     fights, seen = [], set()
-    for row in [n for n in components[0].walk() if 'matchupRow' in (n.attrs.get('class') or '').split()]:
+    for row in rows:
         try:
             links = _fighter_links(row, source_url)
         except ValueError:
