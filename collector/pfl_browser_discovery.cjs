@@ -12,7 +12,7 @@ function parseArgs(argv) {
   return args;
 }
 
-const HOSTS = new Set(['pflmma.com', 'www.pflmma.com', 'cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'code.jquery.com', 'unpkg.com']);
+const HOSTS = new Set(['pflmma.com', 'www.pflmma.com', 'cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'code.jquery.com', 'unpkg.com', 'boxemag.ouest-france.fr']);
 
 function allowed(value, method, body, tag) {
   try {
@@ -31,6 +31,10 @@ function allowed(value, method, body, tag) {
 
 function redact(value) {
   return String(value).replace(/(['"])X-CSRF-TOKEN(['"])\s*:\s*(['"])[^'"]*/gi, '$1X-CSRF-TOKEN$2$3[redacted]');
+}
+
+function normalizeTitle(value) {
+  return String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
 }
 
 function extractDate(text, eventUrl) {
@@ -52,7 +56,16 @@ function extractDate(text, eventUrl) {
   if (candidate >= today) {
     return {date: `${currentYear}-${monthText}-${day}`, source: 'visible_date+current_year_for_future'};
   }
-  return {date: `${currentYear}-${monthText}-${day}`, source: 'current_year_for_past_date'};
+  return {date: '', source: 'past_date_year_ambiguous'};
+}
+
+function extractBoxemagDate(text) {
+  const match = text.match(/\b(?:lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\s+(\d{1,2})\s+(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+(\d{4})\b/i);
+  if (!match) return '';
+  const months = {janvier: 1, février: 2, mars: 3, avril: 4, mai: 5, juin: 6, juillet: 7, août: 8, septembre: 9, octobre: 10, novembre: 11, décembre: 12};
+  const month = months[match[2].toLowerCase()];
+  if (!month) return '';
+  return `${match[3]}-${String(month).padStart(2, '0')}-${String(Number(match[1])).padStart(2, '0')}`;
 }
 
 function extractJsonLdDate(payloads, eventUrl) {
@@ -128,7 +141,7 @@ async function main() {
         if (!allowed(request.url(), request.method(), request.postData(), tag) || ['image', 'media', 'font'].includes(request.resourceType())) return route.abort();
         return route.continue();
       });
-      const candidate = {source_url: url, title: '', date: '', start_at: '', pairs: [], row_count: 0, extraction_status: 'not_available', date_found: false, date_source: '', text_excerpt: '', jsonld_found: false, jsonld_start_date: '', card_html: '', page_html: ''};
+      const candidate = {source_url: url, title: '', date: '', start_at: '', pairs: [], row_count: 0, extraction_status: 'not_available', date_found: false, date_source: '', text_excerpt: '', jsonld_found: false, jsonld_start_date: '', card_html: '', page_html: '', boxemag_date: '', boxemag_url: ''};
       try {
         const response = await page.goto(url, {waitUntil: 'domcontentloaded', timeout: 45000});
         if (!response || !response.ok()) throw new Error('Navigation PFL non reussie');
@@ -187,6 +200,75 @@ async function main() {
             candidate.date_source = extracted.source;
           }
         }
+        if (!candidate.date && candidate.title) {
+          const searchUrl = 'https://boxemag.ouest-france.fr/evenement/?s=' + encodeURIComponent(candidate.title);
+          const boxemagPage = await context.newPage();
+          try {
+            await boxemagPage.route('**/*', route => {
+              const request = route.request();
+              if (!allowed(request.url(), request.method(), request.postData(), '') || ['image', 'media', 'font'].includes(request.resourceType())) return route.abort();
+              return route.continue();
+            });
+            const boxemagResponse = await boxemagPage.goto(searchUrl, {waitUntil: 'domcontentloaded', timeout: 30000});
+            if (boxemagResponse && boxemagResponse.ok()) {
+              const boxemagLinks = await boxemagPage.evaluate((wanted) => {
+                const wantedNormalized = wanted.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+                const matches = [];
+                for (const anchor of document.querySelectorAll('a[href]')) {
+                  const text = (anchor.textContent || '').trim();
+                  const normalized = text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+                  if (normalized.includes(wantedNormalized) && anchor.href.includes('boxemag.ouest-france.fr/evenement/')) {
+                    matches.push({text, href: anchor.href});
+                  }
+                }
+                return matches;
+              }, candidate.title);
+              if (boxemagLinks.length === 1) {
+                const eventPage = await context.newPage();
+                try {
+                  await eventPage.route('**/*', route => {
+                    const request = route.request();
+                    if (!allowed(request.url(), request.method(), request.postData(), '') || ['image', 'media', 'font'].includes(request.resourceType())) return route.abort();
+                    return route.continue();
+                  });
+                  const eventResponse = await eventPage.goto(boxemagLinks[0].href, {waitUntil: 'domcontentloaded', timeout: 30000});
+                  if (eventResponse && eventResponse.ok()) {
+                    const boxemagText = await eventPage.evaluate(() => document.body.innerText);
+                    const boxemagDate = extractBoxemagDate(boxemagText);
+                    if (boxemagDate) {
+                      candidate.boxemag_date = boxemagDate;
+                      candidate.boxemag_url = boxemagLinks[0].href;
+                      candidate.date = boxemagDate;
+                      candidate.start_at = boxemagDate;
+                      candidate.date_source = 'boxemag_date';
+                    }
+                  }
+                } finally {
+                  await eventPage.close();
+                }
+              }
+            }
+          } catch {}
+          finally {
+            await boxemagPage.close();
+          }
+        }
+        if (!candidate.date) {
+          const now = new Date();
+          const currentYear = now.getFullYear();
+          const dateMatch = snapshot.text.match(/\b(MON|TUE|WED|THU|FRI|SAT|SUN)\s+([A-Z]{3})\s+(\d{1,2})\b/i);
+          if (dateMatch) {
+            const months = {JAN: 1, FEB: 2, MAR: 3, APR: 4, MAY: 5, JUN: 6, JUL: 7, AUG: 8, SEP: 9, OCT: 10, NOV: 11, DEC: 12};
+            const month = months[dateMatch[2].toUpperCase()];
+            if (month) {
+              const day = String(Number(dateMatch[3])).padStart(2, '0');
+              const monthText = String(month).padStart(2, '0');
+              candidate.date = `${currentYear}-${monthText}-${day}`;
+              candidate.start_at = candidate.date;
+              candidate.date_source = 'current_year_for_past_date';
+            }
+          }
+        }
         const extraction = spawnSync('python3', [
           '-c',
           'import sys,json; from collector.pfl_card_structure import extract_pairs; json.dump(extract_pairs(sys.stdin.read(), sys.argv[1]), sys.stdout)',
@@ -212,6 +294,8 @@ async function main() {
           jsonld_start_date: candidate.jsonld_start_date,
           row_count: candidate.row_count,
           extraction_status: candidate.extraction_status,
+          boxemag_date: candidate.boxemag_date,
+          boxemag_url: candidate.boxemag_url,
           error: candidate.error || null,
         }));
         await context.close();
