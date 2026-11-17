@@ -80,9 +80,9 @@ jobs:
           PFL_APPLY: ${{ vars.PFL_APPLY }}
         run: |
           if [ "${PFL_APPLY,,}" = "true" ]; then
-            python collector/pfl_reconciliation.py --output reports/pfl-reconciliation.json --apply
+            python collector/pfl_reconciliation.py --discovery reports/pfl-daily-discovery.json --output reports/pfl-reconciliation.json --apply
           else
-            python collector/pfl_reconciliation.py --output reports/pfl-reconciliation.json
+            python collector/pfl_reconciliation.py --discovery reports/pfl-daily-discovery.json --output reports/pfl-reconciliation.json
           fi
       - name: Publier les propositions PFL éligibles
         id: pfl_publisher
