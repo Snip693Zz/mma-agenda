@@ -18,6 +18,8 @@ jobs:
   unittest:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    env:
+      PYTHONPATH: ${{ github.workspace }}:${{ github.workspace }}/collector
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,6 +41,4 @@ jobs:
         working-directory: collector
         run: python -m unittest discover -v
       - name: Executer la suite pytest du collecteur et les propositions UFC
-        env:
-          PYTHONPATH: collector
         run: python -m pytest -q collector tests/test_ufc_update_proposals.py
