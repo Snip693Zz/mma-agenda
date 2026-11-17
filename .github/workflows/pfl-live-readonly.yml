@@ -1,9 +1,87 @@
-Replace both extraction calls in the diagnostic with:
-
-structural = extract_pairs(card, url, allow_fragment=(item.get('card_source') == 'official_ajax_response'))
-
-and change the trigger comment to:
-
-# Trigger version: 2026-11-17-2
-
-All other workflow behavior remains unchanged.
+name: PFL reel - lecture seule
+on:
+  workflow_dispatch:
+  push:
+    branches: [fix/pfl-publication-pipeline]
+    paths:
+      - '.github/workflows/pfl-live-readonly.yml'
+permissions:
+  contents: read
+concurrency:
+  group: pfl-live-readonly
+  cancel-in-progress: false
+jobs:
+  diagnostic:
+    if: github.ref == 'refs/heads/fix/pfl-publication-pipeline'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Verifier la syntaxe et les tests hors ligne
+        run: |
+          node --check collector/pfl_browser_discovery.cjs
+          node --test collector/test_pfl_browser_discovery.cjs
+          python -m pip install pytest
+          python -m compileall -q collector
+          python -m pytest -q collector/test_pfl_card_structure.py collector/test_pfl_card_structure_official_response.py collector/test_pfl_repeated_links.py
+      - name: Installer les dependances
+        run: |
+          python -m pip install supabase
+          npm install --no-save --package-lock=false @playwright/test@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Decouvrir les fiches PFL sans secrets Supabase
+        run: node collector/pfl_browser_discovery.cjs --output reports/pfl-live-browser.json --limit 20
+      - name: Normaliser sans sauvegarde
+        id: discovery
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python collector/pfl_daily_discovery.py --browser-report reports/pfl-live-browser.json --output reports/pfl-live-discovery.json --limit 20
+      - name: Rapprocher sans sauvegarde
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python collector/pfl_reconciliation.py --limit 5 --discovery reports/pfl-live-discovery.json --output reports/pfl-live-readonly.json
+      - name: Diagnostic compact PFL
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from collector.pfl_card_structure import extract_pairs
+          def load(name):
+              p = Path('reports') / name
+              return json.loads(p.read_text()) if p.exists() else {}
+          browser = load('pfl-live-browser.json')
+          discovery = load('pfl-live-discovery.json')
+          report = load('pfl-live-readonly.json')
+          details = []
+          for item in browser.get('candidates', []):
+              url = item.get('source_url', '')
+              if url.rstrip('/').split('/')[-1] not in ('pfl-lyon', 'pfl-lyon-2026', 'pfl-returns-to-dubai'):
+                  continue
+              result = extract_pairs(item.get('card_html', ''), url, allow_fragment=item.get('card_source') == 'official_ajax_response')
+              details.append({key: item.get(key) for key in ('source_url', 'date', 'date_source', 'card_source', 'ajax_status', 'ajax_content_type', 'ajax_body_length') } | {'card_validation': result})
+          observations = report.get('reports', [])
+          compact = {'browser_summary': browser.get('summary'), 'discovery_summary': discovery.get('summary'), 'targeted_diagnostics': details, 'events_observed': report.get('events_observed'), 'fights_observed': report.get('fights_observed'), 'reconciliation': [{'event_id': i.get('event_id'), 'validation': i.get('source_validation')} for i in observations], 'errors': report.get('errors', [])}
+          print('DEBUT DIAGNOSTIC COMPACT PFL')
+          print(json.dumps(compact, ensure_ascii=True, indent=2))
+          print('FIN DIAGNOSTIC COMPACT PFL')
+          if discovery.get('mode') != 'pfl_browser_discovery_report' or report.get('mode') != 'pfl_reconciliation_report':
+              raise SystemExit('Rapport manquant ou format inattendu')
+          if discovery.get('database_writes') is not False or discovery.get('automatic_publication') is not False or report.get('automatic_publication') is not False or 'saved' in report:
+              raise SystemExit('Contrat de lecture seule non respecte')
+          if discovery.get('errors') or report.get('errors') or not observations:
+              raise SystemExit('Diagnostic incomplet')
+          if not any(i.get('source_validation', {}).get('can_reconcile') is True for i in observations):
+              raise SystemExit('Aucune source exploitable : voir le bloc compact ci-dessus')
+          PY
