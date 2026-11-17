@@ -1,0 +1,43 @@
+name: Découverte PFL — rapport sans publication
+
+on:
+  workflow_dispatch:
+    inputs:
+      listing_url:
+        description: 'URL du calendrier PFL'
+        required: false
+        default: 'https://pflmma.com/events'
+      limit:
+        description: 'Nombre maximum de fiches à analyser'
+        required: false
+        default: '20'
+
+permissions:
+  contents: read
+
+jobs:
+  discovery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Installer le navigateur
+        run: |
+          npm install --no-save --package-lock=false @playwright/test@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Lancer la découverte PFL
+        run: node collector/pfl_browser_discovery.cjs --listing-url "${{ inputs.listing_url }}" --limit "${{ inputs.limit }}"
+      - name: Afficher le résumé
+        run: cat reports/pfl-browser-discovery.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pfl-browser-discovery
+          path: reports/pfl-browser-discovery/
+          retention-days: 14
+          if-no-files-found: warn
