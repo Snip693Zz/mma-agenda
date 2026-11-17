@@ -29,4 +29,6 @@ def primary_identity_matches(html, event):
     if len(headings) != 1:
         return False
     normalize = lambda text: ' '.join(text.split()).casefold()
-    return normalize(heading_text(headings[0])) == normalize(title)
+    heading_norm = normalize(heading_text(headings[0]))
+    title_norm = normalize(title)
+    return heading_norm == title_norm or (len(heading_norm) >= 3 and title_norm.startswith(heading_norm))

@@ -128,7 +128,7 @@ async function main() {
         if (!allowed(request.url(), request.method(), request.postData(), tag) || ['image', 'media', 'font'].includes(request.resourceType())) return route.abort();
         return route.continue();
       });
-      const candidate = {source_url: url, title: '', date: '', start_at: '', pairs: [], row_count: 0, extraction_status: 'not_available', date_found: false, date_source: '', text_excerpt: '', jsonld_found: false, jsonld_start_date: '', card_html: ''};
+      const candidate = {source_url: url, title: '', date: '', start_at: '', pairs: [], row_count: 0, extraction_status: 'not_available', date_found: false, date_source: '', text_excerpt: '', jsonld_found: false, jsonld_start_date: '', card_html: '', page_html: ''};
       try {
         const response = await page.goto(url, {waitUntil: 'domcontentloaded', timeout: 45000});
         if (!response || !response.ok()) throw new Error('Navigation PFL non reussie');
@@ -156,6 +156,7 @@ async function main() {
             title: (title || '').trim(),
             text,
             html: component ? component.outerHTML : '',
+            pageHtml: document.documentElement.outerHTML,
             rowCount: component ? component.querySelectorAll('.matchupRow').length : 0,
             dateFound: Boolean(dateMatch),
             excerpt,
@@ -167,6 +168,7 @@ async function main() {
         candidate.text_excerpt = snapshot.excerpt;
         candidate.row_count = snapshot.rowCount;
         candidate.card_html = redact(snapshot.html);
+        candidate.page_html = redact(snapshot.pageHtml || '');
         const jsonldDate = extractJsonLdDate(snapshot.jsonld, url);
         if (jsonldDate) {
           candidate.jsonld_found = true;

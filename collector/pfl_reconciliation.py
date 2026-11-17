@@ -180,15 +180,18 @@ def load_discovery_candidates(path: str) -> dict[str, dict]:
                 'source_url': item.get('source_url') or '',
                 'date': date,
                 'card_html': card_html,
+                'page_html': item.get('page_html') or '',
             }
     return candidates
 
 
 def reconcile_event(event: dict, existing_fights: list[dict], html: str, discovery: dict | None = None) -> dict:
     source_url = str(event.get('url') or '')
+    page_html = ''
     if discovery:
         source_url = str(discovery.get('source_url') or source_url)
         html = str(discovery.get('card_html') or html)
+        page_html = str(discovery.get('page_html') or '')
     observed = extract_structured_fights(html, source_url)
     source_kind = 'official' if event.get('official') else 'secondary'
     if discovery:
@@ -198,7 +201,7 @@ def reconcile_event(event: dict, existing_fights: list[dict], html: str, discove
     validation = assess_source(
         str(event.get('date') or observed_date),
         observed_date,
-        identity_verified=extract_event_identity(html, event),
+        identity_verified=extract_event_identity(page_html or html, event),
         structured_card=bool(observed),
         fight_count=len(observed),
     )
