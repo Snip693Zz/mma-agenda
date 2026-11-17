@@ -13,13 +13,14 @@ function parseArgs(argv) {
 }
 
 const HOSTS = new Set(['pflmma.com', 'www.pflmma.com', 'cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'code.jquery.com', 'unpkg.com']);
+const CARD_ENDPOINT = '/ajax/get_fight_card_component';
 
 function allowed(value, method, body, tag) {
   try {
     const url = new URL(value);
     if (url.protocol !== 'https:' || url.username || url.password || url.port || !HOSTS.has(url.hostname)) return false;
     if (method === 'GET') return true;
-    if (method !== 'POST' || url.origin !== 'https://pflmma.com' || url.pathname !== '/ajax/get_fight_card_component' || url.search) return false;
+    if (method !== 'POST' || url.origin !== 'https://pflmma.com' || url.pathname !== CARD_ENDPOINT || url.search) return false;
     const params = new URLSearchParams(body || '');
     return [...params].length === 2 && params.getAll('event_tag').length === 1 &&
       params.getAll('is_mobile').length === 1 && params.get('event_tag') === tag &&
@@ -89,6 +90,18 @@ function extractJsonLdDate(payloads, eventUrl) {
   return '';
 }
 
+function isOfficialCardResponse(url, method, postData, tag) {
+  try {
+    const parsed = new URL(url);
+    if (parsed.origin !== 'https://pflmma.com' || parsed.pathname !== CARD_ENDPOINT) return false;
+    if (method !== 'POST') return false;
+    const params = new URLSearchParams(postData || '');
+    return params.get('event_tag') === tag && ['0', '1'].includes(params.get('is_mobile'));
+  } catch {
+    return false;
+  }
+}
+
 async function main() {
   const args = parseArgs(process.argv);
   const {chromium} = require('@playwright/test');
@@ -128,7 +141,20 @@ async function main() {
         if (!allowed(request.url(), request.method(), request.postData(), tag) || ['image', 'media', 'font'].includes(request.resourceType())) return route.abort();
         return route.continue();
       });
-      const candidate = {source_url: url, title: '', date: '', start_at: '', pairs: [], row_count: 0, extraction_status: 'not_available', date_found: false, date_source: '', text_excerpt: '', jsonld_found: false, jsonld_start_date: '', card_html: '', page_html: ''};
+      let officialCardResponse = null;
+      page.on('response', async response => {
+        try {
+          const request = response.request();
+          if (!isOfficialCardResponse(response.url(), request.method(), request.postData(), tag)) return;
+          const body = await response.text();
+          officialCardResponse = {
+            status: response.status(),
+            content_type: response.headers()['content-type'] || '',
+            body,
+          };
+        } catch {}
+      });
+      const candidate = {source_url: url, title: '', date: '', start_at: '', pairs: [], row_count: 0, extraction_status: 'not_available', date_found: false, date_source: '', text_excerpt: '', jsonld_found: false, jsonld_start_date: '', card_html: '', card_source: '', ajax_status: null, ajax_content_type: '', ajax_body_length: 0, page_html: ''};
       try {
         const response = await page.goto(url, {waitUntil: 'domcontentloaded', timeout: 45000});
         if (!response || !response.ok()) throw new Error('Navigation PFL non reussie');
@@ -167,7 +193,6 @@ async function main() {
         candidate.date_found = snapshot.dateFound;
         candidate.text_excerpt = snapshot.excerpt;
         candidate.row_count = snapshot.rowCount;
-        candidate.card_html = redact(snapshot.html);
         candidate.page_html = redact(snapshot.pageHtml || '');
         const jsonldDate = extractJsonLdDate(snapshot.jsonld, url);
         if (jsonldDate) {
@@ -187,15 +212,33 @@ async function main() {
             candidate.date_source = extracted.source;
           }
         }
+        if (officialCardResponse && officialCardResponse.status >= 200 && officialCardResponse.status < 300 && officialCardResponse.body.trim()) {
+          candidate.card_html = redact(officialCardResponse.body);
+          candidate.card_source = 'official_ajax_response';
+          candidate.ajax_status = officialCardResponse.status;
+          candidate.ajax_content_type = officialCardResponse.content_type;
+          candidate.ajax_body_length = officialCardResponse.body.length;
+        } else {
+          candidate.card_html = redact(snapshot.html);
+          candidate.card_source = 'rendered_component_fallback';
+          if (officialCardResponse) {
+            candidate.ajax_status = officialCardResponse.status;
+            candidate.ajax_content_type = officialCardResponse.content_type;
+            candidate.ajax_body_length = officialCardResponse.body.length;
+          }
+        }
         const extraction = spawnSync('python3', [
           '-c',
           'import sys,json; from collector.pfl_card_structure import extract_pairs; json.dump(extract_pairs(sys.stdin.read(), sys.argv[1]), sys.stdout)',
           url,
-        ], {input: redact(snapshot.html), encoding: 'utf8', maxBuffer: 2000000});
+        ], {input: candidate.card_html, encoding: 'utf8', maxBuffer: 2000000});
         if (extraction.status === 0) {
           const parsed = JSON.parse(extraction.stdout);
           candidate.pairs = parsed.pairs || [];
           candidate.extraction_status = parsed.status || 'not_available';
+          candidate.extraction_reason = parsed.reason || '';
+          candidate.offending_row_index = parsed.offending_row_index;
+          candidate.offending_row_links = parsed.offending_row_links || [];
         }
       } catch (error) {
         candidate.error = redact(String(error)).slice(0, 500);
@@ -211,7 +254,12 @@ async function main() {
           jsonld_found: candidate.jsonld_found,
           jsonld_start_date: candidate.jsonld_start_date,
           row_count: candidate.row_count,
+          card_source: candidate.card_source,
+          ajax_status: candidate.ajax_status,
           extraction_status: candidate.extraction_status,
+          extraction_reason: candidate.extraction_reason || '',
+          offending_row_index: candidate.offending_row_index,
+          offending_row_links: candidate.offending_row_links || [],
           error: candidate.error || null,
         }));
         await context.close();
@@ -222,7 +270,7 @@ async function main() {
   }
   const metadataFound = candidates.filter(item => item.title && item.date).length;
   const report = {
-    schema_version: 1,
+    schema_version: 2,
     mode: 'pfl_browser_discovery',
     listing_url: args.listingUrl,
     generated_at: new Date().toISOString(),
@@ -232,6 +280,7 @@ async function main() {
       event_links: eventLinks.length,
       pages_fetched: candidates.length,
       metadata_found: metadataFound,
+      official_card_responses: candidates.filter(item => item.card_source === 'official_ajax_response').length,
     },
     candidates,
   };
@@ -240,7 +289,11 @@ async function main() {
   console.log(JSON.stringify(report.summary));
 }
 
-main().catch(error => {
-  console.error(redact(String(error)));
-  process.exitCode = 1;
-});
+if (require.main === module) {
+  main().catch(error => {
+    console.error(redact(String(error)));
+    process.exitCode = 1;
+  });
+}
+
+module.exports = {allowed, isOfficialCardResponse, parseArgs, redact};

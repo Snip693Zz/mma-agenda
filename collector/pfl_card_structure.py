@@ -47,6 +47,31 @@ class Tree(HTMLParser):
         self.stack[-1].text += data
 
 
+def descendant_text(node):
+    parts = [node.text]
+    for child in node.children:
+        parts.append(descendant_text(child))
+    return re.sub(r'\s+', ' ', ''.join(parts)).strip()
+
+
+def _fighter_links(row, source_url):
+    links = []
+    for node in row.walk():
+        if node.tag != 'a':
+            continue
+        url = urlsplit(urljoin(source_url, node.attrs.get('href') or ''))
+        if not re.fullmatch(r'/fighter/[a-zA-Z0-9-]+/?', url.path):
+            continue
+        if (url.scheme != 'https' or url.netloc not in ('pflmma.com', 'www.pflmma.com')
+                or url.query or url.fragment):
+            raise ValueError('invalid_fighter_url')
+        links.append({
+            'url': 'https://pflmma.com' + url.path.rstrip('/'),
+            'text': descendant_text(node),
+        })
+    return links
+
+
 def extract_pairs(html, source_url):
     source = urlsplit(source_url)
     if (source.scheme != 'https' or source.netloc not in ('pflmma.com', 'www.pflmma.com')
@@ -54,19 +79,14 @@ def extract_pairs(html, source_url):
         raise ValueError('Fiche PFL officielle requise')
     result = {'status': 'review_required', 'reason': '', 'pairs': [], 'row_count': 0,
               'duplicate_rows': 0, 'automatic_publication': False, 'database_writes': False,
-              'source_url': source_url, 'event_identity_validated': False}
+              'source_url': source_url, 'event_identity_validated': False,
+              'offending_row_index': None, 'offending_row_links': []}
     tree = Tree(html)
     components = [n for n in tree.root.walk() if n.attrs.get('id') == 'fight_card_component']
-    if tree.malformed:
-        result['reason'] = 'missing_ambiguous_or_incomplete_component'
-        return result
-    if not components:
+    if tree.malformed or not components or not components[0].closed:
         result['reason'] = 'missing_ambiguous_or_incomplete_component'
         return result
     component = components[0]
-    if not component.closed:
-        result['reason'] = 'missing_ambiguous_or_incomplete_component'
-        return result
     nested_components = [n for n in component.walk() if n is not component and n.attrs.get('id') == 'fight_card_component']
     if nested_components:
         result['reason'] = 'nested_card_component'
@@ -80,34 +100,30 @@ def extract_pairs(html, source_url):
         result['reason'] = 'no_structured_rows'
         return result
     pairs, seen = [], set()
-    for row in rows:
+    for index, row in enumerate(rows):
         if not row.closed:
             result['reason'] = 'incomplete_row'
+            result['offending_row_index'] = index
             return result
-        fighters = []
-        fighter_link_count = 0
+        try:
+            links = _fighter_links(row, source_url)
+        except ValueError:
+            result['reason'] = 'invalid_fighter_url'
+            result['offending_row_index'] = index
+            return result
         for node in row.walk():
             if node is not row and 'matchupRow' in (node.attrs.get('class') or '').split():
                 result['reason'] = 'nested_rows'
+                result['offending_row_index'] = index
                 return result
-            if node.tag != 'a':
-                continue
-            url = urlsplit(urljoin(source_url, node.attrs.get('href') or ''))
-            if not re.fullmatch(r'/fighter/[a-zA-Z0-9-]+/?', url.path):
-                continue
-            if (url.scheme != 'https' or url.netloc not in ('pflmma.com', 'www.pflmma.com')
-                    or url.query or url.fragment):
-                result['reason'] = 'invalid_fighter_url'
-                return result
-            fighter_link_count += 1
-            canonical = 'https://pflmma.com' + url.path.rstrip('/')
-            if canonical not in fighters:
-                fighters.append(canonical)
-        if len(fighters) == 1 and fighter_link_count > 1:
-            result['reason'] = 'duplicate_fighter_in_row'
-            return result
-        if len(fighters) != 2:
-            result['reason'] = 'ambiguous_fighter_pair'
+        fighters = []
+        for link in links:
+            if link['url'] not in fighters:
+                fighters.append(link['url'])
+        if (len(fighters) == 1 and len(links) > 1) or len(fighters) != 2:
+            result['reason'] = 'duplicate_fighter_in_row' if len(fighters) == 1 and len(links) > 1 else 'ambiguous_fighter_pair'
+            result['offending_row_index'] = index
+            result['offending_row_links'] = links
             return result
         key = tuple(sorted(fighters))
         if key in seen:
@@ -133,20 +149,14 @@ def extract_structured_fights(html, source_url):
         return []
     fights, seen = [], set()
     for row in [n for n in components[0].walk() if 'matchupRow' in (n.attrs.get('class') or '').split()]:
+        try:
+            links = _fighter_links(row, source_url)
+        except ValueError:
+            return []
         fighters = {}
-        for node in row.walk():
-            if node.tag != 'a':
-                continue
-            url = urlsplit(urljoin(source_url, node.attrs.get('href') or ''))
-            if not re.fullmatch(r'/fighter/[a-zA-Z0-9-]+/?', url.path):
-                continue
-            if (url.scheme != 'https' or url.netloc not in ('pflmma.com', 'www.pflmma.com')
-                    or url.query or url.fragment):
-                return []
-            canonical = 'https://pflmma.com' + url.path.rstrip('/')
-            name = re.sub(r'\s+', ' ', (node.text or '')).strip()
-            if canonical not in fighters and name:
-                fighters[canonical] = name
+        for link in links:
+            if link['url'] not in fighters and link['text']:
+                fighters[link['url']] = link['text']
         if len(fighters) != 2:
             return []
         fighter_a_url, fighter_b_url = list(fighters)
