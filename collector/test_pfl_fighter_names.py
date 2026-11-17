@@ -134,10 +134,14 @@ class RepeatedLinkTests(unittest.TestCase):
         self.assertEqual(fights, [])
 
     def test_duplicate_fighter_in_row_refused_with_names(self):
-        result = extract_pairs(card([
-            row('/fighter/ryan-bader/', 'Ryan Bader', '/fighter/ryan-bader/', 'Ryan Bader',
-                '/fighter/antonio-carlos-junior/', 'Antonio Carlos Junior')
-        ]), SOURCE_URL)
+        html = card([
+            "<div class='matchupRow'>"
+            + anchor('/fighter/ryan-bader/', 'Ryan Bader')
+            + anchor('/fighter/ryan-bader/', 'Ryan Bader')
+            + anchor('/fighter/antonio-carlos-junior/', 'Antonio Carlos Junior')
+            + '</div>'
+        ])
+        result = extract_pairs(html, SOURCE_URL)
         self.assertEqual(result['reason'], 'duplicate_fighter_in_row')
 
 
