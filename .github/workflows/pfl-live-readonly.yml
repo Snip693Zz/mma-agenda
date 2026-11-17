@@ -26,6 +26,8 @@ jobs:
         with:
           node-version: '22'
       - name: Verifier la syntaxe et les tests hors ligne
+        env:
+          PYTHONPATH: .:collector
         run: |
           node --check collector/pfl_browser_discovery.cjs
           node --test collector/test_pfl_browser_discovery.cjs
