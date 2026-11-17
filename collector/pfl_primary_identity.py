@@ -1,8 +1,16 @@
 """Conservative primary-heading check, not full event validation."""
+import re
 try:
     from .pfl_section_candidates import TextTree, heading_text
 except ImportError:
     from pfl_section_candidates import TextTree, heading_text
+
+
+def _og_title(html):
+    match = re.search(r'<meta[^>]+property=["\']og:title["\'][^>]+content=["\']([^"\']+)["\']', html or '', re.IGNORECASE)
+    if not match:
+        match = re.search(r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:title["\']', html or '', re.IGNORECASE)
+    return match.group(1).strip() if match else ''
 
 
 def primary_identity_matches(html, event):
@@ -26,9 +34,12 @@ def primary_identity_matches(html, event):
         return False
     scope = mains[0] if mains else tree.root
     headings = [n for n in visible(scope) if n.tag == 'h1']
-    if len(headings) != 1:
-        return False
     normalize = lambda text: ' '.join(text.split()).casefold()
-    heading_norm = normalize(heading_text(headings[0]))
     title_norm = normalize(title)
-    return heading_norm == title_norm or (len(heading_norm) >= 3 and title_norm.startswith(heading_norm))
+    if len(headings) == 1:
+        heading_norm = normalize(heading_text(headings[0]))
+        return heading_norm == title_norm or (len(heading_norm) >= 3 and title_norm.startswith(heading_norm))
+    if len(headings) == 0:
+        og_norm = normalize(_og_title(html))
+        return bool(og_norm) and (og_norm == title_norm or (len(og_norm) >= 3 and title_norm.startswith(og_norm)))
+    return False

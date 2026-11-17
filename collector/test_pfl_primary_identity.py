@@ -19,6 +19,18 @@ class PrimaryIdentityTests(unittest.TestCase):
     def test_legacy_fragment_still_supported(self):
         self.assertTrue(extract_event_identity('<h1>  pfl   LYON </h1>' + TAIL, EVENT))
 
+    def test_og_title_identity_without_h1(self):
+        html = '<meta property="og:title" content="PFL Lyon">' + TAIL
+        self.assertTrue(extract_event_identity(html, EVENT))
+
+    def test_og_title_mismatch_without_h1_blocks(self):
+        html = '<meta property="og:title" content="Other Event">' + TAIL
+        self.assertFalse(extract_event_identity(html, EVENT))
+
+    def test_og_title_prefix_match_without_h1(self):
+        html = '<meta property="og:title" content="PFL">' + TAIL
+        self.assertTrue(extract_event_identity(html, EVENT))
+
     def test_wrong_or_ambiguous_identity_blocks_reconciliation(self):
         cases = [
             ('<header>PFL Lyon</header><main><h1>Other Event</h1>' + TAIL + '</main>', '2026-12-19', 'event_identity_unverified'),
