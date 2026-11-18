@@ -207,6 +207,7 @@ def reconcile_event(event: dict, existing_fights: list[dict], html: str, discove
     )
     payload_event = dict(event)
     payload_event['source_kind'] = source_kind
+    payload_event['source_url'] = source_url
     proposals = []
     if validation['can_reconcile'] and observed:
         proposals = compare_event(payload_event, existing_fights, observed)
@@ -268,7 +269,7 @@ def save_report(client, report: dict) -> dict:
         'extra': {'report': report},
     }
     payload['source_sha256'] = hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
-    result = client.rpc('record_update_reconciliation_v1', {'p_report': payload}).execute()
+    result = client.rpc('record_pfl_reconciliation_v2', {'p_report': payload}).execute()
     data = result.data
     if isinstance(data, dict):
         return data
