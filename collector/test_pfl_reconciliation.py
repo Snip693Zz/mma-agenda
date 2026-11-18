@@ -41,7 +41,11 @@ def test_structured_source_creates_add_proposals():
     report = reconcile_event(EVENT, [], HTML)
     assert report['source_validation']['can_reconcile'] is True
     assert report['summary']['add_fight'] == 2
-    assert all(proposal['auto_publishable'] for proposal in report['proposals'])
+    assert report['summary']['auto_publishable'] == 0
+    assert all(proposal['auto_publishable'] is False for proposal in report['proposals'])
+    assert all(proposal['payload']['card_position'] is None for proposal in report['proposals'])
+    assert all(proposal['payload']['allocation'] == 'unassigned' for proposal in report['proposals'])
+    assert all(proposal['evidence']['publication_requires_card_assignment'] is True for proposal in report['proposals'])
 
 
 def test_missing_date_blocks_all_proposals():
