@@ -27,6 +27,8 @@ jobs:
         if: always()
         with:
           name: pfl-pipeline-diagnostic
-          path: reports/pfl-pipeline-diagnostic.json
+          path: |
+            reports/pfl-pipeline-diagnostic.json
+            reports/pfl-browser-discovery.json
           if-no-files-found: warn
           retention-days: 14
