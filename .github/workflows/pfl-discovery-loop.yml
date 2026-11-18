@@ -1,0 +1,49 @@
+name: PFL discovery loop - read-only
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Nombre maximum de fiches PFL à inspecter'
+        required: false
+        default: '20'
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install supabase
+      - name: Run read-only PFL discovery
+        run: |
+          python collector/pfl_daily_discovery.py \
+            --limit "${{ github.event.inputs.limit || '20' }}" \
+            --output reports/pfl-daily-discovery.json
+      - name: Verify report is read-only
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('reports/pfl-daily-discovery.json').read_text(encoding='utf-8'))
+          assert report['mode'] == 'pfl_discovery_report'
+          assert report['automatic_publication'] is False
+          assert report['database_writes'] is False
+          print(json.dumps(report['summary'], ensure_ascii=False, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pfl-daily-discovery-${{ github.run_id }}
+          path: reports/pfl-daily-discovery.json
+          if-no-files-found: error
