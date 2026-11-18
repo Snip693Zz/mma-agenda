@@ -47,9 +47,14 @@ begin
   -- Same order as the existing UFC writer; no external IO while holding locks.
   lock table public.events,public.event_cards,public.fights in share row exclusive mode;
   lock table public.proposals,public.proposal_decisions in share row exclusive mode;
-  select * into strict ev from public.events where id=p_event_id for update;
+  select * into ev from public.events where id=p_event_id for update;
+  if not found then
+    return jsonb_build_object('status','review_required','reason','event_not_found','agenda_writes',false);
+  end if;
   select * into pol from public.publication_policy where org=ev.org for share;
-  if not found then return jsonb_build_object('status','review_required','reason','organization_not_configured','agenda_writes',false); end if;
+  if not found then
+    return jsonb_build_object('status','review_required','reason','organization_not_configured','agenda_writes',false);
+  end if;
   select * into strict run from public.ingest_runs where id=p_run_id for share;
   report:=run.extra->'report';
   if run.status<>'success' or run.source_report<>pol.report_source or report->>'mode' is distinct from pol.report_mode
