@@ -57,5 +57,13 @@ def primary_identity_matches(html, event):
     secondary = [_normalize(heading_text(n)) for n in nodes if n.tag == 'h2']
     if secondary:
         matching = [value for value in secondary if _matches(value, title_norm)]
-        return len(matching) == 1 and len(matching[0].split()) >= 2 and matching[0] == og_norm
+        if len(matching) != 1 or len(matching[0].split()) < 2:
+            return False
+        if og_norm:
+            return matching[0] == og_norm
+        # Only an absent/empty OG title permits this corroborating fallback.
+        titles = [n for n in visible(tree.root) if n.tag == 'title']
+        if len(titles) != 1:
+            return False
+        return matching[0] == _normalize(heading_text(titles[0]))
     return _matches(og_norm, title_norm)
