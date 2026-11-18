@@ -37,7 +37,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
-      - run: pip install pytest supabase
+      - run: pip install pytest supabase 'psycopg[binary]'
       - name: Existing and shared Python tests
         run: python -m pytest -q collector tests/test_ufc_update_proposals.py
       - name: Unittest compatibility
@@ -49,3 +49,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f tests/shared-publication-schema.sql
           psql -v ON_ERROR_STOP=1 -f migrations/20261118_shared_additions.sql
           psql -v ON_ERROR_STOP=1 -f tests/shared-publication.sql
+      - name: Concurrent calls and full rollback - disposable database only
+        env:
+          PUBLICATION_TEST_DATABASE: '1'
+        run: python maintenance/publication_atomicity_tests.py
