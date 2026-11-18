@@ -1,0 +1,86 @@
+name: Shared publication - PFL pilot
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Request real publication (also requires an enabled database policy)'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: shared-publication-pilot
+  cancel-in-progress: false
+jobs:
+  pilot:
+    # No production credentials are used from a development branch.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - run: pip install supabase pytest
+      - name: Test before running
+        env:
+          PYTHONPATH: collector
+        run: python -m pytest -q collector tests/test_ufc_update_proposals.py
+      - name: Install browser
+        run: |
+          npm install --no-save --package-lock=false @playwright/test@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Collect and journal - no agenda writes
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          node collector/pfl_browser_discovery.cjs --output reports/pfl-browser-discovery.json --limit 20
+          python collector/pfl_daily_discovery.py --browser-report reports/pfl-browser-discovery.json --output reports/pfl-daily-discovery.json --limit 20
+          python collector/pfl_reconciliation.py --discovery reports/pfl-daily-discovery.json --output reports/pfl-reconciliation.json --apply
+      - name: Preview or publish through the shared transaction
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          PUBLISH_REQUESTED: ${{ inputs.publish }}
+        run: |
+          args=()
+          if [ "${PUBLISH_REQUESTED,,}" = "true" ]; then args+=(--publish); fi
+          python collector/shared_publication.py --org PFL --report reports/pfl-reconciliation.json --output reports/shared-publication-result.json "${args[@]}"
+      - name: Verify the actual public site
+        if: inputs.publish
+        env:
+          PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL }}
+        run: node tests/verify-public-publication.cjs
+      - name: Replay and verify no additional write
+        if: inputs.publish
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          python collector/shared_publication.py --org PFL --report reports/pfl-reconciliation.json --output reports/shared-publication-replay.json --publish
+          python - <<'PY'
+          import json
+          first=json.load(open('reports/shared-publication-result.json'))
+          replay=json.load(open('reports/shared-publication-replay.json'))
+          expected={r['event_id'] for r in first['results'] if r['status'] in ('published','already_present')}
+          assert expected, 'No published event verified'
+          actual={r['event_id'] for r in replay['results'] if r['status']=='already_present' and r.get('agenda_writes') is False}
+          assert expected <= actual, 'Replay was not idempotent'
+          assert not any(r.get('agenda_writes') for r in replay['results']), 'Unexpected replay write'
+          PY
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: shared-publication-pilot
+          path: |
+            reports/pfl-reconciliation.json
+            reports/shared-publication-*.json
+            reports/shared-public-verification.json
+          if-no-files-found: warn

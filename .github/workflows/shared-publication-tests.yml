@@ -1,0 +1,51 @@
+name: Shared publication - isolated tests
+on:
+  push:
+    branches: [feat/shared-publication-loop]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: isolated-test-only
+          POSTGRES_DB: publication_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGDATABASE: publication_test
+      PGUSER: postgres
+      PGPASSWORD: isolated-test-only
+      PYTHONPATH: collector
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - run: pip install pytest supabase
+      - name: Existing and shared Python tests
+        run: python -m pytest -q collector tests/test_ufc_update_proposals.py
+      - name: Unittest compatibility
+        run: python -m unittest discover -s collector -p 'test_*.py'
+      - name: JavaScript syntax
+        run: node --check tests/verify-public-publication.cjs
+      - name: PostgreSQL transactional tests - disposable database only
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tests/shared-publication-schema.sql
+          psql -v ON_ERROR_STOP=1 -f migrations/20261118_shared_additions.sql
+          psql -v ON_ERROR_STOP=1 -f tests/shared-publication.sql
