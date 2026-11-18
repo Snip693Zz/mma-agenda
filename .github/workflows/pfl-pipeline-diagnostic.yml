@@ -23,12 +23,19 @@ jobs:
         run: node collector/pfl_browser_discovery.cjs --output reports/pfl-browser-discovery.json --limit 20
       - name: Diagnostiquer les captures Lyon et Dubaï
         run: python collector/pfl_pipeline_diagnostic.py --report reports/pfl-browser-discovery.json
-      - uses: actions/upload-artifact@v6
+      - name: Conserver le diagnostic JSON sans ZIP
+        uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: pfl-pipeline-diagnostic
-          path: |
-            reports/pfl-pipeline-diagnostic.json
-            reports/pfl-browser-discovery.json
+          path: reports/pfl-pipeline-diagnostic.json
+          archive: false
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Conserver la capture navigateur JSON sans ZIP
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          path: reports/pfl-browser-discovery.json
+          archive: false
           if-no-files-found: warn
           retention-days: 14
