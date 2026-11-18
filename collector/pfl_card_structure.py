@@ -1,13 +1,11 @@
-"""Paires PFL structurelles hors ligne ; aucune publication ni resolution de noms."""
+"""PFL card extraction without network access or publication."""
 import re
+import unicodedata
 from html.parser import HTMLParser
-from urllib.parse import urljoin, urlsplit
+from urllib.parse import urljoin, urlsplit, unquote, quote
 
 VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'}
-LABEL_PATTERN = re.compile(
-    r'\b(?:MORE\s+INFO|VIEW\s+FIGHTER\s+PROFILE|VIEW\s+PROFILE|FIGHTER\s+PROFILE|MORE|INFO|VIEW|PROFILE)\b',
-    re.IGNORECASE,
-)
+LABEL_PATTERN = re.compile(r'\b(?:MORE\s+INFO|VIEW\s+FIGHTER\s+PROFILE|VIEW\s+PROFILE|FIGHTER\s+PROFILE|MORE|INFO|VIEW|PROFILE)\b', re.IGNORECASE)
 
 
 class Node:
@@ -60,22 +58,27 @@ class Tree(HTMLParser):
 
 def _readable_name(node):
     parts = []
-
     def visit(current):
         for kind, value in current.content:
             if kind == 'text':
                 parts.append(value)
             else:
                 visit(value)
-
     visit(node)
-    kept = []
-    for part in parts:
-        cleaned = LABEL_PATTERN.sub(' ', part)
-        normalized = re.sub(r'\s+', ' ', cleaned).strip()
-        if normalized:
-            kept.append(normalized)
-    return re.sub(r'\s+', ' ', ' '.join(kept)).strip()
+    return ' '.join(filter(None, (' '.join(LABEL_PATTERN.sub(' ', part).split()) for part in parts)))
+
+
+def _fighter_url(href, source_url):
+    url = urlsplit(urljoin(source_url, href or ''))
+    path = unicodedata.normalize('NFC', unquote(url.path, errors='strict'))
+    if not path.startswith('/fighter/'):
+        return None
+    slug = path[len('/fighter/'):].removesuffix('/')
+    if (url.scheme != 'https' or url.netloc not in ('pflmma.com', 'www.pflmma.com')
+            or url.query or url.fragment or not slug
+            or not all(c.isalnum() or c == '-' for c in slug)):
+        raise ValueError('Invalid fighter URL')
+    return 'https://pflmma.com/fighter/' + quote(slug, safe='-')
 
 
 def extract_pairs(html, source_url, allow_fragment=False):
@@ -89,21 +92,14 @@ def extract_pairs(html, source_url, allow_fragment=False):
               'source_url': source_url, 'event_identity_validated': False}
     tree = Tree(html)
     components = [n for n in tree.root.walk() if n.attrs.get('id') == 'fight_card_component']
-    if tree.malformed:
-        result['reason'] = 'missing_ambiguous_or_incomplete_component'
-        return result
-    if not components:
+    if tree.malformed or not components or not components[0].closed:
         result['reason'] = 'missing_ambiguous_or_incomplete_component'
         return result
     component = components[0]
-    if not component.closed:
-        result['reason'] = 'missing_ambiguous_or_incomplete_component'
-        return result
-    nested_components = [n for n in component.walk() if n is not component and n.attrs.get('id') == 'fight_card_component']
-    if nested_components:
+    if any(n is not component and n.attrs.get('id') == 'fight_card_component' for n in component.walk()):
         result['reason'] = 'nested_card_component'
         return result
-    if len(components) > 1:
+    if len(components) != 1:
         result['reason'] = 'missing_ambiguous_or_incomplete_component'
         return result
     rows = [n for n in component.walk() if 'matchupRow' in (n.attrs.get('class') or '').split()]
@@ -116,26 +112,24 @@ def extract_pairs(html, source_url, allow_fragment=False):
         if not row.closed:
             result['reason'] = 'incomplete_row'
             return result
-        fighters = []
-        fighter_link_count = 0
+        fighters, count = [], 0
         for node in row.walk():
             if node is not row and 'matchupRow' in (node.attrs.get('class') or '').split():
                 result['reason'] = 'nested_rows'
                 return result
             if node.tag != 'a':
                 continue
-            url = urlsplit(urljoin(source_url, node.attrs.get('href') or ''))
-            if not re.fullmatch(r'/fighter/[a-zA-Z0-9-]+/?', url.path):
-                continue
-            if (url.scheme != 'https' or url.netloc not in ('pflmma.com', 'www.pflmma.com')
-                    or url.query or url.fragment):
+            try:
+                canonical = _fighter_url(node.attrs.get('href'), source_url)
+            except ValueError:
                 result['reason'] = 'invalid_fighter_url'
                 return result
-            fighter_link_count += 1
-            canonical = 'https://pflmma.com' + url.path.rstrip('/')
+            if canonical is None:
+                continue
+            count += 1
             if canonical not in fighters:
                 fighters.append(canonical)
-        if len(fighters) == 1 and fighter_link_count > 1:
+        if len(fighters) == 1 and count > 1:
             result['reason'] = 'duplicate_fighter_in_row'
             return result
         if len(fighters) != 2:
@@ -151,52 +145,72 @@ def extract_pairs(html, source_url, allow_fragment=False):
     return result
 
 
+def _row_names(row, source_url):
+    previous = {}
+    for parent in row.walk():
+        for index, child in enumerate(parent.children):
+            if index:
+                previous[child] = parent.children[index - 1]
+    direct, headings = {}, {}
+    for node in row.walk():
+        if node.tag != 'a':
+            continue
+        canonical = _fighter_url(node.attrs.get('href'), source_url)
+        if canonical is None:
+            continue
+        name = _readable_name(node)
+        if name:
+            direct.setdefault(canonical, set()).add(name)
+        else:
+            sibling = previous.get(node)
+            if sibling is not None and sibling.tag == 'h4' and sibling.closed:
+                name = _readable_name(sibling)
+                if name:
+                    headings.setdefault(canonical, set()).add(name)
+    fighters = {}
+    for canonical in direct.keys() | headings.keys():
+        explicit = direct.get(canonical, set())
+        if len(explicit) > 1:
+            return {}
+        options = explicit | headings.get(canonical, set())
+        full = max(options, key=len)
+        if any(full.casefold() != name.casefold() and not full.casefold().endswith(' ' + name.casefold()) for name in options):
+            return {}
+        fighters[canonical] = full
+    return fighters
+
+
 def extract_structured_fights(html, source_url, allow_fragment=False):
-    """Retourne uniquement les combats issus d'une carte structurellement valide."""
+    """Only return complete cards; never infer names from fighter slugs."""
     try:
         validation = extract_pairs(html, source_url, allow_fragment=allow_fragment)
-    except (TypeError, ValueError):
-        return []
-    if validation.get('status') != 'candidate_pairs' or not validation.get('pairs'):
-        return []
-    tree = Tree(html)
-    components = [n for n in tree.root.walk() if n.attrs.get('id') == 'fight_card_component']
-    if len(components) != 1:
-        return []
-    fights, seen = [], set()
-    for row in [n for n in components[0].walk() if 'matchupRow' in (n.attrs.get('class') or '').split()]:
-        fighters = {}
-        for node in row.walk():
-            if node.tag != 'a':
-                continue
-            url = urlsplit(urljoin(source_url, node.attrs.get('href') or ''))
-            if not re.fullmatch(r'/fighter/[a-zA-Z0-9-]+/?', url.path):
-                continue
-            if (url.scheme != 'https' or url.netloc not in ('pflmma.com', 'www.pflmma.com')
-                    or url.query or url.fragment):
-                return []
-            canonical = 'https://pflmma.com' + url.path.rstrip('/')
-            name = _readable_name(node)
-            if not name:
-                continue
-            if canonical in fighters and fighters[canonical] != name:
-                return []
-            if canonical not in fighters:
-                fighters[canonical] = name
-        if len(fighters) != 2:
+        if validation.get('status') != 'candidate_pairs' or not validation.get('pairs'):
             return []
-        fighter_a_url, fighter_b_url = list(fighters)
-        key = tuple(sorted((fighter_a_url, fighter_b_url)))
-        if key in seen:
-            continue
-        seen.add(key)
-        fights.append({
-            'fighter_a': fighters[fighter_a_url],
-            'fighter_b': fighters[fighter_b_url],
-            'fighter_a_url': fighter_a_url,
-            'fighter_b_url': fighter_b_url,
-            'card_position': 0,
-            'position': len(fights),
-            'card_source': source_url,
-        })
-    return fights
+        tree = Tree(html)
+        component = next(n for n in tree.root.walk() if n.attrs.get('id') == 'fight_card_component')
+        fights, seen = [], set()
+        for row in [n for n in component.walk() if 'matchupRow' in (n.attrs.get('class') or '').split()]:
+            fighters = _row_names(row, source_url)
+            if len(fighters) != 2:
+                return []
+            pair = []
+            for node in row.walk():
+                if node.tag == 'a':
+                    canonical = _fighter_url(node.attrs.get('href'), source_url)
+                    if canonical and canonical not in pair:
+                        pair.append(canonical)
+            if len(pair) != 2 or set(pair) != set(fighters):
+                return []
+            key = tuple(sorted(pair))
+            if key in seen:
+                continue
+            seen.add(key)
+            a, b = pair
+            if fighters[a].casefold() == fighters[b].casefold():
+                return []
+            fights.append({'fighter_a': fighters[a], 'fighter_b': fighters[b],
+                           'fighter_a_url': a, 'fighter_b_url': b,
+                           'card_position': 0, 'position': len(fights), 'card_source': source_url})
+        return fights
+    except (TypeError, ValueError, StopIteration):
+        return []
