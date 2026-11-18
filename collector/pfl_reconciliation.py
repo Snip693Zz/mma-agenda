@@ -185,6 +185,31 @@ def load_discovery_candidates(path: str) -> dict[str, dict]:
     return candidates
 
 
+def active_card_fights(event_id: str, fights: list[dict], cards: list[dict]) -> list[dict]:
+    """Never compare historical or orphaned fights as current fights."""
+    active_positions = {c['position'] for c in cards
+                        if c.get('event_id') == event_id and c.get('is_active') is True}
+    if not active_positions:
+        raise ValueError('Aucune carte active connue : rapprochement refusé')
+    return [dict(f) for f in fights if f.get('event_id') == event_id
+            and f.get('card_position') in active_positions]
+
+
+def guard_unknown_allocation(proposals: list[dict]) -> None:
+    """The structured extractor supplies order, not a validated card allocation."""
+    for proposal in proposals:
+        proposal['auto_publishable'] = False
+        if proposal['kind'] != 'add_fight':
+            continue
+        payload = proposal['payload']
+        payload['card_position'] = None
+        payload['allocation'] = 'unassigned'
+        proposal['evidence']['allocation'] = 'unassigned'
+        proposal['evidence']['source_position'] = payload.get('position')
+        proposal['evidence']['publication_requires_card_assignment'] = True
+        proposal['reason'] += ' ; répartition de carte non validée, affectation requise avant publication'
+
+
 def reconcile_event(event: dict, existing_fights: list[dict], html: str, discovery: dict | None = None) -> dict:
     source_url = str(event.get('url') or '')
     page_html = ''
@@ -193,6 +218,9 @@ def reconcile_event(event: dict, existing_fights: list[dict], html: str, discove
         html = str(discovery.get('card_html') or html)
         page_html = str(discovery.get('page_html') or '')
     observed = extract_structured_fights(html, source_url, allow_fragment=True)
+    for fight in observed:
+        fight['card_position'] = None
+        fight['allocation'] = 'unassigned'
     source_kind = 'official' if event.get('official') else 'secondary'
     if discovery:
         observed_date = str(discovery.get('date') or '')
@@ -211,6 +239,7 @@ def reconcile_event(event: dict, existing_fights: list[dict], html: str, discove
     proposals = []
     if validation['can_reconcile'] and observed:
         proposals = compare_event(payload_event, existing_fights, observed)
+        guard_unknown_allocation(proposals)
     return {
         'event_id': event.get('id'),
         'event': event.get('title'),
@@ -232,17 +261,20 @@ def supabase_client():
     return create_client(url, key)
 
 
-def build_report(events: list[dict], fights_by_event: dict[str, list[dict]], fetcher=fetch_page, discovery_candidates: dict[str, dict] | None = None) -> dict:
+def build_report(events: list[dict], fights_by_event: dict[str, list[dict]], fetcher=fetch_page, discovery_candidates: dict[str, dict] | None = None, cards: list[dict] | None = None) -> dict:
     reports, errors = [], []
     discovery_candidates = discovery_candidates or {}
     for event in events:
         try:
+            if cards is None:
+                raise ValueError('Métadonnées de cartes requises pour exclure les cartes inactives')
+            existing = active_card_fights(event['id'], fights_by_event.get(event['id'], []), cards)
             discovery = discovery_candidates.get(normalized_slug(event.get('url') or ''))
             if discovery:
-                reports.append(reconcile_event(event, fights_by_event.get(event.get('id'), []), '', discovery))
+                reports.append(reconcile_event(event, existing, '', discovery))
             else:
                 html = fetcher(event.get('url') or '')
-                reports.append(reconcile_event(event, fights_by_event.get(event.get('id'), []), html))
+                reports.append(reconcile_event(event, existing, html))
         except (HTTPError, URLError, ValueError) as error:
             errors.append({'event_id': event.get('id'), 'url': event.get('url'), 'reason': str(error)})
     proposals = [proposal for report in reports for proposal in report['proposals']]
@@ -291,13 +323,16 @@ def main() -> int:
     if args.limit > 0:
         events = events[:args.limit]
     fights_by_event = {}
+    cards = []
     if events:
-        fights = client.table('fights').select('event_id,card_position,position,fighter_a,fighter_b').in_('event_id', [event['id'] for event in events]).execute().data or []
+        event_ids = [event['id'] for event in events]
+        cards = client.table('event_cards').select('event_id,position,is_active').in_('event_id', event_ids).execute().data or []
+        fights = client.table('fights').select('event_id,card_position,position,fighter_a,fighter_b').in_('event_id', event_ids).execute().data or []
         for fight in fights:
             fights_by_event.setdefault(fight['event_id'], []).append(fight)
 
     discovery_candidates = load_discovery_candidates(args.discovery) if args.discovery else {}
-    report = build_report(events, fights_by_event, discovery_candidates=discovery_candidates)
+    report = build_report(events, fights_by_event, discovery_candidates=discovery_candidates, cards=cards)
     if args.apply:
         report['saved'] = save_report(client, report)
 
