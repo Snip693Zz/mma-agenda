@@ -1,4 +1,4 @@
-"""Métadonnées PFL issues des blocs propres à la fiche, sans année implicite."""
+"""Extraction PFL ciblée, avec repli strict sans année implicite."""
 from __future__ import annotations
 
 import datetime as dt
@@ -9,33 +9,63 @@ from urllib.parse import urlsplit
 MONTHS = {name: index for index, name in enumerate(
     ('JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'), 1
 )}
+VOID_TAGS = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'}
 
 
 class EventBlocks(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.blocks = {'event-info-title': [], 'event-sticky-title': []}
+        self.scoped_present = False
         self.active = None
         self.depth = 0
         self.parts = []
+        self.og_titles = []
+        self.h1_titles = []
+        self.times = []
+        self.in_h1 = False
+        self.h1_parts = []
 
     def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        classes = set((attrs.get('class') or '').split())
+        if classes & self.blocks.keys():
+            self.scoped_present = True
+        if tag == 'meta' and (attrs.get('property') or '').lower() == 'og:title':
+            title = (attrs.get('content') or '').strip()
+            if title:
+                self.og_titles.append(title)
+        if tag == 'time':
+            self.times.append((attrs.get('datetime') or '').strip())
+        if tag == 'h1':
+            self.in_h1, self.h1_parts = True, []
+        elif self.in_h1:
+            self.h1_parts.append(' ')
         if self.active is not None:
-            if tag not in ('br', 'hr', 'img', 'input', 'meta', 'link', 'wbr'):
+            if tag not in VOID_TAGS:
                 self.depth += 1
             self.parts.append(' ')
             return
-        classes = set((dict(attrs).get('class') or '').split())
         for key in self.blocks:
             if tag in ('h1', 'h2', 'h3', 'h4', 'h5', 'h6') and key in classes:
                 self.active, self.depth, self.parts = key, 1, []
                 break
 
     def handle_startendtag(self, tag, attrs):
-        if self.active is not None:
-            self.parts.append(' ')
+        self.handle_starttag(tag, attrs)
+        if tag not in VOID_TAGS:
+            self.handle_endtag(tag)
 
     def handle_endtag(self, tag):
+        if tag in VOID_TAGS:
+            return
+        if tag == 'h1' and self.in_h1:
+            title = ' '.join(''.join(self.h1_parts).split())
+            if title:
+                self.h1_titles.append(title)
+            self.in_h1 = False
+        elif self.in_h1:
+            self.h1_parts.append(' ')
         if self.active is None:
             return
         self.depth -= 1
@@ -48,12 +78,45 @@ class EventBlocks(HTMLParser):
     def handle_data(self, data):
         if self.active is not None:
             self.parts.append(data)
+        if self.in_h1:
+            self.h1_parts.append(data)
+
+
+def _strict_fallback(parser, expected):
+    result = {'status': 'needs_review', 'url': expected}
+    titles = set(parser.og_titles or parser.h1_titles)
+    if len(titles) != 1:
+        return {**result, 'reason': 'fallback_title_missing_or_ambiguous'}
+    title = next(iter(titles))
+    times = set(parser.times)
+    if len(times) != 1 or not next(iter(times), ''):
+        return {**result, 'title': title, 'reason': 'fallback_datetime_missing_or_ambiguous'}
+    raw = next(iter(times))
+    try:
+        if re.fullmatch(r'\d{4}-\d{2}-\d{2}', raw):
+            date = dt.date.fromisoformat(raw)
+            start_at = ''
+        elif re.fullmatch(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,6})?)?(?:Z|[+-]\d{2}:\d{2})?', raw):
+            parsed = dt.datetime.fromisoformat(raw.replace('Z', '+00:00'))
+            date = parsed.date()
+            start_at = raw if parsed.utcoffset() is not None else ''
+        else:
+            raise ValueError('ISO datetime required')
+    except ValueError:
+        return {**result, 'title': title, 'reason': 'fallback_datetime_invalid'}
+    return {
+        'status': 'metadata_found', 'title': title, 'date': date.isoformat(),
+        'start_at': start_at, 'place': '', 'url': expected,
+        'date_source': 'html_time_datetime',
+    }
 
 
 def extract_scoped_metadata(event_html: str, expected: str) -> dict:
     parser = EventBlocks()
     parser.feed(event_html or '')
     parser.close()
+    if not parser.scoped_present:
+        return _strict_fallback(parser, expected)
     titles = parser.blocks['event-info-title']
     result = {'status': 'needs_review', 'url': expected}
     if len(titles) != 1:
