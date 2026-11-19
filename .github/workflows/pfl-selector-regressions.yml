@@ -1,0 +1,48 @@
+name: PFL selector regressions - no production secrets
+
+on:
+  push:
+    branches: [fix/pfl-order-scoped-selectors]
+  pull_request:
+    branches: [main]
+    paths:
+      - 'collector/**'
+      - 'tests/test_pfl_*.py'
+      - '.github/workflows/pfl-selector-regressions.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  regressions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install test dependencies
+        run: python -m pip install pytest supabase
+      - name: Run collector suite and root PFL regressions
+        shell: bash
+        run: |
+          mkdir -p reports
+          set +e
+          (cd collector && python -m pytest -q --junitxml=../reports/collector-tests.xml) > reports/collector-tests.log 2>&1
+          collector_status=$?
+          python -m unittest discover -s tests -p 'test_pfl_*.py' -v > reports/pfl-root-tests.log 2>&1
+          root_status=$?
+          cat reports/collector-tests.log reports/pfl-root-tests.log
+          echo "collector_status=$collector_status root_status=$root_status"
+          if [ "$collector_status" -ne 0 ] || [ "$root_status" -ne 0 ]; then
+            exit 1
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pfl-selector-regressions-${{ github.run_id }}
+          path: reports/
+          if-no-files-found: warn
