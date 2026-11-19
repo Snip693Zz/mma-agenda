@@ -25,24 +25,36 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+      - name: Test discovery report integrity
+        run: python -m unittest discover -s tests -p 'test_pfl_discovery_report_integrity.py' -v
       - run: pip install supabase
       - name: Run read-only PFL discovery
         run: |
           python collector/pfl_daily_discovery.py \
             --limit "${{ github.event.inputs.limit || '20' }}" \
             --output reports/pfl-daily-discovery.json
-      - name: Verify report is read-only
+      - name: Verify report safety and extraction
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
           report = json.loads(Path('reports/pfl-daily-discovery.json').read_text(encoding='utf-8'))
-          assert report['mode'] == 'pfl_discovery_report'
-          assert report['automatic_publication'] is False
-          assert report['database_writes'] is False
           print(json.dumps(report['summary'], ensure_ascii=False, indent=2))
+          if report['mode'] != 'pfl_discovery_report':
+              raise SystemExit('Unexpected report mode')
+          if report['automatic_publication'] is not False or report['database_writes'] is not False:
+              raise SystemExit('Report must remain read-only')
+          if any(not item.get('source_url') for item in report['candidates']):
+              raise SystemExit('Candidate source URL missing')
+          if report['summary']['event_links'] == 0:
+              raise SystemExit('No event links discovered')
+          if report['summary']['pages_fetched'] == 0:
+              raise SystemExit('No event pages fetched')
+          if report['summary']['metadata_found'] == 0:
+              raise SystemExit('No metadata extracted from fetched pages; inspect report diagnostics')
           PY
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: pfl-daily-discovery-${{ github.run_id }}
           path: reports/pfl-daily-discovery.json

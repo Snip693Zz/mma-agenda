@@ -192,32 +192,52 @@ def build_discovery_report(
     existing_events: list[dict],
     today: str,
 ) -> dict:
-    """Produit un rapport de découverte sans écrire dans la base."""
+    """Classifie uniquement les pages fournies, sans écriture en base."""
     validate_official_url(listing_url)
     links = extract_event_links(listing_html, listing_url)
+    pages = {}
+    for source_url, html in event_pages.items():
+        validate_official_url(source_url)
+        url = canonical_url(source_url)
+        if url not in links:
+            raise ValueError(f'Fiche absente du listing PFL : {url}')
+        if not isinstance(html, str):
+            raise ValueError(f'Contenu HTML invalide : {url}')
+        pages[url] = html
     existing_urls = {
-        canonical_url(event.get('url') or '')
+        canonical_url(event.get(key) or '')
         for event in existing_events
-        if event.get('url')
-    }
-    existing_urls |= {
-        canonical_url(event.get('official_card_url') or '')
-        for event in existing_events
-        if event.get('official_card_url')
+        for key in ('url', 'official_card_url')
     }
     existing_urls.discard('')
     candidates = []
     for url in links:
-        metadata = extract_event_metadata(event_pages.get(url, ''), url)
+        if url not in pages:
+            continue
+        html = pages[url]
+        metadata = dict(extract_event_metadata(html, url))
+        metadata['url'] = url
         classification = classify_candidate(metadata, existing_urls, today)
         candidates.append({
+            **classification,
             'source_url': url,
             'metadata': metadata,
-            **classification,
+            'extraction_status': metadata['status'],
+            'diagnostic': {
+                'html_characters': len(html),
+                'has_jsonld': bool(re.search(r'application/ld\+json', html, re.IGNORECASE)),
+                'has_h1': bool(re.search(r'<h1\b', html, re.IGNORECASE)),
+                'has_time_datetime': bool(re.search(r'<time\b[^>]*\bdatetime\s*=', html, re.IGNORECASE)),
+                'reason': metadata.get('reason', ''),
+            },
         })
+    metadata_found = sum(item['metadata']['status'] == 'metadata_found' for item in candidates)
     summary = {
         'event_links': len(links),
-        'metadata_found': sum(item['metadata']['status'] == 'metadata_found' for item in candidates),
+        'pages_fetched': len(pages),
+        'not_inspected': len(links) - len(pages),
+        'metadata_found': metadata_found,
+        'metadata_missing': len(candidates) - metadata_found,
         'new_candidates': sum(item['proposal'] == 'new_candidate' for item in candidates),
         'existing_events': sum(item['proposal'] == 'existing_event' for item in candidates),
         'review_required': sum(item['proposal'] == 'review_required' for item in candidates),
@@ -232,6 +252,10 @@ def build_discovery_report(
         'as_of': today,
         'candidates': candidates,
         'summary': summary,
+        'diagnostics': {
+            'no_event_links': not links,
+            'no_metadata_on_fetched_pages': bool(pages) and metadata_found == 0,
+        },
     }
 
 
