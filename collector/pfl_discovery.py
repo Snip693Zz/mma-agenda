@@ -42,7 +42,8 @@ class _LinkParser(HTMLParser):
     def __init__(self, base_url: str):
         super().__init__(convert_charrefs=True)
         self.base_url = base_url
-        self.links: set[str] = set()
+        self.links: list[str] = []
+        self.seen: set[str] = set()
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         if tag != 'a':
@@ -54,7 +55,10 @@ class _LinkParser(HTMLParser):
         except ValueError:
             return
         if EVENT_PATH_RE.fullmatch(urlsplit(candidate).path.rstrip('/') + '/'):
-            self.links.add(canonical_url(candidate))
+            url = canonical_url(candidate)
+            if url not in self.seen:
+                self.seen.add(url)
+                self.links.append(url)
 
 
 def extract_event_links(listing_html: str, listing_url: str) -> list[str]:
@@ -63,7 +67,7 @@ def extract_event_links(listing_html: str, listing_url: str) -> list[str]:
     parser = _LinkParser(listing_url)
     parser.feed(listing_html or '')
     parser.close()
-    return sorted(parser.links)
+    return parser.links
 
 
 def _iter_jsonld(value):
@@ -164,7 +168,11 @@ def extract_event_metadata(event_html: str, event_url: str) -> dict:
             'place': str(item.get('location', {}).get('name') or '').strip() if isinstance(item.get('location'), dict) else '',
             'url': expected,
         }
-    return _extract_html_metadata(event_html, expected)
+    try:
+        from .pfl_scoped_metadata import extract_scoped_metadata
+    except ImportError:
+        from pfl_scoped_metadata import extract_scoped_metadata
+    return extract_scoped_metadata(event_html, expected)
 
 
 def classify_candidate(metadata: dict, existing_urls: set[str], today: str) -> dict:
